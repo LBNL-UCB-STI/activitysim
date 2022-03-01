@@ -32,12 +32,12 @@ local,_DF_IS_TOUR,'tour_type' in df.columns
 ,destination_walk_time,shortWalk*60/walkSpeed
 # RIDEHAIL,,
 # ,, Note that the mean and standard deviation are not the values for the distribution itself, but of the underlying normal distribution it is derived from
-,origTaxiWaitTime,"odt_skims['RH_SOLO_WAIT']"
-,destTaxiWaitTime,"dot_skims['RH_SOLO_WAIT']"
-,origSingleTNCWaitTime,"odt_skims['RH_SOLO_WAIT']"
-,destSingleTNCWaitTime,"dot_skims['RH_SOLO_WAIT']"
-,origSharedTNCWaitTime,"odt_skims['RH_POOLED_WAIT']"
-,destSharedTNCWaitTime,"dot_skims['RH_POOLED_WAIT']"
+,origTaxiWaitTime,"odt_skims['RH_SOLO_WAIT'] * (1.0 - odt_skims['RH_SOLO_REJECTIONPROB']) + TNC_missed_trip_penalty * odt_skims['RH_SOLO_REJECTIONPROB']"
+,destTaxiWaitTime,"dot_skims['RH_SOLO_WAIT'] * (1.0 - dot_skims['RH_SOLO_REJECTIONPROB']) + TNC_missed_trip_penalty * dot_skims['RH_SOLO_REJECTIONPROB']"
+,origSingleTNCWaitTime,"odt_skims['RH_SOLO_WAIT'] * (1.0 - odt_skims['RH_SOLO_REJECTIONPROB']) + TNC_missed_trip_penalty * odt_skims['RH_SOLO_REJECTIONPROB']"
+,destSingleTNCWaitTime,"dot_skims['RH_SOLO_WAIT'] * (1.0 - dot_skims['RH_SOLO_REJECTIONPROB']) + TNC_missed_trip_penalty * dot_skims['RH_SOLO_REJECTIONPROB']"
+,origSharedTNCWaitTime,"odt_skims['RH_POOLED_WAIT'] * (1.0 - odt_skims['RH_POOLED_REJECTIONPROB']) + TNC_missed_trip_penalty * odt_skims['RH_POOLED_REJECTIONPROB']"
+,destSharedTNCWaitTime,"dot_skims['RH_POOLED_WAIT'] * (1.0 - dot_skims['RH_POOLED_REJECTIONPROB']) + TNC_missed_trip_penalty * dot_skims['RH_POOLED_REJECTIONPROB']"
 ,totalWaitTaxi,origTaxiWaitTime + destTaxiWaitTime
 ,totalWaitSingleTNC,origSingleTNCWaitTime + destSingleTNCWaitTime
 ,totalWaitSharedTNC,origSharedTNCWaitTime + destSharedTNCWaitTime

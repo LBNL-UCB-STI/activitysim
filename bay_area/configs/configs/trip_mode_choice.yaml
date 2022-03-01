@@ -157,6 +157,7 @@ CONSTANTS:
     5: 0
   min_waitTime: 0
   max_waitTime: 50
+  TNC_missed_trip_penalty: 15
 
 # so far, we can use the same spec as for non-joint tours
 preprocessor:

@@ -45,9 +45,9 @@ dest terminal time not counted at home,_dest_terminal_time,"np.where(inbound & l
 ,origin_walk_time,shortWalk*60/walkSpeed
 ,destination_walk_time,shortWalk*60/walkSpeed
 # RIDEHAIL,, Could just define this in trip_mode_choice.csv but leaving this for now so that we can factor in rejected trips if needed
-,origTaxiWaitTime,"odt_skims['RH_SOLO_WAIT']"
-,origSingleTNCWaitTime,"odt_skims['RH_SOLO_WAIT']"
-,origSharedTNCWaitTime,"odt_skims['RH_POOLED_WAIT']"
+,origTaxiWaitTime,"odt_skims['RH_SOLO_WAIT'] * (1.0 - odt_skims['RH_SOLO_REJECTIONPROB']) + TNC_missed_trip_penalty * odt_skims['RH_SOLO_REJECTIONPROB']"
+,origSingleTNCWaitTime,"odt_skims['RH_SOLO_WAIT'] * (1.0 - odt_skims['RH_SOLO_REJECTIONPROB']) + TNC_missed_trip_penalty * odt_skims['RH_SOLO_REJECTIONPROB']"
+,origSharedTNCWaitTime,"odt_skims['RH_POOLED_WAIT'] * (1.0 - odt_skims['RH_POOLED_REJECTIONPROB']) + TNC_missed_trip_penalty * odt_skims['RH_POOLED_REJECTIONPROB']"
 #,,
 ,sov_available,odt_skims['SOV_TIME']>0
 ,hov2_available,odt_skims['HOV2_TIME']>0
