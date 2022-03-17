@@ -7,7 +7,7 @@ import geopandas as gpd
 import logging
 import warnings
 
-from activitysim.core import pipeline
+from activitysim.core import pipeline, orca
 from activitysim.core import inject
 
 logger = logging.getLogger('activitysim')
@@ -141,12 +141,18 @@ def generate_beam_plans():
     tours = pipeline.get_table('tours')
     persons = pipeline.get_table('persons')
     households = pipeline.get_table('households')
-    land_use = pipeline.get_table('land_use').reset_index()
 
-    # re-create zones shapefile
-    land_use['geometry'] = land_use['geometry'].apply(wkt.loads)
-    zones = gpd.GeoDataFrame(land_use, geometry='geometry', crs='EPSG:4326')
-    zones.geometry = zones.geometry.buffer(0)
+    if orca.is_table('beam_geoms'):
+        beam_geoms = pipeline.get_table('beam_geoms')
+        zones = gpd.GeoDataFrame(beam_geoms, geometry='geometry', crs='EPSG:4326')
+        zones.geometry = zones.geometry.buffer(0)
+    else:
+        land_use = pipeline.get_table('land_use').reset_index()
+
+        # re-create zones shapefile
+        land_use['geometry'] = land_use['geometry'].apply(wkt.loads)
+        zones = gpd.GeoDataFrame(land_use, geometry='geometry', crs='EPSG:4326')
+        zones.geometry = zones.geometry.buffer(0)
 
     # augment trips table with attrs we need to generate plans
     trips = get_trip_coords(trips, zones, persons)

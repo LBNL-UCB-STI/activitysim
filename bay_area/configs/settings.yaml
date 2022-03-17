@@ -30,6 +30,9 @@ input_table_list:
 # input skims
 skims_file: skims.omx
 
+# input valid geometries
+beam_geometries: clipped_tazs.csv
+
 # raise error if any sub-process fails without waiting for others to complete
 fail_fast: True
 
