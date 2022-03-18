@@ -144,6 +144,7 @@ def generate_beam_plans():
 
     if orca.is_table('beam_geoms'):
         beam_geoms = pipeline.get_table('beam_geoms')
+        beam_geoms['geometry'] = gpd.GeoSeries.from_wkt(beam_geoms['geometry'])
         zones = gpd.GeoDataFrame(beam_geoms, geometry='geometry', crs='EPSG:4326')
         zones.geometry = zones.geometry.buffer(0)
     else:
