@@ -6,7 +6,7 @@ ENV FULL_CONDA_PATH $CONDA_DIR/envs/$CONDA_ENV
 
 
 ENV ASIM_PATH /activitysim
-ENV ASIM_SUBDIR example
+ENV ASIM_SUBDIR examples
 ENV EXEC_NAME simulation.py
 
 RUN apt-get --allow-releaseinfo-change update \
