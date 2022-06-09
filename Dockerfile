@@ -6,14 +6,14 @@ ENV FULL_CONDA_PATH $CONDA_DIR/envs/$CONDA_ENV
 
 
 ENV ASIM_PATH /activitysim
-ENV ASIM_SUBDIR example
+ENV ASIM_SUBDIR examples
 ENV EXEC_NAME simulation.py
 
 RUN apt-get --allow-releaseinfo-change update \
 	&& apt-get install -y build-essential zip unzip
 RUN conda update conda --yes
 
-RUN git clone https://github.com/ual/activitysim.git
+RUN git clone -b zn/buffered-road-geoms https://github.com/LBNL-UCB-STI/activitysim.git
 
 RUN conda env create --quiet -p $FULL_CONDA_PATH --file activitysim/environment.yml
 RUN cd activitysim && $FULL_CONDA_PATH/bin/python setup.py install
