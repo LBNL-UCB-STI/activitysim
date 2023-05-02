@@ -228,7 +228,7 @@ def generate_beam_plans():
         'departure_time']]
 
     # save back to pipeline
-    pipeline.extend_table("plans", final_plans, axis=1)
+    pipeline.replace_table("plans", final_plans)
 
     # summary stats
     input_cars_per_hh = np.round(
