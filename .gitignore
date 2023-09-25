@@ -11,6 +11,7 @@ bay_area/pilates/*
 bay_area/*.ipynb
 
 *.h5
+.idea
 .ipynb_checkpoints
 .coverage*
 .pytest_cache
@@ -83,3 +84,14 @@ docs/_build/
 
 # macOS
 *.DS_Store
+_test_est
+
+# activitysim conventions
+*_local/
+*_local.*
+
+**/__sharrowcache__
+**/skims.zarr
+**/output/
+**/_generated_version.py
+docs/**/_generated

@@ -2,15 +2,14 @@
 How the System Works
 ====================
 
-This page describes how the software works, how multiprocessing works, and the example model data schema.
+This page describes how the software works, how multiprocessing works, and the primary example model data schema.  The code snippets below may not exactly match the latest version of the software, but they are close enough to illustrate how the system works.  
 
 .. _how_the_system_works:
 
 Execution Flow
 --------------
 
-The example model run starts by running ``activitysim run --working_dir my_test_example``
-after following the steps in :ref:`example_run`.
+The example model run starts by running the steps in :ref:`example_run`.
 
 Initialization
 ~~~~~~~~~~~~~~
@@ -36,10 +35,10 @@ which then loads the misc, tables, and models class definitions.  Loading :mod:`
    from activitysim.core import config
    from activitysim.core import inject
 
-which loads the config and inject classes.  These define `ORCA <https://github.com/udst/orca>`__ inspired injectables (functions) and
+which loads the config and inject classes.  These define Inject injectables (functions) and
 helper functions for running models.  For example, the Python decorator ``@inject.injectable`` overrides the function definition ``settings`` to
 execute this function whenever the ``settings`` object is called by the system.  The :mod:`activitysim.core.inject` manages the data
-pipeline.  The inject class does everything ORCA did in previous versions of ActivitySim and so ORCA is no longer a dependency.
+pipeline.
 
 ::
 
@@ -75,7 +74,7 @@ the ``@inject.step()`` decorator.  These steps will eventually be run by the dat
 
   #then in accessibility.py
   @inject.step()
-  def compute_accessibility(accessibility, skim_dict, land_use, trace_od):
+  def compute_accessibility(accessibility, network_los, land_use, trace_od):
 
 Back in the main ``run`` command, the next steps are to load the tracing, configuration, setting, and pipeline classes
 to get the system management components up and running.
@@ -240,7 +239,7 @@ Now that the persons, households, and other data are in memory, and also annotat
 for later calculations, the school location model can be run.  The school location model is defined
 in :mod:`activitysim.abm.models.location_choice`.  As shown below, the school location model
 actually uses the ``persons_merged`` table, which includes joined household, land use, and accessibility
-tables as well.  The school location model also requires the skims dictionary object, which is discussed next.
+tables as well.  The school location model also requires the network_los object, which is discussed next.
 Before running the generic iterate location choice function, the model reads the model settings file, which
 defines various settings, including the expression files, sample size, mode choice logsum
 calculation settings, time periods for skim lookups, shadow pricing settings, etc.
@@ -257,8 +256,7 @@ calculation settings, time periods for skim lookups, shadow pricing settings, et
    @inject.step()
    def school_location(
         persons_merged, persons, households,
-        skim_dict, skim_stack,
-        chunk_size, trace_hh_id, locutor
+        network_los, chunk_size, trace_hh_id, locutor
         ):
 
      trace_label = 'school_location'
@@ -267,25 +265,26 @@ calculation settings, time periods for skim lookups, shadow pricing settings, et
      iterate_location_choice(
         model_settings,
         persons_merged, persons, households,
-        skim_dict, skim_stack,
+        network_los,
         chunk_size, trace_hh_id, locutor, trace_label
 
 
-Deep inside the method calls, the skim matrix lookups required for this model are configured. The following code
-sets the keys for looking up the skim values for this model. In this case there is a ``TAZ`` column
+Deep inside the method calls, the skim matrix lookups required for this model are configured via ``network_los``. The following
+code sets the keys for looking up the skim values for this model. In this case there is a ``TAZ`` column
 in the households table that is renamed to `TAZ_chooser`` and a ``TAZ`` in the alternatives generation code.
 The skims are lazy loaded under the name "skims" and are available in the expressions using the ``@skims`` expression.
 
 ::
 
-    # create wrapper with keys for this lookup - in this case there is a TAZ in the choosers
-    # and a TAZ in the alternatives which get merged during interaction
+    # create wrapper with keys for this lookup - in this case there is a home_zone_id in the choosers
+    # and a zone_id in the alternatives which get merged during interaction
     # (logit.interaction_dataset suffixes duplicate chooser column with '_chooser')
     # the skims will be available under the name "skims" for any @ expressions
-    skims = skim_dict.wrap('TAZ_chooser', 'TAZ')
+    skim_dict = network_los.get_default_skim_dict()
+    skims = skim_dict.wrap('home_zone_id', 'zone_id')
 
     locals_d = {
-        'skims': skims
+        'skims': skims,
     }
 
 The next step is to call the :func:`activitysim.core.interaction_sample.interaction_sample` function which
@@ -321,7 +320,7 @@ the ``LOGIT_TYPE`` setting in the model settings YAML file.   The ``auto_ownersh
 the ``LOGIT_TYPE`` as ``MNL.``
 
 If the expression is a skim matrix, then the entire column of chooser OD pairs is retrieved from the matrix (i.e. numpy array)
-in one vectorized step.  The ``orig`` and ``dest`` objects in ``self.data[orig, dest]`` in :mod:`activitysim.core.skim` are vectors
+in one vectorized step.  The ``orig`` and ``dest`` objects in ``self.data[orig, dest]`` in :mod:`activitysim.core.los` are vectors
 and selecting numpy array items with vector indexes returns a vector.  Trace data is also written out if configured (not shown below).
 
 ::
@@ -370,7 +369,7 @@ then used for the next model step - solving the logsums for the sample.
      location_sample_df = run_location_logsums(
                 segment_name,
                 choosers,
-                skim_dict, skim_stack,
+                network_los,
                 location_sample_df,
                 model_settings,
                 chunk_size,
@@ -389,7 +388,7 @@ logsums settings and expression files.  The resulting logsums are added to the c
        choosers,
        tour_purpose,
        logsum_settings, model_settings,
-       skim_dict, skim_stack,
+       network_los,
        chunk_size,
        trace_label)
 
@@ -413,7 +412,7 @@ above and is called as follows:
 	          segment_name,
 	          choosers,
 	          location_sample_df,
-	          skim_dict,
+	          network_los,
 	          dest_size_terms,
 	          model_settings,
 	          chunk_size,
@@ -443,7 +442,7 @@ to :ref:`shadow_pricing` for more information.
 
         choices = run_location_choice(
             persons_merged_df,
-            skim_dict, skim_stack,
+            network_los,
             spc,
             model_settings,
             chunk_size, trace_hh_id,
@@ -538,24 +537,38 @@ the ``tours`` table managed in the data pipeline.  This is the same basic patter
 Vectorized 3D Skim Indexing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The mode choice model uses the :class:`activitysim.core.skim.SkimStackWrapper` class in addition to the skims (2D)
-class.  The SkimStackWrapper class represents a collection of skims with a third dimension, which in this case
-is time period.  Setting up the 3D index for SkimStackWrapper is done as follows:
+The mode choice model uses a collection of skims with a third dimension, which in this case
+is time period.  Setting up the 3D index for skims is done as follows:
 
 ::
 
-  # setup three skim keys based on columns in the chooser table
-  # origin, destination, time period; destination, origin, time period; origin, destination
-  odt_skim_stack_wrapper = skim_stack.wrap(left_key='TAZ', right_key='destination', skim_key="out_period")
-  dot_skim_stack_wrapper = skim_stack.wrap(left_key='destination', right_key='TAZ', skim_key="in_period")
-  od_skims               = skim_dict.wrap('TAZ', 'destination')
+    skim_dict = network_los.get_default_skim_dict()
 
-  #pass these into simple_simulate so they can be used in expressions
-  locals_d = {
-    "odt_skims": odt_skim_stack_wrapper,
-    "dot_skims": dot_skim_stack_wrapper,
-    "od_skims": od_skim_stack_wrapper
-  }
+    # setup skim keys
+    orig_col_name = 'home_zone_id'
+    dest_col_name = 'destination'
+
+    out_time_col_name = 'start'
+    in_time_col_name = 'end'
+    odt_skim_stack_wrapper = skim_dict.wrap_3d(orig_key=orig_col_name, dest_key=dest_col_name,
+                                               dim3_key='out_period')
+    dot_skim_stack_wrapper = skim_dict.wrap_3d(orig_key=dest_col_name, dest_key=orig_col_name,
+                                               dim3_key='in_period')
+    odr_skim_stack_wrapper = skim_dict.wrap_3d(orig_key=orig_col_name, dest_key=dest_col_name,
+                                               dim3_key='in_period')
+    dor_skim_stack_wrapper = skim_dict.wrap_3d(orig_key=dest_col_name, dest_key=orig_col_name,
+                                               dim3_key='out_period')
+    od_skim_stack_wrapper = skim_dict.wrap(orig_col_name, dest_col_name)
+
+    skims = {
+        "odt_skims": odt_skim_stack_wrapper,
+        "dot_skims": dot_skim_stack_wrapper,
+        "od_skims": od_skim_stack_wrapper,
+        'orig_col_name': orig_col_name,
+        'dest_col_name': dest_col_name,
+        'out_time_col_name': out_time_col_name,
+        'in_time_col_name': in_time_col_name
+    }
 
 When model expressions such as ``@odt_skims['WLK_LOC_WLK_TOTIVT']`` are solved,
 the ``WLK_LOC_WLK_TOTIVT`` skim matrix values for all chooser table origins, destinations, and
@@ -565,7 +578,7 @@ All the skims are preloaded (cached) by the pipeline manager at the beginning of
 run in order to avoid repeatedly reading the skims from the OMX files on disk.  This saves
 significant model runtime.
 
-See :ref:`skims_in_detail` for more information on skim handling.
+See :ref:`los_in_detail` for more information on skim handling.
 
 Accessibilities Model
 ~~~~~~~~~~~~~~~~~~~~~
@@ -723,7 +736,7 @@ Data Schema
 -----------
 
 The ActivitySim data schema depends on the sub-models implemented.  The data schema listed below is for
-the example model.  These tables and skims are defined in the :mod:`activitysim.abm.tables` package.
+the primary TM1 example model.  These tables and skims are defined in the :mod:`activitysim.abm.tables` package.
 
 .. index:: constants
 .. index:: households
@@ -741,7 +754,7 @@ Data Tables
 The following tables are currently implemented:
 
   * households - household attributes for each household being simulated.  Index: ``household_id`` (see ``activitysim.abm.tables.households.py``)
-  * landuse - zonal land use (such as population and employment) attributes. Index: ``TAZ`` (see ``activitysim.abm.tables.landuse.py``)
+  * landuse - zonal land use (such as population and employment) attributes. Index: ``zone_id`` (see ``activitysim.abm.tables.landuse.py``)
   * persons - person attributes for each person being simulated.  Index: ``person_id`` (see ``activitysim.abm.tables.persons.py``)
   * time windows - manages person time windows throughout the simulation.  See :ref:`time_windows`.  Index:  ``person_id`` (see the person_windows table create decorator in ``activitysim.abm.tables.time_windows.py``)
   * tours - tour attributes for each tour (mandatory, non-mandatory, joint, and atwork-subtour) being simulated.  Index:  ``tour_id`` (see ``activitysim.abm.models.util.tour_frequency.py``)
@@ -1170,7 +1183,7 @@ uses the information stored in the pipeline file to create the table below for a
 +----------------------------+-------------------------------+---------+------------------------------+------+------+
 | persons                    | workplace_in_cbd              | bool    | workplace_location           | 52   | 271  |
 +----------------------------+-------------------------------+---------+------------------------------+------+------+
-| persons                    | work_taz_area_type            | float64 | workplace_location           | 52   | 271  |
+| persons                    | work_zone_area_type           | float64 | workplace_location           | 52   | 271  |
 +----------------------------+-------------------------------+---------+------------------------------+------+------+
 | persons                    | roundtrip_auto_time_to_work   | float32 | workplace_location           | 52   | 271  |
 +----------------------------+-------------------------------+---------+------------------------------+------+------+
@@ -1328,30 +1341,61 @@ uses the information stored in the pipeline file to create the table below for a
 Skims
 ~~~~~
 
-The skims class defines orca injectables to access the skim matrices.  The skims class reads the
+The skims class defines Inject injectables to access the skim matrices.  The skims class reads the
 skims from the omx_file on disk.  The injectables and omx_file for the example are listed below.
 The skims are float64 matrix.
 
-+-------------+-----------------+------------------------------------------------------------------------+
-|       Table |            Type |                                            Creation                    |
-+=============+=================+========================================================================+
-|   skim_dict |        SkimDict | skims.py defines skim_dict which reads omx_file                        |
-+-------------+-----------------+------------------------------------------------------------------------+
-|  skim_stack |       SkimStack | skims.py defines skim_stack which calls skim_dict which reads omx_file |
-+-------------+-----------------+------------------------------------------------------------------------+
+Skims are named <PATH TYPE>_<MEASURE>__<TIME PERIOD>:
 
-Skims are named <PATHTYPE>_<MEASURE>__<TIME PERIOD>:
+* Highway paths:
 
-* Highway paths are SOV, HOV2, HOV3, SOVTOLL, HOV2TOLL, HOV3TOLL
-* Transit paths are:
+  * SOV - SOV free
+  * HOV2 - HOV2 free
+  * HOV3 - HOV3 free
+  * SOVTOLL - SOV toll
+  * HOV2TOLL - HOV2 toll
+  * HOV3TOLL - HOV3 toll
+  
+* Transit paths:
 
   * Walk access and walk egress - WLK_COM_WLK, WLK_EXP_WLK, WLK_HVY_WLK, WLK_LOC_WLK, WLK_LRF_WLK
   * Walk access and drive egress - WLK_COM_DRV, WLK_EXP_DRV, WLK_HVY_DRV, WLK_LOC_DRV, WLK_LRF_DRV
   * Drive access and walk egress - DRV_COM_WLK, DRV_EXP_WLK, DRV_HVY_WLK, DRV_LOC_WLK, DRV_LRF_WLK
   * COM = commuter rail, EXP = express bus, HVY = heavy rail, LOC = local bus, LRF = light rail ferry
 
-* Non-motorized paths are WALK, BIKE
-* Time periods are EA, AM, MD, PM, EV
+* Non-motorized paths:
+
+  * WALK
+  * BIKE
+
+* Measures:
+
+  * TIME - Time (minutes)
+  * DIST - Distance (miles)
+  * BTOLL - Bridge toll (cents)
+  * VTOLL - Value toll (cents)
+
+  * IVT - In-vehicle time, time (minutes x 100)
+  * IWAIT - Initial wait time, time (minutes x 100)
+  * XWAIT - Transfer wait time, time (minutes x 100)
+  * WACC - Walk access time, time (minutes x 100)
+  * WAUX - Auxiliary walk time, time (minutes x 100)
+  * WEGR - Walk egress time, time (minutes x 100)
+  * DTIM - Drive access and/or egress time, time (minutes x 100)
+  * DDIST - Drive access and/or egress distance, distance (miles x 100)
+  * FAR - Fare, cents
+  * BOARDS - Boardings, number
+  * TOTIVT - Total in-vehicle time, time (minutes x 100)
+  * KEYIVT - Transit submode in-vehicle time, time (minutes x 100)
+  * FERRYIVT - Ferry in-vehicle time, time (minutes x 100)
+
+* Time periods:
+
+  * EA
+  * AM
+  * MD
+  * PM
+  * EV
 
 +------------------------------+-----------------+
 |                        Field |            Type |
@@ -1566,11 +1610,11 @@ Skims are named <PATHTYPE>_<MEASURE>__<TIME PERIOD>:
 +------------------------------+-----------------+
 |           HOV3TOLL_VTOLL__PM |  float64 matrix |
 +------------------------------+-----------------+
-|                    \DIST__\  |  float64 matrix |
+|                    \DIST\    |  float64 matrix |
 +------------------------------+-----------------+
-|                \DISTWALK__\  |  float64 matrix |
+|                \DISTWALK\    |  float64 matrix |
 +------------------------------+-----------------+
-|                \DISTBIKE__\  |  float64 matrix |
+|                \DISTBIKE\    |  float64 matrix |
 +------------------------------+-----------------+
 |         DRV_COM_WLK_WAIT__AM |  float64 matrix |
 +------------------------------+-----------------+

@@ -2,103 +2,118 @@
 # See full license in LICENSE.txt.
 import logging
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
-from activitysim.core import assign
-from activitysim.core import tracing
-from activitysim.core import config
-from activitysim.core import inject
-from activitysim.core import pipeline
-
+from activitysim.core import assign, chunk, config, inject, los, mem, pipeline, tracing
+from activitysim.core.pathbuilder import TransitVirtualPathBuilder
 
 logger = logging.getLogger(__name__)
 
 
-class AccessibilitySkims(object):
-    """
-    Wrapper for skim arrays to facilitate use of skims by accessibility model
+def compute_accessibilities_for_zones(
+    accessibility_df,
+    land_use_df,
+    assignment_spec,
+    constants,
+    network_los,
+    trace_od,
+    trace_label,
+):
 
-    Parameters
-    ----------
-    skims : 2D array
-    omx: open omx file object
-        this is only used to load skims on demand that were not preloaded
-    length: int
-        number of zones in skim to return in skim matrix
-        in case the skims contain additional external zones that should be trimmed out so skim
-        array is correct shape to match (flattened) O-D tiled columns in the od dataframe
-    transpose: bool
-        whether to transpose the matrix before flattening. (i.e. act as a D-O instead of O-D skim)
-    """
+    orig_zones = accessibility_df.index.values
+    dest_zones = land_use_df.index.values
 
-    def __init__(self, skim_dict, orig_zones, dest_zones, transpose=False):
+    orig_zone_count = len(orig_zones)
+    dest_zone_count = len(dest_zones)
 
-        omx_shape = skim_dict.skim_info['omx_shape']
-        logger.info("init AccessibilitySkims with %d dest zones %d orig zones omx_shape %s" %
-                    (len(dest_zones), len(orig_zones), omx_shape, ))
+    logger.info(
+        "Running %s with %d orig zones %d dest zones"
+        % (trace_label, orig_zone_count, dest_zone_count)
+    )
 
-        assert len(orig_zones) <= len(dest_zones)
-        assert np.isin(orig_zones, dest_zones).all()
-        assert len(np.unique(orig_zones)) == len(orig_zones)
-        assert len(np.unique(dest_zones)) == len(dest_zones)
+    # create OD dataframe
+    od_df = pd.DataFrame(
+        data={
+            "orig": np.repeat(orig_zones, dest_zone_count),
+            "dest": np.tile(dest_zones, orig_zone_count),
+        }
+    )
 
-        self.skim_dict = skim_dict
-        self.transpose = transpose
+    if trace_od:
+        trace_orig, trace_dest = trace_od
+        trace_od_rows = (od_df.orig == trace_orig) & (od_df.dest == trace_dest)
+    else:
+        trace_od_rows = None
 
-        if omx_shape[0] == len(orig_zones) and skim_dict.offset_mapper.offset_series is None:
-            # no slicing required because whatever the offset_int, the skim data aligns with zone list
-            self.map_data = False
+    # merge land_use_columns into od_df
+    logger.info(f"{trace_label}: merge land_use_columns into od_df")
+    od_df = pd.merge(od_df, land_use_df, left_on="dest", right_index=True).sort_index()
+    chunk.log_df(trace_label, "od_df", od_df)
+
+    locals_d = {
+        "log": np.log,
+        "exp": np.exp,
+        "network_los": network_los,
+    }
+    locals_d.update(constants)
+
+    skim_dict = network_los.get_default_skim_dict()
+    locals_d["skim_od"] = skim_dict.wrap("orig", "dest").set_df(od_df)
+    locals_d["skim_do"] = skim_dict.wrap("dest", "orig").set_df(od_df)
+
+    if network_los.zone_system == los.THREE_ZONE:
+        locals_d["tvpb"] = network_los.tvpb
+
+    logger.info(f"{trace_label}: assign.assign_variables")
+    results, trace_results, trace_assigned_locals = assign.assign_variables(
+        assignment_spec,
+        od_df,
+        locals_d,
+        trace_rows=trace_od_rows,
+        trace_label=trace_label,
+        chunk_log=True,
+    )
+
+    chunk.log_df(trace_label, "results", results)
+    logger.info(f"{trace_label}: have results")
+
+    # accessibility_df = accessibility_df.copy()
+    for column in results.columns:
+        data = np.asanyarray(results[column])
+        data.shape = (orig_zone_count, dest_zone_count)  # (o,d)
+        accessibility_df[column] = np.log(np.sum(data, axis=1) + 1)
+
+    if trace_od:
+
+        if not trace_od_rows.any():
+            logger.warning(
+                f"trace_od not found origin = {trace_orig}, dest = {trace_dest}"
+            )
         else:
 
-            if omx_shape[0] == len(orig_zones):
-                logger.debug("AccessibilitySkims - applying offset_mapper")
+            # add OD columns to trace results
+            df = pd.concat([od_df[trace_od_rows], trace_results], axis=1)
 
-            skim_index = list(range(omx_shape[0]))
-            orig_map = skim_dict.offset_mapper.map(orig_zones)
-            dest_map = skim_dict.offset_mapper.map(dest_zones)
+            # dump the trace results table (with _temp variables) to aid debugging
+            tracing.trace_df(
+                df,
+                label="accessibility",
+                index_label="skim_offset",
+                slicer="NONE",
+                warn_if_empty=True,
+            )
 
-            # (we might be sliced multiprocessing)
-            # assert np.isin(skim_index, orig_map).all()
+            if trace_assigned_locals:
+                tracing.write_csv(
+                    trace_assigned_locals, file_name="accessibility_locals"
+                )
 
-            if np.isin(skim_index, dest_map).all():
-                # not using the whole skim matrix
-                logger.info("%s skim zones not in dest_map: %s" %
-                            ((~dest_map).sum(), np.ix_(~dest_map)))
-
-            self.map_data = True
-            self.orig_map = orig_map
-            self.dest_map = dest_map
-
-    def __getitem__(self, key):
-        """
-        accessor to return flattened skim array with specified key
-        flattened array will have length length*length and will match tiled OD df used by assign
-
-        this allows the skim array to be accessed from expressions as
-        skim['DISTANCE'] or skim[('SOVTOLL_TIME', 'MD')]
-        """
-
-        data = self.skim_dict.get(key).data
-
-        if self.transpose:
-            data = data.transpose()
-
-        if self.map_data:
-
-            # slice skim to include only orig rows and dest columns
-            # 2-d boolean slicing in numpy is a bit tricky
-            # data = data[orig_map, dest_map]          # <- WRONG!
-            # data = data[orig_map, :][:, dest_map]    # <- RIGHT
-            # data = data[np.ix_(orig_map, dest_map)]  # <- ALSO RIGHT
-
-            data = data[self.orig_map, :][:, self.dest_map]
-
-        return data.flatten()
+    return accessibility_df
 
 
 @inject.step()
-def compute_accessibility(accessibility, skim_dict, land_use, trace_od):
+def compute_accessibility(land_use, accessibility, network_los, chunk_size, trace_od):
 
     """
     Compute accessibility for each zone in land use file using expressions from accessibility_spec
@@ -116,82 +131,50 @@ def compute_accessibility(accessibility, skim_dict, land_use, trace_od):
     steeper than automobile or transit.  The minimum accessibility is zero.
     """
 
-    trace_label = 'compute_accessibility'
-    model_settings = config.read_model_settings('accessibility.yaml')
-    assignment_spec = assign.read_assignment_spec(config.config_file_path('accessibility.csv'))
+    trace_label = "compute_accessibility"
+    model_settings = config.read_model_settings("accessibility.yaml")
+    assignment_spec = assign.read_assignment_spec(
+        config.config_file_path("accessibility.csv")
+    )
 
     accessibility_df = accessibility.to_frame()
-
-    logger.info("Running %s with %d dest zones" % (trace_label, len(accessibility_df)))
+    if len(accessibility_df.columns) > 0:
+        logger.warning(
+            f"accessibility table is not empty. Columns:{list(accessibility_df.columns)}"
+        )
+        raise RuntimeError(f"accessibility table is not empty.")
 
     constants = config.get_model_constants(model_settings)
 
-    land_use_columns = model_settings.get('land_use_columns', [])
+    # only include the land_use columns needed by spec, as specified by land_use_columns model_setting
+    land_use_columns = model_settings.get("land_use_columns", [])
     land_use_df = land_use.to_frame()
     land_use_df = land_use_df[land_use_columns]
 
-    # don't assume they are the same: accessibility may be sliced if we are multiprocessing
-    orig_zones = accessibility_df.index.values
-    dest_zones = land_use_df.index.values
-
-    orig_zone_count = len(orig_zones)
-    dest_zone_count = len(dest_zones)
-
-    logger.info("Running %s with %d dest zones %d orig zones" %
-                (trace_label, dest_zone_count, orig_zone_count))
-
-    # create OD dataframe
-    od_df = pd.DataFrame(
-        data={
-            'orig': np.repeat(np.asanyarray(accessibility_df.index), dest_zone_count),
-            'dest': np.tile(np.asanyarray(land_use_df.index), orig_zone_count)
-        }
+    logger.info(
+        f"Running {trace_label} with {len(accessibility_df.index)} orig zones {len(land_use_df)} dest zones"
     )
 
-    if trace_od:
-        trace_orig, trace_dest = trace_od
-        trace_od_rows = (od_df.orig == trace_orig) & (od_df.dest == trace_dest)
-    else:
-        trace_od_rows = None
+    accessibilities_list = []
 
-    # merge land_use_columns into od_df
-    od_df = pd.merge(od_df, land_use_df, left_on='dest', right_index=True).sort_index()
+    for i, chooser_chunk, chunk_trace_label in chunk.adaptive_chunked_choosers(
+        accessibility_df, chunk_size, trace_label
+    ):
 
-    locals_d = {
-        'log': np.log,
-        'exp': np.exp,
-        'skim_od': AccessibilitySkims(skim_dict, orig_zones, dest_zones),
-        'skim_do': AccessibilitySkims(skim_dict, orig_zones, dest_zones, transpose=True)
-    }
-    if constants is not None:
-        locals_d.update(constants)
+        accessibilities = compute_accessibilities_for_zones(
+            chooser_chunk,
+            land_use_df,
+            assignment_spec,
+            constants,
+            network_los,
+            trace_od,
+            trace_label,
+        )
+        accessibilities_list.append(accessibilities)
 
-    results, trace_results, trace_assigned_locals \
-        = assign.assign_variables(assignment_spec, od_df, locals_d, trace_rows=trace_od_rows)
+    accessibility_df = pd.concat(accessibilities_list)
 
-    for column in results.columns:
-        data = np.asanyarray(results[column])
-        data.shape = (orig_zone_count, dest_zone_count)  # (o,d)
-        accessibility_df[column] = np.log(np.sum(data, axis=1) + 1)
+    logger.info(f"{trace_label} computed accessibilities {accessibility_df.shape}")
 
     # - write table to pipeline
     pipeline.replace_table("accessibility", accessibility_df)
-
-    if trace_od:
-
-        if not trace_od_rows.any():
-            logger.warning("trace_od not found origin = %s, dest = %s" % (trace_orig, trace_dest))
-        else:
-
-            # add OD columns to trace results
-            df = pd.concat([od_df[trace_od_rows], trace_results], axis=1)
-
-            # dump the trace results table (with _temp variables) to aid debugging
-            tracing.trace_df(df,
-                             label='accessibility',
-                             index_label='skim_offset',
-                             slicer='NONE',
-                             warn_if_empty=True)
-
-            if trace_assigned_locals:
-                tracing.write_csv(trace_assigned_locals, file_name="accessibility_locals")

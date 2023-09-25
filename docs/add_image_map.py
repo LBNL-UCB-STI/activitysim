@@ -1,7 +1,6 @@
-
 # rst doesn't support image maps, so we'll add one after the html has been built
 
-fileName = "_build/html/abmexample.html"
+fileName = "_build/html/examples.html"
 line = 'src="_images/abmexample.jpg" />'
 lineWithMap = 'src="_images/abmexample.jpg" usemap="#image-map" />'
 imageMap = """\n   <map name="image-map">
@@ -30,15 +29,18 @@ imageMap = """\n   <map name="image-map">
     <area target="" alt="" title="" href="models.html#auto-ownership" coords="237,86,433,109" shape="rect">
     <area target="" alt="" title="" href="models.html#school-location" coords="237,43,435,67" shape="rect">
     <area target="" alt="" title="" href="models.html#accessibility" coords="236,6,436,27" shape="rect">
+    <area target="" alt="" title="" href="models.html#work-from-home" coords="500,25,675,53" shape="rect">
+    <area target="" alt="" title="" href="models.html#transit-pass-ownership" coords="501,67,676,95" shape="rect">
+    <area target="" alt="" title="" href="models.html#telecommute-frequency" coords="502,108,677,136" shape="rect">
    </map>
     """  # noqa
 
 print("add image map to " + fileName)
 
-with open(fileName) as file:
+with open(fileName, encoding="utf-8") as file:
     lines = file.readlines()
 
-with open(fileName, 'w') as file:
+with open(fileName, "w") as file:
     for aLine in lines:
         if line in aLine:
             print("updated " + fileName)

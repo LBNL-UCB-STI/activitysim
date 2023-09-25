@@ -1,7 +1,9 @@
 BSD 3-Clause License
 
+Copyright (c) Association of Metropolitan Planning Organizations Research Foundation
 Copyright (c) After March 2016, Contributing Authors
 Copyright (c) Before March 2016, UrbanSim Inc
+
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
