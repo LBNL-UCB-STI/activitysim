@@ -1,8 +1,0 @@
-#Ignore all output files 
-
-*.cvs
-*.h5
-*.txt
-*.log
-*.yaml
-trip_mode_choice/*.csv
