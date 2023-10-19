@@ -1,0 +1,91 @@
+resume_after: None
+multiprocess: True
+models:
+  -  initialize_landuse
+  -  compute_accessibility
+  -  initialize_households
+  -  school_location
+  -  workplace_location
+  -  auto_ownership_simulate
+  -  free_parking
+  -  cdap_simulate
+  -  mandatory_tour_frequency
+  -  mandatory_tour_scheduling
+  -  joint_tour_frequency
+  -  joint_tour_composition
+  -  joint_tour_participation
+  -  joint_tour_destination
+  -  joint_tour_scheduling
+  -  non_mandatory_tour_frequency
+  -  non_mandatory_tour_destination
+  -  non_mandatory_tour_scheduling
+  -  tour_mode_choice_simulate
+  -  atwork_subtour_frequency
+  -  atwork_subtour_destination
+  -  atwork_subtour_scheduling
+  -  atwork_subtour_mode_choice
+  -  stop_frequency
+  -  trip_purpose
+  -  trip_destination
+  -  trip_purpose_and_destination
+  -  trip_scheduling
+  -  trip_mode_choice
+  -  generate_beam_plans
+  -  write_data_dictionary
+  -  write_tables
+
+multiprocess_steps:
+  step: mp_initialize
+    begin: initialize_landuse
+    name: mp_initialize
+    step_num: 0
+    num_processes: 1
+    chunk_size: 10000000000
+    models:
+       - initialize_landuse
+       - compute_accessibility
+       - initialize_households
+  step: mp_households
+    begin: school_location
+    name: mp_households
+    slice: {'tables': ['households', 'persons']}
+    step_num: 1
+    num_processes: 70
+    chunk_size: 142857143
+    models:
+       - school_location
+       - workplace_location
+       - auto_ownership_simulate
+       - free_parking
+       - cdap_simulate
+       - mandatory_tour_frequency
+       - mandatory_tour_scheduling
+       - joint_tour_frequency
+       - joint_tour_composition
+       - joint_tour_participation
+       - joint_tour_destination
+       - joint_tour_scheduling
+       - non_mandatory_tour_frequency
+       - non_mandatory_tour_destination
+       - non_mandatory_tour_scheduling
+       - tour_mode_choice_simulate
+       - atwork_subtour_frequency
+       - atwork_subtour_destination
+       - atwork_subtour_scheduling
+       - atwork_subtour_mode_choice
+       - stop_frequency
+       - trip_purpose
+       - trip_destination
+       - trip_purpose_and_destination
+       - trip_scheduling
+       - trip_mode_choice
+  step: mp_summarize
+    begin: generate_beam_plans
+    name: mp_summarize
+    step_num: 2
+    num_processes: 1
+    chunk_size: 10000000000
+    models:
+       - generate_beam_plans
+       - write_data_dictionary
+       - write_tables

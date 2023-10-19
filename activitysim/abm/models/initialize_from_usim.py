@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import numpy as np
 import geopandas as gpd
 import orca
 from shapely.geometry import Polygon
@@ -134,33 +135,38 @@ def get_taz_from_points(df, zones_gdf, local_crs):
     logger.info("Assigning TAZs to {0}".format(df.index.name))
     df = gpd.GeoDataFrame(
         df, geometry=gpd.points_from_xy(df.x, df.y), crs="EPSG:4326")
+    assert df.is_valid.all()
     zones_gdf.geometry.crs = "EPSG:4326"
 
-    # convert to meters-based local crs
-    df = df.to_crs(local_crs)
-    zones_gdf = zones_gdf.to_crs(local_crs)
+#     # convert to meters-based local crs (#Not sure why I would need to conver to meters)
+#     df = df.to_crs(local_crs)
+#     zones_gdf = zones_gdf.to_crs(local_crs)
 
     # Spatial join
-    intx = gpd.sjoin(
-        df.reset_index(), zones_gdf.reset_index(), how='left', op='intersects')
+#     intx = gpd.sjoin(
+#         df.reset_index(), zones_gdf.reset_index(), how='left', op='intersects')
 
+    intx = gpd.sjoin(
+        df, zones_gdf.reset_index(), how='left', op='intersects')
+
+    ## THIS MAY NO LONGER BE NEEDED BECAUSE WE ARE NOT DOING H3 AREAS
     # Drop duplicates and keep the one with the smallest H3 area
-    intx['intx_area'] = intx['geometry'].area
-    intx = intx.sort_values('intx_area')
-    intx.drop_duplicates(subset=[df.index.name], keep='first', inplace=True)
-    intx.set_index(df.index.name, inplace=True)
+#     intx['intx_area'] = intx['geometry'].area
+#     intx = intx.sort_values('intx_area')
+#     intx.drop_duplicates(subset=[df.index.name], keep='first', inplace=True)
+#     intx.set_index(df.index.name, inplace=True)
     df['TAZ'] = intx['TAZ'].reindex(df.index)
 
-    # Check if there is any unassigined object
-    unassigned_mask = pd.isnull(df['TAZ'])
-    if any(unassigned_mask):
+#     # Check if there is any unassigined object
+#     unassigned_mask = pd.isnull(df['TAZ'])
+#     if any(unassigned_mask):
 
-        zones_gdf['geometry'] = zones_gdf['geometry'].centroid
-        all_dists = df.loc[unassigned_mask, 'geometry'].apply(
-            lambda x: zones_gdf['geometry'].distance(x))
+#         zones_gdf['geometry'] = zones_gdf['geometry'].centroid
+#         all_dists = df.loc[unassigned_mask, 'geometry'].apply(
+#             lambda x: zones_gdf['geometry'].distance(x))
 
-        df.loc[unassigned_mask, 'TAZ'] = all_dists.idxmin(
-            axis=1).values
+#         df.loc[unassigned_mask, 'TAZ'] = all_dists.idxmin(
+#             axis=1).values
 
     return df['TAZ']
 
@@ -276,6 +282,7 @@ def store(data_dir, settings):
 
         else:
             remote_data_full_path = settings.get('remote_data_full_path')
+        print(remote_data_full_path)
 
         logger.info("Downloading UrbanSim data from s3 at {0}!".format(
             remote_data_full_path))
@@ -413,6 +420,7 @@ def zones(store, local_crs, data_dir):
     referenced to WGS84 (EPSG:4326) projection.
     """
     usim_zone_geoms = config.setting('usim_zone_geoms')
+    zone_index = config.setting('usim_zone_index')
 
     # load from the h5 datastore if its there
     if '/zone_geoms' in store.keys():
@@ -422,7 +430,9 @@ def zones(store, local_crs, data_dir):
         if 'geometry' in zones.columns:
             zones['geometry'] = zones['geometry'].apply(wkt.loads)
             zones = gpd.GeoDataFrame(
-                zones, geometry='geometry', crs='EPSG:4326')
+                zones, geometry='geometry', crs='EPSG:4326') 
+            zones.set_index(zone_index, inplace = True)
+            zones.index.name = 'TAZ'
         else:
             raise KeyError(
                 "Table 'zone_geoms' exists in the .h5 datastore but "
@@ -471,10 +481,13 @@ def zones(store, local_crs, data_dir):
     elif ".shp" in usim_zone_geoms:
         fname = usim_zone_geoms
         filepath = config.data_file_path(fname)
+        
+        
         zones = gpd.read_file(filepath, crs="EPSG:4326")
-        zones.reset_index(inplace=True, drop=True)
+#         zones.reset_index(inplace=True, drop=True) ## Problematic code (Assumes .shp file is in order) 
+        
+        zones.set_index(zone_index, inplace = True)
         zones.index.name = 'TAZ'
-
         # save zone geoms in .h5 datastore so we don't
         # have to do this again
         out_zones = pd.DataFrame(zones.copy())
@@ -498,6 +511,8 @@ def schools(store, state_fips, county_codes):
     if '/schools' in store.keys():
         logger.info("Loading school enrollment data from .h5 datastore!")
         enrollment = store['schools']
+        
+        #TO DO: ADD ASSERT TO CHECK SCHOOLS ARE IN THE STATE
 
     else:
         logger.info(
@@ -505,29 +520,40 @@ def schools(store, state_fips, county_codes):
         base_url = 'https://educationdata.urban.org/api/v1/' + \
             '{topic}/{source}/{endpoint}/{year}/?{filters}'
 
-        school_tables = []
-        for county in county_codes:
-            county_fips = str(state_fips) + str(county)
-            enroll_filters = 'county_code={0}'.format(county_fips)
-            enroll_url = base_url.format(
-                topic='schools', source='ccd', endpoint='directory',
-                year='2015', filters=enroll_filters)
+#         school_tables = []
+#         for county in county_codes:
+#             county_fips = str(state_fips) + str(county)
+# #             enroll_filters = 'county_code={0}'.format(county_fips) #This not working anymore. 
+#             enroll_filters = 'fips={}'.format(int(state_fips))
+#             enroll_url = base_url.format(
+#                 topic='schools', source='ccd', endpoint='directory',
+#                 year='2015', filters=enroll_filters)
 
-            enroll_result = requests.get(enroll_url)
-            enroll = pd.DataFrame(enroll_result.json()['results'])
-            school_tables.append(enroll)
-            time.sleep(2)
+#             enroll_result = requests.get(enroll_url)
+#             enroll = pd.DataFrame(enroll_result.json()['results'])
+#             school_tables.append(enroll)
+#             time.sleep(2)
+        fips = int(state_fips)
+        enroll_filters = 'fips={}'.format(fips) #All schools in state (can't do filter by county)
+        enroll_url = base_url.format(topic='schools', source='ccd',
+                                     endpoint='directory',year='2015', 
+                                     filters=enroll_filters)
+        enroll_result = requests.get(enroll_url)
+        enrollment = pd.DataFrame(enroll_result.json()['results'])
 
-        enrollment = pd.concat(school_tables, axis=0)
+#         enrollment = pd.concat(school_tables, axis=0)
         enrollment = enrollment[[
             'ncessch', 'county_code', 'latitude',
             'longitude', 'enrollment']].set_index('ncessch')
         enrollment.rename(
             columns={'longitude': 'x', 'latitude': 'y'}, inplace=True)
-
+        
+        #Filter schools in coutnies 
+        enrollment = enrollment[enrollment['county_code'].str[1:].isin(county_codes)]
+        
         logger.info("Saving school enrollment data to .h5 datastore!")
         store['schools'] = enrollment
-
+    enrollment['enrollment'] = enrollment['enrollment'].clip(lower = 0) #Missing values (-1, and -2 as zeroes)
     return enrollment.dropna()
 
 
@@ -576,7 +602,8 @@ def colleges(store, state_fips, county_codes):
 
         logger.info("Saving college data to .h5 datastore!")
         store['colleges'] = colleges
-
+    
+    colleges = colleges[~colleges.x.isnull()]
     return colleges
 
 
@@ -586,7 +613,7 @@ def colleges(store, state_fips, county_codes):
 def TAZ(schools, zones, local_crs):
     if TAZ in schools.columns:
         return schools.TAZ
-    zones_gdf = zones.to_frame(columns=['geometry', 'h3_id'])
+    zones_gdf = zones.to_frame(columns=['geometry'])
     schools_df = schools.to_frame(columns=['x', 'y'])
     schools_df.index.name = 'school_id'
     return get_taz_from_points(schools_df, zones_gdf, local_crs)
@@ -598,8 +625,15 @@ def TAZ(colleges, zones, local_crs):
         return schools.TAZ
     colleges_df = colleges.to_frame(columns=['x', 'y'])
     colleges_df.index.name = 'college_id'
-    zones_gdf = zones.to_frame(columns=['geometry', 'h3_id'])
+    zones_gdf = zones.to_frame(columns=['geometry'])
     return get_taz_from_points(colleges_df, zones_gdf, local_crs)
+
+@orca.column('blocks', cache=True)
+def TAZ(blocks, zones, local_crs):
+    zones_gdf = zones.to_frame(columns=['geometry'])
+    blocks_df = blocks.to_frame(columns=['x', 'y'])
+    blocks_df.index.name = 'block_id'
+    return get_taz_from_points(blocks_df, zones_gdf, local_crs)
 
 
 @orca.column('usim_households')
@@ -894,7 +928,7 @@ def TOTACRE(blocks, zones, local_crs):
 
 @orca.column('zones', cache=True)
 def HSENROLL(schools, zones):
-    s = schools.to_frame(columns=['TAZ', 'enrollment']).groupby(
+    s = schools.to_frame().groupby(
         'TAZ')['enrollment'].sum()
     return s.reindex(zones.index).fillna(0)
 
@@ -1044,8 +1078,13 @@ def create_inputs_from_usim_data(data_dir, settings):
         elif orca.get_table('blocks')['TAZ'].isnull().all():
 
             assign_taz_to_blocks = True
+            
+#         elif orca.get_table('blocks')['TAZ'].min() == 0:
+#             ## Assumes zones numbering starts in 1. 
+#             assign_taz_to_blocks = True
 
         if assign_taz_to_blocks:
+            
             zones_gdf = orca.get_table('zones').to_frame(columns=['geometry'])
             blocks_gdf = orca.get_table('block_geoms').to_frame()
             blocks_gdf.crs = 'EPSG:4326'

@@ -1,0 +1,23 @@
+Expression,Label,0,1
+pemploy==1,util_dummy_for_full_time_worker,1.0,1.0
+pemploy!=1,util_dummy_for_non_full_time_worker,0.0,0.0
+"ptype in [4, 5]",util_dummy_for_non_workers,0.0,0.0
+income_segment == 2,util_medium_hh_income_dummy,0.0,0.0
+(income_segment > 2) & (income_segment < 5),util_high_hh_income_dummy,1.0,1.0
+ auto_ownership == 0,util_zero_cars_owned_by_hh_dummy,0.0,0.0
+@(df.pemploy==1)*df.num_discr_tours,util_individual_discretionary_tours_made_by_full_time_worker,0.0,0.0
+@(df.pemploy==2)*df.num_discr_tours,util_individual_discretionary_tours_made_by_part_time_worker,0.0,0.0
+num_eatout_tours,util_individual_eating_out_tours_made_by_person,0.0,0.0
+@(df.pemploy==1)*df.num_maint_shop_escort,util_main_shop_escort_tours_allocated_to_full_time_worker,0.0,0.0
+@(df.pemploy==2)*df.num_maint_shop_escort,util_main_shop_escort_tours_allocated_to_part_time_worker,0.0,0.0
+num_joint_maint_shop_eat,util_participation_in_joint_shop_main_eat_tours,0.0,0.0
+num_joint_discr,util_participation_in_joint_discretionary_tours,0.0,0.0
+@np.log(df.duration+0.5),util_log_of_the_work_tour_duration,2.4423470353692043,2.4423470353692043
+work_tour_is_SOV,util_dummy_for_drive_alone_mode_for_work_tour,1.0,1.0
+num_work_tours==2,util_two_work_tours_by_person,0.0,0.0
+work_taz_area_type<4,util_workplace_urban_area_dummy,0.0,1.0
+(work_taz_area_type>3) & (work_taz_area_type<6),util_workplace_suburban_area_dummy,1.0,0.0
+auOpRetail,util_auto_accessibility_to_retail_for_work_taz,9.863735588052773,9.863735588052773
+nmRetail,util_walk_accessibility_to_retail_for_work_taz,3.047157405320902,3.047157405320902
+(is_worker | is_student) * num_non_mand,util_dummy_for_worker_or_student_with_non_mandatory_tour,0.0,0.0
+1,util_at_work_sub_tour_alternative_specific_constant,1.0,1.0

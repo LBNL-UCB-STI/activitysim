@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><metadata>
+<idinfo>
+<descript>
+<abstract>Transportation Analysis Zones (TAZs) are used in the Metropolitan Transportation Commission's (MTC's) travel and Urban Sim models for the San Francisco Bay Region. These models are used in processes to forecast population growth, economic growth, and transportation/transit capacity and responsiveness and then distribute those results throughout the region.Data tables containing modeling results are joined to the TAZ features using a zone id (taz1454). Tables currently available for download are as follows:Plan Bay Area 2040 ForecastEmployment (total employment, TAZ resident employment, retail employment, financial and professional services employment, health, educational, and recreational employment, manufacturing, wholesale, and transportation employment, agricultural and natural resources employment, and other employment)Households (number of households and household income quartile)Land Use and Transportation (area type, commercial or industrial acres, residential acres, number of single-family and multi-family dwelling units, time to get from automobile storage location to origin/destination, and hourly parking rates)Population and Demographics (total population, household and group quarter populations, population by age group, share of population that is 62+, high school enrollment, and college enrollment)</abstract>
+<purpose>Transportation Analysis Zone (TAZ) geographies used in the Metropolitan Transportation Commission's (MTC's) travel model. There are 1454 zones in this version.</purpose>
+</descript>
+<keywords>
+<theme>
+<themekt>None</themekt>
+<themekey>policy</themekey>
+<themekey>mtc</themekey>
+<themekey>metropolitan transportation commission</themekey>
+<themekey>abag</themekey>
+<themekey>association of bay area governments</themekey>
+<themekey>taz</themekey>
+<themekey>transportation analysis zone</themekey>
+</theme>
+</keywords>
+<accconst>None</accconst>
+<useconst>This data is intended for planning purposes only. The Metropolitan Transportation Commission (MTC) provides spatial and attribute data (also referred to as &amp;quot;information&amp;quot;) &amp;quot;as-is,&amp;quot; and shall incur no responsibility or liability as to the completeness, currentness, or accuracy of this information. The MTC, and other agencies/cities/counties from which the data were sourced, assume no responsibility arising from use of this information by individuals, businesses, or other public entities. The data is provided with no warranty of any kind, expressed or implied, including but not limited to the implied warranties of merchantability and fitness for a particular purpose. Do not make any decisions based on this data before validating your decision with the appropriate city, county, or government entity.</useconst>
+<datacred>Metropolitan Transportation Commission</datacred>
+</idinfo>
+<metainfo>
+<metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
+<metstdv>FGDC-STD-001-1998</metstdv>
+<mettc>local time</mettc>
+</metainfo>
+</metadata>

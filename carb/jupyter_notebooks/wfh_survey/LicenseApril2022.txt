@@ -1,0 +1,6 @@
+
+WFH Code and Data: May 2020 to March 2022
+
+Copyright 2022 by Jose Maria Barrero, Nicholas Bloom, and Steven J. Davis
+
+The code and data files in this .zip package are made available under the CC-BY 4.0 license https://creativecommons.org/licenses/by/4.0/

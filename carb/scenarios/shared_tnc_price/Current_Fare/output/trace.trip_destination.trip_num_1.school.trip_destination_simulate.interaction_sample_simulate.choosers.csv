@@ -1,0 +1,17 @@
+label,value
+trip_id,387286909
+person_id,1180752
+household_id,456291
+tour_id,48410863
+primary_purpose,school
+trip_num,1
+outbound,False
+trip_count,2
+purpose,shopping
+destination,755
+origin,1257
+failed,False
+next_trip_id,387286910
+tour_mode,SHARED3FREE
+trip_period,MD
+is_joint,False

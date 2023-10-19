@@ -1,0 +1,4 @@
+Description,Target,Expression
+#,,Annotate persons categories
+education_category,education_category,"pd.cut(df.edu,[-1,20,21,25], labels = [0,1,2]).astype(int)"
+workers_category,workers_category,"pd.cut(df.num_workers, [-1,2,20], labels = [0,1]).astype(int)"

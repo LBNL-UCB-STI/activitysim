@@ -14,6 +14,7 @@ bay_area/*.ipynb
 .ipynb_checkpoints
 .coverage*
 .pytest_cache
+.vagrantD
 .vagrant
 
 #Austin data
@@ -22,6 +23,14 @@ austin/data/*
 austin/output/*
 austin/tmp/*
 austin/pilates/*
+
+#Carb data
+carb/jupyter_notebooks/NHTS_2017/*
+carb/policy_analysis/*
+carb/NHTS_2017_data/*
+carb/bay_area_base/output/*
+carb/bay_area_base/data/*
+carb/BayWheels_data/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -83,3 +92,4 @@ docs/_build/
 
 # macOS
 *.DS_Store
+

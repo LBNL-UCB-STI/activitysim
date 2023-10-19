@@ -1,0 +1,12 @@
+,0
+_DISTANCE_SKIM,<activitysim.core.skim.SkimWrapper object at 0x7f1c91c7fb80>
+_SOVMD_SKIM,<activitysim.core.skim.SkimWrapper object at 0x7f1c8927c3d0>
+_MAX_TIME_TO_WORK,999
+_WALK_SPEED_MPH,3
+_DISTWALK_SKIM,<activitysim.core.skim.SkimWrapper object at 0x7f1c8927c850>
+_IVT_SKIM,<activitysim.core.skim.SkimWrapper object at 0x7f1c8927c400>
+_IWAIT_SKIM,<activitysim.core.skim.SkimWrapper object at 0x7f1c8927ca00>
+_XWAIT_SKIM,<activitysim.core.skim.SkimWrapper object at 0x7f1c8927c910>
+_WAUX_SKIM,<activitysim.core.skim.SkimWrapper object at 0x7f1c8927c5e0>
+_WACC_SKIM,<activitysim.core.skim.SkimWrapper object at 0x7f1c8927cc40>
+_WEGR_SKIM,<activitysim.core.skim.SkimWrapper object at 0x7f1c8927c520>

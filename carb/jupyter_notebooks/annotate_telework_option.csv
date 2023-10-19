@@ -1,0 +1,5 @@
+Description,Target,Expression
+#,,Annotate persons categories
+job_sector,job_sector,"df.job_sector"
+age_category,age_category,"pd.cut(df.age, [-np.inf,25,45,np.inf], labels = [0,1,2]).astype(int)"
+income_category,income_category,"pd.cut(df.income, [-np.inf,50000,150000,np.inf], labels = [0,1,2]).astype(int)"

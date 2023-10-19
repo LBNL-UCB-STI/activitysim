@@ -1,10 +1,13 @@
-# input tables 
+# input tables
 input_table_list:
   - tablename: households
     filename: households.csv
     index_col: household_id
     rename_columns:
       household_id: household_id
+      persons: hhsize
+      workers: num_workers
+      cars: auto_ownership
   - tablename: persons
     filename: persons.csv
     index_col: person_id
@@ -47,7 +50,7 @@ use_shadow_pricing: False
 
 
 # read cached skims (using numpy memmap) from output directory (memmap is faster than omx )
-read_skim_cache: True
+read_skim_cache: False
 # write memmapped cached skims to output directory after reading from omx, for use in subsequent runs
 #write_skim_cache: True
 #alternate dir to read/write skim cache (defaults to output_dir)
@@ -68,12 +71,14 @@ trace_od:
 #resume_after: trip_scheduling
 
 models:
+  ### mp_initialize step
   - initialize_landuse
   - compute_accessibility
   - initialize_households
+  ### mp_households step
   - school_location
   - workplace_location
-  - auto_ownership_simulate
+#   - auto_ownership_simulate
   - free_parking
   - cdap_simulate
   - mandatory_tour_frequency
@@ -97,6 +102,8 @@ models:
   - trip_purpose_and_destination
   - trip_scheduling
   - trip_mode_choice
+  ### mp_summarize step
+  - generate_beam_plans
   - write_data_dictionary
   - track_skim_usage
   - write_trip_matrices
@@ -104,7 +111,6 @@ models:
 
 
 output_tables:
-  h5_store: False
   action: include
   prefix: final_
   tables:
@@ -116,16 +122,16 @@ output_tables:
     - tours
     - trips
     - joint_tour_participants
+    - plans
+#     - trip_mode_choice_raw
+#     - trip_mode_choice_utilities
+#     - trip_mode_choice_specs
+#     - trip_mode_choice_data_dict
 
 # area_types less than this are considered urban
 urban_threshold: 4
 cbd_threshold: 2
 rural_threshold: 6
-
-# upperEA	Upper limit on time of day for the Early morning time period		5
-# upperAM	Upper limit on time of day for the AM peak time period		10
-# upperMD	Upper limit on time of day for the Midday time period		15
-# upperPM	Upper limit on time of day for the PM time peak period		19
 
 skim_time_periods:
     period_minutes: 60

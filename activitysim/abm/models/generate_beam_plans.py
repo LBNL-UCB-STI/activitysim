@@ -225,30 +225,31 @@ def generate_beam_plans():
     # save back to pipeline
     pipeline.replace_table("plans", final_plans)
 
-    # summary stats
-    input_cars_per_hh = np.round(
-        households['VEHICL'].sum() / len(households), 2)
-    simulated_cars_per_hh = np.round(
-        households['auto_ownership'].sum() / len(households), 2)
-    logger.warning(
-        "AUTO OWNERSHIP -- input: {0} cars/hh // output: {1} cars/hh".format(
-            input_cars_per_hh, simulated_cars_per_hh))
+#     # summary stats
+#     input_cars_per_hh = np.round(
+#         households['VEHICL'].sum() / len(households), 2)
+#     simulated_cars_per_hh = np.round(
+#         households['auto_ownership'].sum() / len(households), 2)
+#     logger.warning(
+#         "AUTO OWNERSHIP -- input: {0} cars/hh // output: {1} cars/hh".format(
+#             input_cars_per_hh, simulated_cars_per_hh))
 
-    trips['number_of_participants'] = trips['tour_id'].map(
-        tours['number_of_participants'])
-    trips['mode_type'] = 'drive'
-    transit_modes = ['COM', 'EXP', 'HVY', 'LOC', 'LRF', 'TRN']
-    active_modes = ['WALK', 'BIKE']
-    trips.loc[
-        trips['trip_mode'].str.contains('|'.join(transit_modes)),
-        'mode_type'] = 'transit'
-    trips.loc[trips['trip_mode'].isin(active_modes), 'mode_type'] = 'active'
-    expanded_trips = trips.loc[
-        trips.index.repeat(trips['number_of_participants'])]
-    mode_shares = expanded_trips[
-        'mode_type'].value_counts() / len(expanded_trips)
-    mode_shares = np.round(mode_shares * 100, 1)
-    logger.warning(
-        "MODE SHARES -- drive: {0}% // transit: {1}% // active: {2}%".format(
-            mode_shares['drive'], mode_shares['transit'],
-            mode_shares['active']))
+#     trips['number_of_participants'] = trips['tour_id'].map(
+#         tours['number_of_participants'])
+#     trips['mode_type'] = 'drive'
+#     transit_modes = ['COM', 'EXP', 'HVY', 'LOC', 'LRF', 'TRN']
+#     active_modes = ['WALK', 'BIKE']
+#     trips.loc[
+#         trips['trip_mode'].str.contains('|'.join(transit_modes)),
+#         'mode_type'] = 'transit'
+#     trips.loc[trips['trip_mode'].isin(active_modes), 'mode_type'] = 'active'
+#     expanded_trips = trips.loc[
+#         trips.index.repeat(trips['number_of_participants'])]
+#     mode_shares = expanded_trips[
+#         'mode_type'].value_counts() / len(expanded_trips)
+#     mode_shares = np.round(mode_shares * 100, 1)
+#     mode_shares.keys()
+#     logger.warning(
+#         "MODE SHARES -- drive: {0}% // transit: {1}% // active: {2}%".format(
+#             mode_shares['drive'], mode_shares['transit'],
+#             mode_shares['active']))

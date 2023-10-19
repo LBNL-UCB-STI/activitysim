@@ -1,0 +1,7 @@
+alternative,probability_1,probability_2,probability_3
+person_id,1180752.0,1180753.0,1180754.0
+work1,0.0,0.9819171849842161,0.9742941563333081
+work2,0.0,0.018082815015783998,0.02570584366669188
+school1,1.0,0.0,0.0
+school2,0.0,0.0,0.0
+work_and_school,0.0,0.0,0.0

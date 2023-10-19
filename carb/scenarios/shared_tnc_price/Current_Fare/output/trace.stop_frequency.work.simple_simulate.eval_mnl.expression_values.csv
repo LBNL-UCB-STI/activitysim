@@ -1,0 +1,44 @@
+Expression,0,1
+(income_in_thousands>19999) & (income_in_thousands<50000),0.0,0.0
+(income_in_thousands>=50000) & (income_in_thousands<100000),0.0,0.0
+(income_in_thousands>=100000),0.0,0.0
+hhsize,3.0,3.0
+num_full,2.0,2.0
+num_student,1.0,1.0
+num_age_0_4,1.0,1.0
+(num_age_0_4 > 0),1.0,1.0
+num_age_5_15,0.0,0.0
+(num_age_5_15 > 0),0.0,0.0
+num_adult,2.0,2.0
+(num_adult == 1) & (num_age_0_4 + num_age_5_15 > 0),0.0,0.0
+more_cars_than_workers,1.0,1.0
+auto_ownership,2.0,2.0
+female,1.0,0.0
+tour_mode_is_transit,0.0,0.0
+tour_mode_is_non_motorized,0.0,0.0
+num_work_tours,1.0,1.0
+num_univ_tours,0.0,0.0
+num_school_tours,0.0,0.0
+num_escort_tours,0.0,0.0
+num_shop_tours,0.0,0.0
+num_maint_tours,0.0,0.0
+num_eatout_tours,0.0,0.0
+num_social_tours,0.0,0.0
+num_hh_shop_tours,0.0,0.0
+(start>5) & (start<8),1.0,0.0
+(end > 16),1.0,1.0
+(end > 18),0.0,1.0
+(duration > 10),1.0,1.0
+(duration > 8),1.0,1.0
+(duration > 2),1.0,1.0
+hhacc,0.0,0.0
+hhacc # (2),0.0,0.0
+pracc,0.0,0.0
+pracc # (2),0.0,0.0
+(distance_in_miles < 20),0.0,1.0
+distance_in_miles,29.34000015258789,9.989999771118164
+tour_mode_is_drive_transit,0.0,0.0
+1,1.0,1.0
+1 # (2),1.0,1.0
+1 # (3),1.0,1.0
+num_atwork_subtours,1.0,0.0

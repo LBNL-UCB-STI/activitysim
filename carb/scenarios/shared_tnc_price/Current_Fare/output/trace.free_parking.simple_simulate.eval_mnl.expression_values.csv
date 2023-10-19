@@ -1,0 +1,9 @@
+Expression,Label,0,1
+@df.workplace_county_id == ID_SAN_FRANCISCO,util_asc_san_francisco,1.0,1.0
+@df.workplace_county_id == ID_SANTA_CLARA,util_asc_santa_clara,0.0,0.0
+@df.workplace_county_id == ID_ALAMEDA,util_asc_alameda,0.0,0.0
+@df.income>=100000,util_income_very_high,1.0,1.0
+@(df.income>=60000) & (df.income<100000),util_income_high,0.0,0.0
+@df.hhsize>3,util_hh_size_4_up,0.0,0.0
+@df.auto_ownership>df.num_workers,util_more_autos_than_workers,0.0,0.0
+@df.auto_ownership<df.num_workers,util_fewer_autos_than_workers,0.0,0.0
