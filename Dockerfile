@@ -21,5 +21,7 @@ RUN cd activitysim && $FULL_CONDA_PATH/bin/python setup.py install
 ENV PATH $FULL_CONDA_PATH/bin:$PATH
 ENV CONDA_DEFAULT_ENV $CONDA_ENV
 
-WORKDIR $ASIM_PATH/$ASIM_SUBDIR
+ENV EXAMPLE example_mtc
+
+WORKDIR $ASIM_PATH/$ASIM_PATH/$ASIM_SUBDIR/$EXAMPLE
 ENTRYPOINT ["python", "-u", "simulation.py"]

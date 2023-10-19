@@ -197,7 +197,8 @@ def read_model_coefficient_template(model_settings):
     # this makes for a more legible template than repeating the identical coefficient name in each column
 
     # replace missing cell values with coefficient_name from index
-    template = template.where(~template.isnull(), template.index)
+    # template = template.where(~template.isnull(), template.index)
+    template.loc[template.isnull().all(axis=1), :] = template.index[template.isnull().all(axis=1)]
 
     return template
 
