@@ -1240,6 +1240,13 @@ def eval_nl_logsums(choosers, spec, nest_spec, locals_d, trace_label=None, alt_c
     raw_utilities = eval_utilities(spec, choosers, locals_d,
                                    trace_label=trace_label, have_trace_targets=have_trace_targets,
                                    alt_col_name=alt_col_name)
+    best_utils = raw_utilities.max(axis=1).groupby(raw_utilities.index).max()
+    bad_utils = (best_utils < -30.0)
+    if bad_utils.any():
+        logger.warning("Found {0} choosers with a best utility that will get sent to -inf. Adding a constant so it "
+                       "doesn't happen, but you should check this".format(bad_utils.sum()))
+        raw_utilities.loc[bad_utils.loc[bad_utils].index, :] -= best_utils.loc[bad_utils.loc[bad_utils].index]
+
     chunk.log_df(trace_label, "raw_utilities", raw_utilities)
 
     if have_trace_targets:
