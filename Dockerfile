@@ -24,4 +24,7 @@ ENV CONDA_DEFAULT_ENV $CONDA_ENV
 ENV EXAMPLE bay_area
 
 WORKDIR $ASIM_PATH/$EXAMPLE
+
+ARG CACHE_DATE=not_a_date2
+
 ENTRYPOINT ["python", "-u", "simulation.py"]
