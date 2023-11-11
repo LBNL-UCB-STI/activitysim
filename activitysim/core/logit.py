@@ -157,7 +157,9 @@ def utils_to_probs(utils, trace_label=None, exponentiated=False, allow_zero_prob
         report_bad_choices(zero_probs, utils,
                            trace_label=tracing.extend_trace_label(trace_label, 'zero_prob_utils'),
                            msg="all probabilities are zero",
-                           trace_choosers=trace_choosers)
+                           trace_choosers=trace_choosers,
+                           raise_error=False)
+        utils_arr[zero_probs, 0] = 1
 
     inf_utils = np.isinf(arr_sum)
     if inf_utils.any():
@@ -221,7 +223,10 @@ def make_choices(probs, trace_label=None, trace_choosers=None):
         report_bad_choices(bad_probs, probs,
                            trace_label=tracing.extend_trace_label(trace_label, 'bad_probs'),
                            msg="probabilities do not add up to 1",
-                           trace_choosers=trace_choosers)
+                           trace_choosers=trace_choosers,
+                           raise_error=False)
+        bad_probs[bad_probs, :] = 0
+        bad_probs[bad_probs, 0] = 1
 
     rands = pipeline.get_rn_generator().random_for_df(probs)
 
