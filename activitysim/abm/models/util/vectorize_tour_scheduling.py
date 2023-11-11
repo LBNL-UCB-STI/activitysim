@@ -372,6 +372,8 @@ def _schedule_tours(
 
     # - update previous_tour and timetable parameters
 
+    choices.clip(0, None, inplace=True)
+
     # update previous_tour (series with most recent previous tdd choices) with latest values
     previous_tour.loc[tours[tour_owner_id_col]] = choices.values
 
