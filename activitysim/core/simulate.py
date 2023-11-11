@@ -862,7 +862,7 @@ def eval_mnl(choosers, spec, locals_d, custom_chooser, estimator,
         tracing.trace_df(utilities, '%s.utilities' % trace_label,
                          column_labels=['alternative', 'utility'])
 
-    probs = logit.utils_to_probs(utilities, trace_label=trace_label, trace_choosers=choosers)
+    probs = logit.utils_to_probs(utilities, trace_label=trace_label, trace_choosers=choosers, allow_zero_probs=True)
     chunk.log_df(trace_label, "probs", probs)
 
     del utilities
