@@ -143,12 +143,12 @@ def _interaction_sample_simulate(
         = eval_interaction_utilities(spec, interaction_df, locals_d, trace_label, trace_rows, estimator)
     chunk.log_df(trace_label, 'interaction_utilities', interaction_utilities)
 
-    best_utils = interaction_utilities.max(axis=1).groupby(interaction_utilities.index).max()
-    bad_utils = (best_utils < -20.0)
-    if bad_utils.any():
-        logger.warning("Found {0} choosers with a best utility that will get sent to -inf. Adding a constant so it "
-                       "doesn't happen, but you should check this".format(bad_utils.sum()))
-        interaction_utilities.loc[bad_utils.loc[bad_utils].index, :] -= best_utils.loc[bad_utils.loc[bad_utils].index]
+    # best_utils = interaction_utilities.max(axis=1).groupby(interaction_utilities.index).max()
+    # bad_utils = (best_utils < -20.0)
+    # if bad_utils.any():
+    #     logger.warning("Found {0} choosers with a best utility that will get sent to -inf. Adding a constant so it "
+    #                    "doesn't happen, but you should check this".format(bad_utils.sum()))
+    #     interaction_utilities.loc[bad_utils.loc[bad_utils].index, :] -= best_utils.loc[bad_utils.loc[bad_utils].index]
 
     del interaction_df
     chunk.log_df(trace_label, 'interaction_df', None)
