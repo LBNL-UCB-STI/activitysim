@@ -862,13 +862,7 @@ def eval_mnl(choosers, spec, locals_d, custom_chooser, estimator,
         tracing.trace_df(utilities, '%s.utilities' % trace_label,
                          column_labels=['alternative', 'utility'])
 
-    probs = logit.utils_to_probs(utilities, trace_label=trace_label, trace_choosers=choosers, allow_zero_probs=True)
-
-    zero_probs = (probs.sum(axis=1) == 0)
-    if zero_probs.any():
-        # FIXME this is kind of gnarly, but we force choice of first alt
-        probs.loc[zero_probs, 0] = 1.0
-
+    probs = logit.utils_to_probs(utilities, trace_label=trace_label, trace_choosers=choosers)
     chunk.log_df(trace_label, "probs", probs)
 
     del utilities
