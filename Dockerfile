@@ -13,9 +13,13 @@ RUN apt-get --allow-releaseinfo-change update \
 	&& apt-get install -y build-essential zip unzip
 RUN conda update conda --yes
 
+ARG CACHE_DATE=not_a_date3
+
 RUN git clone -b telework https://github.com/LBNL-UCB-STI/activitysim.git
 
-RUN conda env create --quiet -p $FULL_CONDA_PATH --file activitysim/environment.yml
+RUN conda install -n base conda-libmamba-solver
+
+RUN conda env create --quiet -p $FULL_CONDA_PATH --file activitysim/environment.yml --solver=libmamba
 RUN cd activitysim && $FULL_CONDA_PATH/bin/python setup.py install
 
 ENV PATH $FULL_CONDA_PATH/bin:$PATH
@@ -25,6 +29,6 @@ ENV EXAMPLE bay_area
 
 WORKDIR $ASIM_PATH/$EXAMPLE
 
-ARG CACHE_DATE=not_a_date2
+
 
 ENTRYPOINT ["python", "-u", "simulation.py"]

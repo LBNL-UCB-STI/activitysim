@@ -310,7 +310,7 @@ def calc_rows_per_chunk(chunk_size, choosers, alt_sample, spec, trace_label=None
 
 def interaction_sample_simulate(
         choosers, alternatives, spec, choice_column,
-        allow_zero_probs=False, zero_prob_choice_val=None,
+        allow_zero_probs=True, zero_prob_choice_val=None,
         want_logsums=False,
         skims=None, locals_d=None, chunk_size=0,
         trace_label=None, trace_choice_name=None,
