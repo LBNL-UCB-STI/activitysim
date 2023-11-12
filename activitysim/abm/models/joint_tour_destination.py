@@ -388,7 +388,7 @@ def joint_tour_destination(
         estimator.end_estimation()
 
     # add column as we want joint_tours table for tracing.
-    bad_choices = ~(choices_df.choice >= 0)
+    bad_choices = ~(choices_df.choice >= 0).values
     if bad_choices.sum() > 0:
         logger.warning("Somehow we still have {0} missing choices, WTF?".format(bad_choices.sum()))
         choices_df[bad_choices, :] = choices_df[~bad_choices, :].sample(bad_choices.sum(), replace=True)
