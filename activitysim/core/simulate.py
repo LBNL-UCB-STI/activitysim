@@ -996,7 +996,11 @@ def eval_nl(choosers, spec, nest_spec, locals_d, custom_chooser, estimator,
             no_choices, base_probabilities,
             trace_label=tracing.extend_trace_label(trace_label, 'bad_probs'),
             trace_choosers=choosers,
-            msg="base_probabilities do not sum to one")
+            msg="base_probabilities do not sum to one",
+            raise_error=False)
+        logger.warning("Bad choosers: {0}".format(choosers.loc[no_choices]))
+        base_probabilities[no_choices, :] = 0
+        base_probabilities[no_choices, 0] = 1
 
     if custom_chooser:
         choices, rands = custom_chooser(probs=base_probabilities, choosers=choosers, spec=spec,
