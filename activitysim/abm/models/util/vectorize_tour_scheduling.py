@@ -371,8 +371,11 @@ def _schedule_tours(
     )
 
     # - update previous_tour and timetable parameters
-
-    choices.clip(0, None, inplace=True)
+    if choices.min() < 0:
+        logger.warning("INDEX BELOW 0")
+    choices[~(choices > 0)] = 0
+    if choices.min() < 0:
+        logger.warning("INDEX STIIIIILL BELOW 0")
 
     # update previous_tour (series with most recent previous tdd choices) with latest values
     previous_tour.loc[tours[tour_owner_id_col]] = choices.values
