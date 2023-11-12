@@ -76,6 +76,11 @@ def non_mandatory_tour_destination(
         estimator,
         chunk_size, trace_hh_id, trace_label)
 
+    bad_choices = ~(choices_df.choice >= 0).values
+    if bad_choices.sum() > 0:
+        logger.warning("Somehow we still have {0} missing choices in non-mandatory, WTF?".format(bad_choices.sum()))
+        choices_df.loc[bad_choices, :] = choices_df.loc[~bad_choices, :].sample(bad_choices.sum(), replace=True)
+
     if estimator:
         estimator.write_choices(choices_df.choice)
         choices_df.choice = estimator.get_survey_values(choices_df.choice, 'tours', 'destination')
