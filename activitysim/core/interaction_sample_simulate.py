@@ -390,7 +390,7 @@ def interaction_sample_simulate(
     alternatives,
     spec,
     choice_column,
-    allow_zero_probs=False,
+    allow_zero_probs=True,
     zero_prob_choice_val=None,
     log_alt_losers=False,
     want_logsums=False,
