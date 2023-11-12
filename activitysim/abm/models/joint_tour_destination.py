@@ -203,7 +203,7 @@ def run_destination_simulate(
 
     if n_bad_dests > 0:
         logger.warning("Found {0} nan destination choices. Filling with random".format(n_bad_dests))
-        choices.loc[choices.isna().sum(axis=1), :] = choices.loc[~choices.isna().sum(axis=1), :].sample(
+        choices.loc[choices.isna().any(axis=1), :] = choices.loc[~choices.isna().any(axis=1), :].sample(
             n_bad_dests,
             replace=True)
 
