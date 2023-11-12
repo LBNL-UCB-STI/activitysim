@@ -28,7 +28,6 @@ def _interaction_sample_simulate(
         skims, locals_d,
         trace_label, trace_choice_name,
         estimator):
-
     """
     Run a MNL simulation in the situation in which alternatives must
     be merged with choosers because there are interaction terms or
@@ -280,7 +279,6 @@ def _interaction_sample_simulate(
 
 
 def calc_rows_per_chunk(chunk_size, choosers, alt_sample, spec, trace_label=None):
-
     # It is hard to estimate the size of the utilities_df since it conflates duplicate picks.
     # Currently we ignore it, but maybe we should chunk based on worst case?
 
@@ -315,7 +313,6 @@ def interaction_sample_simulate(
         skims=None, locals_d=None, chunk_size=0,
         trace_label=None, trace_choice_name=None,
         estimator=None):
-
     """
     Run a simulation in the situation in which alternatives must
     be merged with choosers because there are interaction terms or
@@ -379,7 +376,6 @@ def interaction_sample_simulate(
     result_list = []
     for i, num_chunks, chooser_chunk, alternative_chunk \
             in chunk.chunked_choosers_and_alts(choosers, alternatives, rows_per_chunk):
-
         logger.info("Running chunk %s of %s size %d" % (i, num_chunks, len(chooser_chunk)))
 
         chunk_trace_label = tracing.extend_trace_label(trace_label, 'chunk_%s' % i) \
@@ -405,6 +401,17 @@ def interaction_sample_simulate(
     # http://pandas.pydata.org/pandas-docs/stable/io.html#id2
     if len(result_list) > 1:
         choices = pd.concat(result_list)
+
+    if want_logsums:
+        n_bad_dests = choices.isna().sum().sum()
+
+        if n_bad_dests > 0:
+            logger.warning(
+                "Found {0} nan destination choices in interaction_sample_simulate. Filling with random".format(
+                    n_bad_dests))
+            choices.loc[choices.isna().any(axis=1), :] = choices.loc[~choices.isna().any(axis=1), :].sample(
+                n_bad_dests,
+                replace=True)
 
     assert len(choices.index == len(choosers.index))
 
