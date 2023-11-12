@@ -166,7 +166,9 @@ def utils_to_probs(utils, trace_label=None, exponentiated=False, allow_zero_prob
         report_bad_choices(inf_utils, utils,
                            trace_label=tracing.extend_trace_label(trace_label, 'inf_exp_utils'),
                            msg="infinite exponentiated utilities",
-                           trace_choosers=trace_choosers)
+                           trace_choosers=trace_choosers,
+                           raise_error=False)
+        utils_arr[np.isinf(utils_arr)] = 0
 
     # if allow_zero_probs, this may cause a RuntimeWarning: invalid value encountered in divide
     with np.errstate(invalid='ignore' if allow_zero_probs else 'warn',
