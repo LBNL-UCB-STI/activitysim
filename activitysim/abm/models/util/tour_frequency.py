@@ -341,6 +341,14 @@ def process_mandatory_tours(persons, mandatory_tour_frequency_alts):
 
     tours['household_id'] = tours_merged.household_id
 
+    bad_dest = (tours.destination >= 0)
+
+    if bad_dest.sum() > 0:
+        logger.warning("At the start we have {0} bad tour destinations".format(bad_dest.sum()))
+        tours.loc[bad_dest, "destination"] = tours.loc[~bad_dest, "destination"].sample(
+            bad_dest.sum(),
+            replace=True)
+
     # assign stable (predictable) tour_id
     set_tour_index(tours)
 
