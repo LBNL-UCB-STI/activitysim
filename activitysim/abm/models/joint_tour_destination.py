@@ -22,7 +22,6 @@ from .util import tour_destination
 from .util import logsums as logsum
 from .util import estimation
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -35,7 +34,6 @@ def run_destination_sample(
         destination_size_terms,
         estimator,
         chunk_size, trace_label):
-
     spec = simulate.spec_for_segment(model_settings, spec_id='SAMPLE_SPEC',
                                      segment_name=spec_segment_name, estimator=estimator)
 
@@ -197,9 +195,13 @@ def run_destination_simulate(
         trace_choice_name='destination',
         estimator=estimator)
 
-    if choices.isna().sum() > 0:
-        logger.warning("Found {0} nan destination choices. Filling with random".format(choices.isna().sum()))
-        choices.loc[choices.isna()] = choices.loc[~choices.isna()].sample(choices.isna().sum(), replace=True)
+    n_bad_dests = choices['choice'].isna().sum()
+
+    if n_bad_dests > 0:
+        logger.warning("Found {0} nan destination choices. Filling with random".format(n_bad_dests))
+        choices.loc[choices['choice'].isna(), 'choice'] = choices.loc[~choices['choice'].isna(), 'choice'].sample(
+            n_bad_dests,
+            replace=True)
 
     return choices
 
@@ -215,7 +217,6 @@ def run_joint_tour_destination(
         skim_stack,
         estimator,
         chunk_size, trace_hh_id, trace_label):
-
     size_term_calculator = tour_destination.SizeTermCalculator(model_settings['SIZE_TERM_SELECTOR'])
 
     chooser_segment_column = model_settings['CHOOSER_SEGMENT_COLUMN_NAME']
@@ -323,7 +324,6 @@ def joint_tour_destination(
         skim_dict, skim_stack,
         chunk_size,
         trace_hh_id):
-
     """
     Given the tour generation from the above, each tour needs to have a
     destination, so in this case tours are the choosers (with the associated
