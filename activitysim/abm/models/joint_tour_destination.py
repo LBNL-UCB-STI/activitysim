@@ -125,7 +125,11 @@ def run_destination_logsums(
         chunk_size,
         trace_label)
 
-    destination_sample['mode_choice_logsum'] = logsums.fillna(-20.0)
+    if logsums.isna().sum() > 0:
+        logger.warning("Finding {0} logsums that are NaN. Filling with {0}".format(logsums.isna().sum(),
+                                                                                   logsums.loc[~logsums.isna().min()]))
+
+    destination_sample['mode_choice_logsum'] = logsums.fillna(logsums.loc[~logsums.isna().min()])
 
     return destination_sample
 
@@ -195,11 +199,11 @@ def run_destination_simulate(
         trace_choice_name='destination',
         estimator=estimator)
 
-    n_bad_dests = choices['choice'].isna().sum()
+    n_bad_dests = choices.isna().sum().sum()
 
     if n_bad_dests > 0:
         logger.warning("Found {0} nan destination choices. Filling with random".format(n_bad_dests))
-        choices.loc[choices['choice'].isna(), 'choice'] = choices.loc[~choices['choice'].isna(), 'choice'].sample(
+        choices.loc[choices.isna().sum(axis=1), :] = choices.loc[~choices.isna().sum(axis=1), :].sample(
             n_bad_dests,
             replace=True)
 

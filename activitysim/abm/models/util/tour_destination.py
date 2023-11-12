@@ -17,7 +17,6 @@ from activitysim.core.interaction_sample import interaction_sample
 
 from activitysim.core.mem import force_garbage_collect
 
-
 from . import logsums as logsum
 from activitysim.abm.tables.size_terms import tour_destination_size_terms
 
@@ -33,7 +32,6 @@ class SizeTermCalculator(object):
     """
 
     def __init__(self, size_term_selector):
-
         # do this once so they can request siae_terms for various segments (tour_type or purpose)
         land_use = inject.get_table('land_use')
         size_terms = inject.get_injectable('size_terms')
@@ -66,7 +64,6 @@ def run_destination_sample(
         destination_size_terms,
         estimator,
         chunk_size, trace_label):
-
     model_spec = simulate.spec_for_segment(model_settings, spec_id='SAMPLE_SPEC',
                                            segment_name=spec_segment_name, estimator=estimator)
 
@@ -160,7 +157,11 @@ def run_destination_logsums(
         chunk_size,
         trace_label)
 
-    destination_sample['mode_choice_logsum'] = logsums.fillna(-20.0)
+    if logsums.isna().sum() > 0:
+        logger.warning("Finding {0} logsums that are NaN. Filling with {0}".format(logsums.isna().sum(),
+                                                                                   logsums.loc[~logsums.isna().min()]))
+
+    destination_sample['mode_choice_logsum'] = logsums.fillna(logsums.loc[~logsums.isna().min()])
 
     return destination_sample
 
@@ -252,7 +253,6 @@ def run_tour_destination(
         skim_stack,
         estimator,
         chunk_size, trace_hh_id, trace_label):
-
     size_term_calculator = SizeTermCalculator(model_settings['SIZE_TERM_SELECTOR'])
 
     chooser_segment_column = model_settings['CHOOSER_SEGMENT_COLUMN_NAME']
