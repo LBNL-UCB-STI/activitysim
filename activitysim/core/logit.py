@@ -227,8 +227,8 @@ def make_choices(probs, trace_label=None, trace_choosers=None):
                            msg="probabilities do not add up to 1",
                            trace_choosers=trace_choosers,
                            raise_error=False)
-        bad_probs[bad_probs, :] = 0
-        bad_probs[bad_probs, 0] = 1
+        bad_probs.loc[bad_probs, :] = 0
+        bad_probs.loc[bad_probs, 0] = 1
 
     rands = pipeline.get_rn_generator().random_for_df(probs)
 
