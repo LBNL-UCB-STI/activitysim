@@ -998,9 +998,9 @@ def eval_nl(choosers, spec, nest_spec, locals_d, custom_chooser, estimator,
             trace_choosers=choosers,
             msg="base_probabilities do not sum to one",
             raise_error=False)
-        logger.warning("Bad choosers: {0}".format(choosers.loc[no_choices]))
-        base_probabilities[no_choices, :] = 0
-        base_probabilities[no_choices, 0] = 1
+        logger.warning("Bad choosers: first one is {0}".format(choosers.loc[no_choices].iloc[0,:].to_series()))
+        base_probabilities.loc[no_choices, :] = 0
+        base_probabilities.loc[no_choices, 0] = 1
 
     if custom_chooser:
         choices, rands = custom_chooser(probs=base_probabilities, choosers=choosers, spec=spec,
