@@ -223,9 +223,9 @@ def run_location_logsums(
     # logsums now does, since workplace_location_sample was on left side of merge de-dup merge
     if logsums.isna().sum() > 0:
         logger.warning("Finding {0} logsums that are NaN. Filling with {0}".format(logsums.isna().sum(),
-                                                                                   logsums.loc[~logsums.isna().min()]))
+                                                                                   logsums.loc[~logsums.isna()].min()))
 
-    location_sample_df['mode_choice_logsum'] = logsums.fillna(logsums.loc[~logsums.isna().min()])
+    location_sample_df['mode_choice_logsum'] = logsums.fillna(logsums.loc[~logsums.isna()].min())
 
     return location_sample_df
 
