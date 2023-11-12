@@ -136,7 +136,7 @@ def atwork_subtour_destination_logsums(
         chunk_size,
         trace_label)
 
-    destination_sample['mode_choice_logsum'] = logsums
+    destination_sample['mode_choice_logsum'] = logsums.fillna(-20.0)
 
     return destination_sample
 
