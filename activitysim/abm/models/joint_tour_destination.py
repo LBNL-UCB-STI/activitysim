@@ -197,7 +197,7 @@ def run_destination_simulate(
         trace_choice_name='destination',
         estimator=estimator)
 
-    if choices.isna().any():
+    if choices.isna().sum() > 0:
         logger.warning("Found {0} nan destination choices. Filling with random".format(choices.isna().sum()))
         choices.loc[choices.isna()] = choices.loc[~choices.isna()].sample(choices.isna().sum(), replace=True)
 
