@@ -341,7 +341,7 @@ def process_mandatory_tours(persons, mandatory_tour_frequency_alts):
 
     tours['household_id'] = tours_merged.household_id
 
-    bad_work_dest = tours.loc[tours_merged.tour_type == 'work', "destination"] >= 0
+    bad_work_dest = ~(tours.loc[tours_merged.tour_type == 'work', "destination"] >= 0)
 
     if bad_work_dest.sum() > 0:
         logger.warning(
