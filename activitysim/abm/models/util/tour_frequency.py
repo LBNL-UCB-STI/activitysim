@@ -54,7 +54,7 @@ def canonical_tours():
     atwork_subtour_flavors = {'eat': 1, 'business': 2, 'maint': 1}
     atwork_subtour_channels = enumerate_tour_types(atwork_subtour_flavors)
     max_work_tours = mandatory_tour_flavors['work']
-    atwork_subtour_channels = ['%s_%s' % (c, i+1)
+    atwork_subtour_channels = ['%s_%s' % (c, i + 1)
                                for c in atwork_subtour_channels
                                for i in range(max_work_tours)]
 
@@ -341,13 +341,21 @@ def process_mandatory_tours(persons, mandatory_tour_frequency_alts):
 
     tours['household_id'] = tours_merged.household_id
 
-    bad_dest = (tours.destination >= 0)
+    bad_work_dest = tours.loc[tours_merged.tour_type == 'work', "destination"] >= 0
 
-    if bad_dest.sum() > 0:
-        logger.warning("At the start we have {0} bad tour destinations".format(bad_dest.sum()))
-        tours.loc[bad_dest, "destination"] = tours.loc[~bad_dest, "destination"].sample(
-            bad_dest.sum(),
-            replace=True)
+    if bad_work_dest.sum() > 0:
+        logger.warning("At the start we have {0} bad work tour destinations".format(bad_work_dest.sum()))
+        tours.loc[tours_merged.tour_type == 'work', "destination"].loc[bad_work_dest] = \
+        tours.loc[tours_merged.tour_type == 'work', "destination"].loc[~bad_work_dest].sample(
+            bad_work_dest.sum(), replace=True)
+
+    bad_school_dest = tours.loc[tours_merged.tour_type == 'school', "destination"] >= 0
+
+    if bad_school_dest.sum() > 0:
+        logger.warning("At the start we have {0} bad school tour destinations".format(bad_school_dest.sum()))
+        tours.loc[tours_merged.tour_type == 'school', "destination"].loc[bad_school_dest] = \
+        tours.loc[tours_merged.tour_type == 'school', "destination"].loc[~bad_school_dest].sample(
+            bad_school_dest.sum(), replace=True)
 
     # assign stable (predictable) tour_id
     set_tour_index(tours)
@@ -423,7 +431,6 @@ def process_non_mandatory_tours(persons, tour_counts):
 
 
 def process_atwork_subtours(work_tours, atwork_subtour_frequency_alts):
-
     """
     This method processes the atwork_subtour_frequency column that comes
     out of the model of the same name and turns into a DataFrame that
