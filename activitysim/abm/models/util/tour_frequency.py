@@ -351,7 +351,7 @@ def process_mandatory_tours(persons, mandatory_tour_frequency_alts):
             tours.loc[tours_merged.tour_type == 'work', "destination"].loc[~bad_work_dest].sample(
                 bad_work_dest.sum(), replace=True)
 
-    bad_school_dest = tours.loc[tours_merged.tour_type == 'school', "destination"] >= 0
+    bad_school_dest = ~(tours.loc[tours_merged.tour_type == 'school', "destination"] >= 0)
 
     if bad_school_dest.sum() > 0:
         logger.warning("At the start we have {0} bad school tour destinations".format(bad_school_dest.sum()))
