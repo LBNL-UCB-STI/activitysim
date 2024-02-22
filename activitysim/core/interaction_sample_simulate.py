@@ -411,7 +411,7 @@ def interaction_sample_simulate(
                     n_bad_dests))
             choices.loc[choices.isna().any(axis=1), :] = choices.loc[~choices.isna().any(axis=1), :].sample(
                 n_bad_dests,
-                replace=True)
+                replace=True).values
 
     assert len(choices.index == len(choosers.index))
 
