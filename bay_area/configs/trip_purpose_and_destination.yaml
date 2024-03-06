@@ -1,6 +1,4 @@
 
-inherit_settings: True
-
 MAX_ITERATIONS: 5
 
 # drop failed trips and cleanup failed trip leg_mates for consistency

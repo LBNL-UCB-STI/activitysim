@@ -399,6 +399,17 @@ def interaction_sample_simulate(
     if len(result_list) > 1:
         choices = pd.concat(result_list)
 
+    if want_logsums:
+        n_bad_dests = choices.isna().sum().sum()
+
+        if n_bad_dests > 0:
+            logger.warning(
+                "Found {0} nan destination choices in interaction_sample_simulate. Filling with random".format(
+                    n_bad_dests))
+            choices.loc[choices.isna().any(axis=1), :] = choices.loc[~choices.isna().any(axis=1), :].sample(
+                n_bad_dests,
+                replace=True).values
+
     assert len(choices.index == len(choosers.index))
 
     return choices

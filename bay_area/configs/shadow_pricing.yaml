@@ -1,5 +1,3 @@
-inherit_settings: True
-
 shadow_pricing_models:
   school: school_location
   workplace: workplace_location
