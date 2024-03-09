@@ -496,7 +496,7 @@ def open_pipeline(resume_after=None):
     _PIPELINE.init_state()
     _PIPELINE.is_open = True
 
-    get_rn_generator().set_base_seed(inject.get_injectable('rng_base_seed', None))
+    get_rn_generator().set_base_seed(None)
 
     if resume_after:
         # open existing pipeline
