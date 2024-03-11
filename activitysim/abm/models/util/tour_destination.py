@@ -160,7 +160,11 @@ def run_destination_logsums(
         chunk_size,
         trace_label)
 
-    destination_sample['mode_choice_logsum'] = logsums
+    if logsums.isna().sum() > 0:
+        logger.warning("Finding {0} logsums that are NaN. Filling with {0}".format(logsums.isna().sum(),
+                                                                                   logsums.loc[~logsums.isna()].min()))
+
+    destination_sample['mode_choice_logsum'] = logsums.fillna(logsums.loc[~logsums.isna()].min())
 
     return destination_sample
 

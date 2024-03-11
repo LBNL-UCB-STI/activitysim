@@ -221,7 +221,11 @@ def run_location_logsums(
     # when the index has duplicates, however, in the special case that the series index exactly
     # matches the table index, then the series value order is preserved
     # logsums now does, since workplace_location_sample was on left side of merge de-dup merge
-    location_sample_df['mode_choice_logsum'] = logsums
+    if logsums.isna().sum() > 0:
+        logger.warning("Finding {0} logsums that are NaN. Filling with {0}".format(logsums.isna().sum(),
+                                                                                   logsums.loc[~logsums.isna()].min()))
+
+    location_sample_df['mode_choice_logsum'] = logsums.fillna(logsums.loc[~logsums.isna()].min())
 
     return location_sample_df
 

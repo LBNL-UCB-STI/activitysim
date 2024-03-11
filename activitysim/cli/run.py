@@ -59,10 +59,10 @@ def add_run_args(parser, multiprocess=True):
     parser.add_argument("-u", "--skims_url", 
                         action="store", 
                         help="url of skims .csv")
-    parser.add_argument( "-x", "--path_to_remote_data", 
+    parser.add_argument("-x", "--path_to_remote_data",
                         action="store",
                         help="url of urbansim .h5 model data")
-    parser.add_argument( "t", "--write_to_s3", 
+    parser.add_argument("-t", "--write_to_s3",
                         action="store_true", 
                         help="write output to s3?")
 

@@ -308,7 +308,6 @@ def interaction_sample_simulate(
         skims=None, locals_d=None, chunk_size=0,
         trace_label=None, trace_choice_name=None,
         estimator=None):
-
     """
     Run a simulation in the situation in which alternatives must
     be merged with choosers because there are interaction terms or
