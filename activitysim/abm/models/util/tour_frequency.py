@@ -257,6 +257,24 @@ def process_mandatory_tours(
 
     tours["household_id"] = tours_merged.household_id
 
+    bad_work_dest = ~(tours.loc[tours_merged.tour_type == 'work', "destination"] >= 0)
+
+    if bad_work_dest.sum() > 0:
+        logger.warning(
+            "At the start we have {0} bad work tour destinations, replacing them by sampling from {1} good ones".format(
+                bad_work_dest.sum(), (~bad_work_dest).sum()))
+        tours.loc[tours_merged.tour_type == 'work', "destination"].loc[bad_work_dest] = \
+            tours.loc[tours_merged.tour_type == 'work', "destination"].loc[~bad_work_dest].sample(
+                bad_work_dest.sum(), replace=True)
+
+    bad_school_dest = ~(tours.loc[tours_merged.tour_type == 'school', "destination"] >= 0)
+
+    if bad_school_dest.sum() > 0:
+        logger.warning("At the start we have {0} bad school tour destinations".format(bad_school_dest.sum()))
+        tours.loc[tours_merged.tour_type == 'school', "destination"].loc[bad_school_dest] = \
+            tours.loc[tours_merged.tour_type == 'school', "destination"].loc[~bad_school_dest].sample(
+                bad_school_dest.sum(), replace=True)
+
     # assign stable (predictable) tour_id
     set_tour_index(state, tours)
 
