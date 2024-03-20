@@ -349,7 +349,7 @@ def process_mandatory_tours(persons, mandatory_tour_frequency_alts):
                 bad_work_dest.sum(), (~bad_work_dest).sum()))
         tours.loc[tours_merged.tour_type == 'work', "destination"].loc[bad_work_dest] = \
             tours.loc[tours_merged.tour_type == 'work', "destination"].loc[~bad_work_dest].sample(
-                bad_work_dest.sum(), replace=True)
+                bad_work_dest.sum(), replace=True).values
 
     bad_school_dest = ~(tours.loc[tours_merged.tour_type == 'school', "destination"] >= 0)
 
@@ -357,7 +357,7 @@ def process_mandatory_tours(persons, mandatory_tour_frequency_alts):
         logger.warning("At the start we have {0} bad school tour destinations".format(bad_school_dest.sum()))
         tours.loc[tours_merged.tour_type == 'school', "destination"].loc[bad_school_dest] = \
             tours.loc[tours_merged.tour_type == 'school', "destination"].loc[~bad_school_dest].sample(
-                bad_school_dest.sum(), replace=True)
+                bad_school_dest.sum(), replace=True).values
 
     # assign stable (predictable) tour_id
     set_tour_index(tours)

@@ -13,8 +13,6 @@ RUN apt-get --allow-releaseinfo-change update \
 	&& apt-get install -y build-essential zip unzip
 RUN conda update conda --yes
 
-ARG CACHE_DATE=not_a_date3
-
 RUN git clone -b telework https://github.com/LBNL-UCB-STI/activitysim.git
 
 RUN conda install -n base conda-libmamba-solver

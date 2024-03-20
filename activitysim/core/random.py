@@ -520,12 +520,8 @@ class Random(object):
 
         assert len(list(self.channels.keys())) == 0
 
-        if seed is None:
-            self.base_seed = np.random.RandomState().randint(_MAX_SEED)
-            logger.info("Set random seed randomly to %s" % self.base_seed)
-        else:
-            logger.info("Set random seed base to %s" % seed)
-            self.base_seed = seed
+        self.base_seed = np.random.RandomState().randint(_MAX_SEED)
+        logger.info("Set random seed randomly to %s" % self.base_seed)
 
     def get_global_rng(self):
         """

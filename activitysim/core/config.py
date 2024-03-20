@@ -59,7 +59,7 @@ def pipeline_file_name(settings):
 
 @inject.injectable(cache=True)
 def rng_base_seed(settings):
-    return settings.get('rng_base_seed', 0)
+    return settings.get('rng_base_seed', None)
 
 
 @inject.injectable(cache=True)

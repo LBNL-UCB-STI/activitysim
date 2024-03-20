@@ -198,7 +198,7 @@ def read_model_coefficient_template(model_settings):
 
     # replace missing cell values with coefficient_name from index
     # template = template.where(~template.isnull(), template.index)
-    template.loc[template.isnull().all(axis=1), :] = template.index[template.isnull().all(axis=1)]
+    template.loc[template.isnull().all(axis=1), :] = template.index[template.isnull().all(axis=1)].values[:, None]
 
     return template
 
