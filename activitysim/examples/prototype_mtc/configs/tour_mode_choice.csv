@@ -254,7 +254,7 @@ util_DRIVE_COM_Topology,DRIVE_COM - Topology,@coef_topology_trn_multiplier * df.
 util_DRIVE_COM_Person_is_less_than_10_years_old,DRIVE_COM - Person is less than 10 years old,@(df.age < 10),,,,,,,,,,,,,,,,,,coef_age010_trn_multiplier,,,
 #,Taxi,,,,,,,,,,,,,,,,,,,,,,
 util_Taxi_In_vehicle_time,Taxi - In-vehicle time,@(odt_skims['HOV2TOLL_TIME'] + dot_skims['HOV2TOLL_TIME']),,,,,,,,,,,,,,,,,,,coef_ivt,,
- util_Taxi_Wait_time,Taxi - Wait time,@ridehail_wait_time_multiplier * df.totalWaitTaxi,,,,,,,,,,,,,,,,,,,coef_ivt,,
+util_Taxi_Wait_time,Taxi - Wait time,@ridehail_wait_time_multiplier * df.totalWaitTaxi,,,,,,,,,,,,,,,,,,,coef_ivt,,
 util_Taxi_Tolls,Taxi - Tolls,@ivt_cost_multiplier * df.ivot * (odt_skims['HOV2TOLL_VTOLL'] + dot_skims['HOV2TOLL_VTOLL']),,,,,,,,,,,,,,,,,,,coef_ivt,,
 util_Taxi_Bridge_toll,Taxi - Bridge toll,@ivt_cost_multiplier * df.ivot * (odt_skims['HOV2TOLL_BTOLL'] + dot_skims['HOV2TOLL_BTOLL']),,,,,,,,,,,,,,,,,,,coef_ivt,,
 util_Taxi_Fare,Taxi - Fare,@ivt_cost_multiplier * df.ivot * (Taxi_baseFare * 2 + (odt_skims['HOV2TOLL_DIST'] + dot_skims['HOV2TOLL_DIST']) * Taxi_costPerMile +(odt_skims['HOV2TOLL_TIME'] + dot_skims['HOV2TOLL_TIME']) * Taxi_costPerMinute)*100,,,,,,,,,,,,,,,,,,,coef_ivt,,

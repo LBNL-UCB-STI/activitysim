@@ -9,18 +9,18 @@ logging:
 
   # Configuring the default (root) logger is highly recommended
   root:
-    level: NOTSET
+    level: DEBUG
     handlers: [console, logfile]
 
   loggers:
 
     activitysim:
-      level: INFO
+      level: DEBUG
       handlers: [console, logfile]
       propagate: false
 
     orca:
-      level: WARN
+      level: WARNING
       handlers: [console, logfile]
       propagate: false
 
@@ -50,7 +50,7 @@ logging:
       class: logging.StreamHandler
       stream: ext://sys.stdout
       formatter: elapsedFormatter
-      level: NOTSET
+      level: WARNING
 
   formatters:
 
