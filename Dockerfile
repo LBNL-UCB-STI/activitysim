@@ -19,6 +19,8 @@ RUN conda install -n base conda-libmamba-solver
 
 RUN conda env create --quiet -p $FULL_CONDA_PATH --file activitysim/environment.yml --solver=libmamba
 
+RUN conda install -n asim pyarrow --solver=libmamba
+
 RUN cd activitysim && git pull && $FULL_CONDA_PATH/bin/python setup.py install
 
 ENV PATH $FULL_CONDA_PATH/bin:$PATH

@@ -226,6 +226,7 @@ def write_tables(output_dir):
     action = output_tables_settings.get('action')
     tables = output_tables_settings.get('tables')
     prefix = output_tables_settings.get('prefix', 'final_')
+    filetype = output_tables_settings.get('filetype', 'csv')
     h5_store = output_tables_settings.get('h5_store', False)
 
     if action not in ['include', 'skip']:
@@ -252,10 +253,16 @@ def write_tables(output_dir):
             file_path = config.output_file_path('%soutput_tables.h5' % prefix)
             df.to_hdf(file_path, key=table_name, mode='a', format='fixed')
         else:
-            file_name = "%s%s.csv" % (prefix, table_name)
-            file_path = config.output_file_path(file_name)
+            if filetype == "csv":
+                file_name = "%s%s.csv" % (prefix, table_name)
+                file_path = config.output_file_path(file_name)
 
-            # include the index if it has a name or is a MultiIndex
-            write_index = df.index.name is not None or isinstance(df.index, pd.MultiIndex)
-
-            df.to_csv(file_path, index=write_index)
+                # include the index if it has a name or is a MultiIndex
+                write_index = df.index.name is not None or isinstance(df.index, pd.MultiIndex)
+                df.to_csv(file_path, index=write_index)
+            elif filetype == "parquet":
+                file_name = "%s%s.parquet" % (prefix, table_name)
+                file_path = config.output_file_path(file_name)
+                df.to_parquet(file_path)
+            else:
+                raise NotImplementedError("Output format {0} not implemented".format(filetype))

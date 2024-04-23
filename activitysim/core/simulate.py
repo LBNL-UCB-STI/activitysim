@@ -416,10 +416,10 @@ def eval_utilities(spec, choosers, locals_d=None, trace_label=None,
         #Comment: "choosers.index[0]" is the ID of the first trip in the given for loop. 
         # we choose this as the name of the csv file to print out because it will be unique
         # for any given loop. This avoids replacing finals csv files. 
-        raw_fname = str(choosers.index[0]) + '_raw.csv'
-        utils_fname = str(choosers.index[0]) + '_utilities.csv'
-        raw.to_csv('output/trip_mode_choice/' + raw_fname)
-        utilities.to_csv('output/trip_mode_choice/' + utils_fname)
+        raw_fname = str(choosers.index[0]) + '_raw.parquet'
+        utils_fname = str(choosers.index[0]) + '_utilities.parquet'
+        raw.to_parquet('output/trip_mode_choice/' + raw_fname)
+        utilities.to_parquet('output/trip_mode_choice/' + utils_fname)
         
         if os.path.isfile('output/trip_mode_choice/trip_mode_choice_specs.csv'):
             pass 
@@ -431,9 +431,9 @@ def eval_utilities(spec, choosers, locals_d=None, trace_label=None,
         else: 
             data_dict.to_csv('output/trip_mode_choice/trip_mode_choice_data_dict.csv')
             
-        del(raw)
-        del(specs)
-        del(data_dict)
+        del raw
+        del specs
+        del data_dict
         
 #         # Raw data
 #         if 'trip_mode_choice_raw' in orca.list_tables():

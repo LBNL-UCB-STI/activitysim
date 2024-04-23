@@ -86,7 +86,8 @@ def initialize_landuse():
 
     model_settings = config.read_model_settings('initialize_landuse.yaml', mandatory=True)
 
-    beam_geometries_path = config.setting('beam_geometries')
+    beam_geometries_path = config.settings()["beam_geometries"]
+    logger.info("Reading beam geoms from {0}".format(beam_geometries_path))
     data_file_path = config.data_file_path(beam_geometries_path, mandatory=True)
 
     beam_geom_dataframe = pd.read_csv(data_file_path)
