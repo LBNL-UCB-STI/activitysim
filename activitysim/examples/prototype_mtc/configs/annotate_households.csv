@@ -30,4 +30,3 @@ family,family,households.HHT.isin(HHT_FAMILY)
 home_is_urban,home_is_urban,"reindex(land_use.area_type, households.home_zone_id) < setting('urban_threshold')"
 home_is_rural,home_is_rural,"reindex(land_use.area_type, households.home_zone_id) > setting('rural_threshold')"
 #,, default for work and school location logsums before auto_ownership model is run
-auto_ownership,auto_ownership,households.VEHICL

@@ -60,19 +60,15 @@ input_table_list:
     filename: land_use.csv
     index_col: zone_id
     rename_columns:
-      ZONE: zone_id  # person_id is the required index column
+      TAZ: zone_id  # person_id is the required index column
       COUNTY: county_id
     recode_columns:
       zone_id: zero-based
     keep_columns:
-      - DISTRICT
-      - SD
       - county_id
       - TOTHH
       - TOTPOP
       - TOTACRE
-      - RESACRE
-      - CIACRE
       - TOTEMP
       - AGE0519
       - RETEMPN
@@ -169,7 +165,7 @@ keep_mem_logs: True
 # multiprocessing controls
 multiprocess: True
 chunk_size: 10_000_000_000
-num_processes: 94
+num_processes: 2
 stagger: 0
 
 # trace household id; comment out or leave empty for no trace
