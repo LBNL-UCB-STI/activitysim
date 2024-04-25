@@ -227,7 +227,6 @@ models:
   - trip_scheduling
   - trip_mode_choice
   ### mp_summarize step
-  - generate_beam_plans
   - write_data_dictionary
   - track_skim_usage
   - write_trip_matrices
@@ -244,7 +243,7 @@ multiprocess_steps:
         - households
         - persons
   - name: mp_summarize
-    begin: generate_beam_plans
+    begin: write_data_dictionary
 
 output_tables:
   h5_store: False
@@ -274,6 +273,7 @@ output_tables:
         destination: land_use.zone_id
     - joint_tour_participants
     - plans
+    - beam_plans
 #     - trip_mode_choice_raw
 #     - trip_mode_choice_utilities
 #     - trip_mode_choice_specs
