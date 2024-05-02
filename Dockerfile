@@ -23,5 +23,7 @@ ENV CONDA_DEFAULT_ENV $CONDA_ENV
 
 ENV EXAMPLE example_mtc
 
+RUN cd activitysim && git pull
+
 WORKDIR $ASIM_PATH/$ASIM_PATH/$ASIM_SUBDIR/$EXAMPLE
 ENTRYPOINT ["python", "-u", "simulation.py"]
