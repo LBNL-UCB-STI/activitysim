@@ -552,7 +552,7 @@ class Random(object):
         exists to allow sampling of input tables consistent no matter what step they are called in
         """
 
-        seed = [self.base_seed, hash32(one_off_step_name)]
+        seed = [0, hash32(one_off_step_name)] # HACK:: Ensure that external RNG is always consistent
         return np.random.RandomState(seed)
 
     def random_for_df(self, df, n=1):
