@@ -160,11 +160,13 @@ def generate_beam_plans():
     trips['departure_time'] = generate_departure_times(trips, tours)
     trips['number_of_participants'] = trips['tour_id'].map(
         tours['number_of_participants'])
+    trips['tour_mode'] = trips['tour_id'].map(
+            tours['tour_mode'])
 
     # trim trips table
     cols = [
-        'person_id', 'departure_time', 'purpose', 'origin',
-        'destination', 'number_of_participants', 'trip_mode', 'x', 'y']
+        'person_id', 'tour_id', 'departure_time', 'purpose', 'origin',
+        'destination', 'number_of_participants', 'tour_mode', 'trip_mode', 'x', 'y']
     sorted_trips = trips[cols].sort_values(
         ['person_id', 'departure_time']).reset_index()
 
@@ -215,10 +217,13 @@ def generate_beam_plans():
 
     final_plans['trip_id'] = final_plans['trip_id'].shift()
     final_plans['trip_mode'] = final_plans['trip_mode'].shift()
+    final_plans['tour_id'] = final_plans['tour_id'].shift()
+    final_plans['tour_mode'] = final_plans['tour_mode'].shift()
     final_plans['number_of_participants'] = final_plans[
         'number_of_participants'].shift()
+
     final_plans = final_plans[[
-        'trip_id', 'person_id', 'number_of_participants', 'trip_mode',
+        'tour_id', 'trip_id', 'person_id', 'number_of_participants', 'tour_mode', 'trip_mode',
         'PlanElementIndex', 'ActivityElement', 'ActivityType', 'x', 'y',
         'departure_time']]
 
