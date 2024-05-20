@@ -28,6 +28,6 @@ ENV EXAMPLE bay_area
 
 WORKDIR $ASIM_PATH/$EXAMPLE
 
-RUN cd activitysim && git pull
+RUN git pull
 
 ENTRYPOINT ["python", "-u", "simulation.py"]
