@@ -110,7 +110,7 @@ def sample_geoseries(geoseries, size, overestimate=2):
 def get_trip_coords(trips, zones, persons, size=500):
     # Generates random points within each zone for zones
     # that are not empty geometries (i.e. contain no blocks)
-    trips['purpose'] = trips['purpose'].str.lower()
+    trips["purpose"] = trips["purpose"].str.lower()
     rand_point_zones = {}
     for zone in zones[~(zones["geometry"].is_empty | zones["geometry"].isna())].TAZ:
         size = 500
@@ -119,13 +119,13 @@ def get_trip_coords(trips, zones, persons, size=500):
         rand_point_zones[zone] = points
 
     def assignLoc(grp):
-        zs = rand_point_zones[grp.iloc[0]['origin']]
+        zs = rand_point_zones[grp.iloc[0]["origin"]]
         z = random.choice(zs)
         grp["origin_x"] = z[0]
         grp["origin_y"] = z[1]
         return grp
 
-    trips = trips.groupby(['household_id', 'origin', 'purpose']).apply(assignLoc)
+    trips = trips.groupby(["household_id", "origin", "purpose"]).apply(assignLoc)
 
     # retain home coords from urbansim data bc they will typically be
     # higher resolution than zone, so we don't need the semi-random coords
@@ -141,13 +141,15 @@ def get_trip_coords(trips, zones, persons, size=500):
     return trips
 
 
+def generatePersonStartTimes(df):
+    df["mustEndBy"] = np.minimum(df["depart"].shift(-1).fillna(25), df["tour_end"]) + 1
+    return df
+
+
 def generate_departure_times(trips, tours):
-    trips["inbound"] = ~trips.outbound
-    trips["tour_start"] = trips.tour_id.map(tours.start)
-    trips["tour_end"] = trips.tour_id.map(tours.end)
 
     # TO DO: fractional times must respect the original order of trips!!!!
-    df = (
+    ordered_trips2 = (
         trips[
             [
                 "person_id",
@@ -157,57 +159,135 @@ def generate_departure_times(trips, tours):
                 "tour_id",
                 "inbound",
                 "trip_num",
+                "totalTime",
             ]
         ]
         .reset_index()
         .drop_duplicates("trip_id")
     )
-    df["frac"] = np.random.rand(
-        len(df),
+    ordered_trips2["frac"] = np.random.rand(
+        len(ordered_trips2),
     )
-    df.index.name = "og_df_idx"
+    ordered_trips2.index.name = "og_df_idx"
 
-    # Making sure trips within the hour are sequential
-    ordered_trips = df.sort_values(
-        by=[
-            "person_id",
-            "depart",
-            "frac",
-            "tour_start",
-            "tour_end",
-            "tour_id",
-            "inbound",
-            "trip_num",
-        ]
-    ).reset_index()
-    df2 = df.sort_values(
-        by=[
-            "person_id",
-            "depart",
-            "tour_start",
-            "tour_end",
-            "tour_id",
-            "inbound",
-            "trip_num",
-        ]
-    ).reset_index()
-    df2["fractional"] = ordered_trips.frac
+    def getTotalTime(df):
+        df["frac"] = df["frac"].sort_values(ascending=True).values
+        cannotSpillIntoNextWindow = df.iloc[-1]["mustFinishWithinHour"]
+        if cannotSpillIntoNextWindow:
+            allowableDuration = 60.0
+        else:
+            allowableDuration = 60.0 + df.iloc[-1]["totalTime"]
+        totalBuffer = np.max([(allowableDuration - df["totalTime"].sum()) / 60.0, 0.0])
+        df["newStartTime"] = (
+            df["depart"]
+            + df["frac"] * totalBuffer
+            + df["totalTime"].shift(1).fillna(0.0).cumsum() / 60.0
+        )
+        df["gapAfterTrip"] = -((df["newStartTime"] + df["totalTime"] / 60.0) - df[
+            "newStartTime"
+        ].shift(-1).fillna(100).values)
+        i = 0
+        while not np.all(df["gapAfterTrip"].values >= 0):
+            df.loc[
+                ~(df["gapAfterTrip"].shift(1).fillna(100).values > 0), "newStartTime"
+            ] -= (
+                df.loc[~(df["gapAfterTrip"].values > 0), "gapAfterTrip"]
+                .fillna(0.0)
+                .values
+            )
+            df["gapAfterTrip"] = -((df["newStartTime"] + df["totalTime"] / 60.0) - df[
+                "newStartTime"
+            ].shift(-1).fillna(100).values)
+            i += 1
+            if i > 15:
+                raise ValueError
+        return df
 
-    # Adding fractional to int hour
-    df2["depart"] = np.round(df2["depart"] + df2["fractional"], 3)
-    df2.set_index("og_df_idx", inplace=True)
-    df2 = df2.reindex(df.index)
+    def process(df):
+        df["mustFinishWithinHour"] = (
+            df["depart"] >= df["depart"].shift(-1).fillna(24) - 1
+        )
+        df = df.groupby("depart").apply(getTotalTime)
+        return df
+
+    df2 = ordered_trips2.groupby(["person_id"]).apply(process)
     df2.set_index("trip_id", inplace=True)
     df2 = df2.reindex(trips.index)
-    return df2.depart
+    return df2.newStartTime.rename("depart")
 
+
+def label_trip_modes(trips, skims):
+    odt_skim_stack_wrapper = skims['odt_skims']
+    dot_skim_stack_wrapper = skims['dot_skims']
+    od_skim_wrapper = skims['od_skims']
+
+    trips["totalTime"] = -1.0
+    trips["trip_mode_full"] = trips["trip_mode"].replace(
+        {
+            "SHARED2PAY": "HOV2TOLL",
+            "SHARED3PAY": "HOV3TOLL",
+            "SHARED2FREE": "HOV2",
+            "SHARED3FREE": "HOV3",
+            "DRIVEALONEFREE": "SOV",
+            "DRIVEALONEPAY": "SOVTOLL",
+        }
+    )
+    trips.loc[trips.trip_mode.str.startswith("WALK_"), "trip_mode_full"] = (
+        trips.loc[
+            trips.trip_mode.str.startswith("WALK_"), "trip_mode_full"
+        ].str.replace("WALK", "WLK")
+        + "_WLK"
+    )
+    trips.loc[
+        trips.trip_mode.str.startswith("DRIVE_") & trips.outbound, "trip_mode_full"
+    ] = (
+        trips.loc[
+            trips.trip_mode.str.startswith("DRIVE_") & trips.outbound, "trip_mode_full"
+        ].str.replace("DRIVE", "DRV")
+        + "_WLK"
+    )
+    trips.loc[
+        trips.trip_mode.str.startswith("DRIVE_") & ~trips.outbound, "trip_mode_full"
+    ] = (
+        trips.loc[
+            trips.trip_mode.str.startswith("DRIVE_") & ~trips.outbound, "trip_mode_full"
+        ].str.replace("DRIVE", "WLK")
+        + "_DRV"
+    )
+    for (mode, isOutbound), subdf in trips.groupby(["trip_mode_full", "outbound"]):
+        mask = (trips["trip_mode_full"] == mode) & (trips["outbound"] == isOutbound)
+        if mode in mode_to_time_columns:
+            metrics, multiplier = mode_to_time_columns[mode]
+            times = []
+            for metric in metrics:
+                if isOutbound:
+                    val = (
+                        odt_skim_stack_wrapper[f"{mode}_{metric}"].loc[mask]
+                        / multiplier
+                    )
+                else:
+                    val = (
+                        dot_skim_stack_wrapper[f"{mode}_{metric}"].loc[mask]
+                        / multiplier
+                    )
+                times.append(val)
+            look = pd.concat(times, axis=1)
+            trips.loc[mask, "totalTime"] = look.sum(axis=1)
+        elif mode in mode_to_spd:
+            spd = mode_to_spd[mode]
+            dist = od_skim_wrapper[f"DIST{mode}"].loc[mask]
+            trips.loc[mask, "totalTime"] = dist / spd
+        else:
+            fallback_time = odt_skim_stack_wrapper["SOV_TIME"].loc[mask]
+            trips.loc[mask, "totalTime"] = fallback_time * 1.1
+    return trips
 
 @inject.step()
-def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack):
+def generate_beam_plans(trips_w, tours_w, persons_w, skim_dict, skim_stack):
     # Importing ActivitySim results
-    trips = trips.to_frame()
-    tours = tours.to_frame()
-    persons = persons.to_frame()
+    trips = trips_w.to_frame()
+    tours = tours_w.to_frame()
+    persons = persons_w.to_frame()
 
     if orca.is_table("beam_geoms"):
         beam_geoms = pipeline.get_table("beam_geoms")
@@ -242,67 +322,105 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack):
 
     set_skim_wrapper_targets(trips, skims)
 
-    trips["totalTime"] = -1.0
-    trips["trip_mode_full"] = trips["trip_mode"].replace(
-        {
-            "SHARED2PAY": "HOV2TOLL",
-            "SHARED3PAY": "HOV3TOLL",
-            "SHARED2FREE": "HOV2",
-            "SHARED3FREE": "HOV3",
-            "DRIVEALONEFREE": "SOV",
-            "DRIVEALONEPAY": "SOVTOLL",
-        }
+    trips["inbound"] = ~trips.outbound
+    trips["tour_start"] = trips.tour_id.map(tours.start)
+    trips["tour_end"] = trips.tour_id.map(tours.end)
+
+    print("SOORTING TRIPS")
+    trips['isAtWork'] = trips.purpose == "atwork"
+
+    trips['actuallyInbound'] = trips["inbound"].copy()
+    trips.loc[(trips.primary_purpose == "work") & (trips.purpose != "Home"), 'actuallyInbound'] = ~trips.loc[(trips.primary_purpose == "work") & (trips.purpose != "Home"), 'inbound'].copy()
+    trips.loc[(trips.purpose == "atwork"), 'actuallyInbound'] = ~trips.loc[(trips.purpose == "atwork"), 'inbound'].copy()
+
+    trips = trips.sort_values(
+        by=[
+            "person_id",
+            "depart",
+            "tour_end",
+            "inbound",
+            "tour_start"
+        ]
     )
-    trips.loc[trips.trip_mode.str.startswith("WALK_"), "trip_mode_full"] = (
-            trips.loc[
-                trips.trip_mode.str.startswith("WALK_"), "trip_mode_full"
-            ].str.replace("WALK", "WLK")
-            + "_WLK"
+
+    def manually_rearrange(df):
+        bad_inds = np.nonzero(df.is_bad.values)[0]
+        destinationOfLastGoodTrip = df.iloc[bad_inds[0] - 1]["destination"]
+        timePeriodToFix = df.iloc[bad_inds[0]]["depart"]
+        try:
+            potentialIndsToMoveUp = np.argwhere(((df["depart"] == timePeriodToFix) & (df["origin"] == destinationOfLastGoodTrip) & (np.arange(len(df)) > bad_inds[0])).values)[0]
+        except IndexError:
+            tripsToShuffle = df.loc[df["depart"] == timePeriodToFix]
+            df2 = df.copy()
+            df2.loc[tripsToShuffle.index] = tripsToShuffle.sample(frac=1).values
+            df2.is_bad = ~(df2["origin"] == df2["destination"].shift())
+            df2.is_bad.iloc[0] = False
+            if not df2.original_order.is_unique:
+                print(df2)
+                raise ValueError
+            return df2
+        tripIndToMoveUp = np.random.choice(potentialIndsToMoveUp)
+        tripsToShuffle = df.iloc[bad_inds[0]: tripIndToMoveUp].copy()
+
+        df2 = df.copy()
+        df2.iloc[bad_inds[0]] = df2.iloc[tripIndToMoveUp].values
+        df2.iloc[(bad_inds[0] + 1): (tripIndToMoveUp + 1)] = tripsToShuffle.sample(frac=1).values
+        df2.is_bad = ~(df2["origin"] == df2["destination"].shift())
+        df2.is_bad.iloc[0] = False
+        if not df2.original_order.is_unique:
+            print(tripIndToMoveUp, bad_inds, destinationOfLastGoodTrip, tripsToShuffle.original_order.values)
+            print(df2[["origin", "destination","original_order","depart"]])
+            raise ValueError
+        return df2
+
+    trips.reset_index(inplace=True)
+    trips["original_order"] = np.arange(len(trips))
+    topo_sort_mask = (trips["destination"].shift() == trips["origin"]) | (
+        trips["person_id"].shift() != trips["person_id"]
     )
-    trips.loc[
-        trips.trip_mode.str.startswith("DRIVE_") & trips.outbound, "trip_mode_full"
-    ] = (
-            trips.loc[
-                trips.trip_mode.str.startswith("DRIVE_") & trips.outbound, "trip_mode_full"
-            ].str.replace("DRIVE", "DRV")
-            + "_WLK"
-    )
-    trips.loc[
-        trips.trip_mode.str.startswith("DRIVE_") & ~trips.outbound, "trip_mode_full"
-    ] = (
-            trips.loc[
-                trips.trip_mode.str.startswith("DRIVE_") & ~trips.outbound, "trip_mode_full"
-            ].str.replace("DRIVE", "WLK")
-            + "_DRV"
-    )
-    for (mode, isOutbound), subdf in trips.groupby(["trip_mode_full", "outbound"]):
-        mask = (trips["trip_mode_full"] == mode) & (trips['outbound'] == isOutbound)
-        if mode in mode_to_time_columns:
-            metrics, multiplier = mode_to_time_columns[mode]
-            times = []
-            for metric in metrics:
-                if isOutbound:
-                    val = odt_skim_stack_wrapper[f"{mode}_{metric}"].loc[mask] / multiplier
-                else:
-                    val = dot_skim_stack_wrapper[f"{mode}_{metric}"].loc[mask] / multiplier
-                times.append(val)
-            look = pd.concat(times, axis=1)
-            trips.loc[mask, "totalTime"] = look.sum(axis=1)
-        elif mode in mode_to_spd:
-            spd = mode_to_spd[mode]
-            dist = od_skim_wrapper[f"DIST{mode}"].loc[mask]
-            trips.loc[mask, "totalTime"] = dist / spd
-        else:
-            fallback_time = odt_skim_stack_wrapper["SOV_TIME"].loc[mask]
-            trips.loc[mask, "totalTime"] = fallback_time * 1.1
+    trips["is_bad"] = False
+    trips.loc[~topo_sort_mask, "is_bad"] = True
+    i = 1
+    while (topo_sort_mask.sum() > 0) & (i < 400):
+
+        print(f"Before rearranging: {trips.is_bad.sum()} trips")
+        bad_plans = trips.loc[trips.person_id.isin(trips.loc[~topo_sort_mask, "person_id"]), :]
+        fixed_plans = bad_plans.groupby(["person_id"]).apply(manually_rearrange).reset_index(drop=True)
+        fixed_plans.index = bad_plans.index.copy()
+        trips.loc[fixed_plans.index, :] = fixed_plans.copy()
+        topo_sort_mask = (trips["destination"].shift() == trips["origin"]) | (
+                trips["person_id"].shift() != trips["person_id"]
+        )
+        print(f"After: {(~topo_sort_mask).sum()} trips")
+        i += 1
+
+    trips.set_index("trip_id", inplace=True)
+
+    trips = label_trip_modes(trips, skims)
+    print("LABELING TRIPS")
+    num_true, num_false = topo_sort_mask.value_counts().values
+
+    if num_false > 0:
+        num_trips = len(trips)
+        pct_discontinuous_trips = np.round((num_false / num_trips) * 100, 1)
+        print(
+            "{0} of {1} ({2}%) of trips are topologically inconsistent "
+            "after assigning departure times.".format(
+                num_false, num_trips, pct_discontinuous_trips
+            )
+        )
 
     # augment trips table with attrs we need to generate plans
     trips = get_trip_coords(trips, zones, persons)
+    print("ADDED COORDS")
+
     trips["departure_time"] = generate_departure_times(trips, tours)
+    print("ADDED TIMES")
     trips["number_of_participants"] = trips["tour_id"].map(
         tours["number_of_participants"]
     )
     trips["tour_mode"] = trips["tour_id"].map(tours["tour_mode"])
+    trips.rename(columns={"totalTime": "trip_dur_min"}, inplace=True)
 
     # trim trips table
     cols = [
@@ -317,25 +435,13 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack):
         "trip_mode",
         "x",
         "y",
+        "trip_dur_min"
     ]
     sorted_trips = (
         trips[cols].sort_values(["person_id", "departure_time"]).reset_index()
     )
 
-    topo_sort_mask = (sorted_trips["destination"].shift() == sorted_trips["origin"]) | (
-            sorted_trips["person_id"].shift() != sorted_trips["person_id"]
-    )
-    num_true, num_false = topo_sort_mask.value_counts().values
 
-    if num_false > 0:
-        num_trips = len(sorted_trips)
-        pct_discontinuous_trips = np.round((num_false / num_trips) * 100, 1)
-        logger.warning(
-            "{0} of {1} ({2}%) of trips are topologically inconsistent "
-            "after assigning departure times.".format(
-                num_false, num_trips, pct_discontinuous_trips
-            )
-        )
 
     # Adding a new row for each unique person_id
     # this row will represent the returning trip
@@ -396,6 +502,7 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack):
 
     # save back to pipeline
     pipeline.replace_table("plans", final_plans)
+
 
 #     # summary stats
 #     input_cars_per_hh = np.round(
