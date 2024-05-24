@@ -28,6 +28,6 @@ ENV EXAMPLE bay_area
 
 WORKDIR $ASIM_PATH/$EXAMPLE
 
-RUN git pull
+RUN git fetch && git checkout -b beam-plans-fixes origin/beam-plans-fixes && git pull
 
 ENTRYPOINT ["python", "-u", "simulation.py"]

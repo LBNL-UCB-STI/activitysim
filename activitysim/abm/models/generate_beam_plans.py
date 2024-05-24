@@ -178,13 +178,14 @@ def generate_departure_times(trips, tours):
             allowableDuration = 60.0 + df.iloc[-1]["totalTime"]
         totalBuffer = np.max([(allowableDuration - df["totalTime"].sum()) / 60.0, 0.0])
         df["newStartTime"] = (
-                df["depart"]
-                + df["frac"] * totalBuffer
-                + df["totalTime"].shift(1).fillna(0.0).cumsum() / 60.0
+            df["depart"]
+            + df["frac"] * totalBuffer
+            + df["totalTime"].shift(1).fillna(0.0).cumsum() / 60.0
         )
-        df["gapAfterTrip"] = -((df["newStartTime"] + df["totalTime"] / 60.0) - df[
-            "newStartTime"
-        ].shift(-1).fillna(100).values)
+        df["gapAfterTrip"] = -(
+            (df["newStartTime"] + df["totalTime"] / 60.0)
+            - df["newStartTime"].shift(-1).fillna(100).values
+        )
         i = 0
         while not np.all(df["gapAfterTrip"].values >= 0):
             df.loc[
@@ -194,9 +195,10 @@ def generate_departure_times(trips, tours):
                 .fillna(0.0)
                 .values
             )
-            df["gapAfterTrip"] = -((df["newStartTime"] + df["totalTime"] / 60.0) - df[
-                "newStartTime"
-            ].shift(-1).fillna(100).values)
+            df["gapAfterTrip"] = -(
+                (df["newStartTime"] + df["totalTime"] / 60.0)
+                - df["newStartTime"].shift(-1).fillna(100).values
+            )
             i += 1
             if i > 15:
                 raise ValueError
@@ -204,7 +206,7 @@ def generate_departure_times(trips, tours):
 
     def process(df):
         df["mustFinishWithinHour"] = (
-                df["depart"] >= df["depart"].shift(-1).fillna(24) - 1
+            df["depart"] >= df["depart"].shift(-1).fillna(24) - 1
         )
         df = df.groupby("depart").apply(getTotalTime)
         return df
@@ -216,9 +218,9 @@ def generate_departure_times(trips, tours):
 
 
 def label_trip_modes(trips, skims):
-    odt_skim_stack_wrapper = skims['odt_skims']
-    dot_skim_stack_wrapper = skims['dot_skims']
-    od_skim_wrapper = skims['od_skims']
+    odt_skim_stack_wrapper = skims["odt_skims"]
+    dot_skim_stack_wrapper = skims["dot_skims"]
+    od_skim_wrapper = skims["od_skims"]
 
     trips["totalTime"] = -1.0
     trips["trip_mode_full"] = trips["trip_mode"].replace(
@@ -232,26 +234,26 @@ def label_trip_modes(trips, skims):
         }
     )
     trips.loc[trips.trip_mode.str.startswith("WALK_"), "trip_mode_full"] = (
-            trips.loc[
-                trips.trip_mode.str.startswith("WALK_"), "trip_mode_full"
-            ].str.replace("WALK", "WLK")
-            + "_WLK"
+        trips.loc[
+            trips.trip_mode.str.startswith("WALK_"), "trip_mode_full"
+        ].str.replace("WALK", "WLK")
+        + "_WLK"
     )
     trips.loc[
         trips.trip_mode.str.startswith("DRIVE_") & trips.outbound, "trip_mode_full"
     ] = (
-            trips.loc[
-                trips.trip_mode.str.startswith("DRIVE_") & trips.outbound, "trip_mode_full"
-            ].str.replace("DRIVE", "DRV")
-            + "_WLK"
+        trips.loc[
+            trips.trip_mode.str.startswith("DRIVE_") & trips.outbound, "trip_mode_full"
+        ].str.replace("DRIVE", "DRV")
+        + "_WLK"
     )
     trips.loc[
         trips.trip_mode.str.startswith("DRIVE_") & ~trips.outbound, "trip_mode_full"
     ] = (
-            trips.loc[
-                trips.trip_mode.str.startswith("DRIVE_") & ~trips.outbound, "trip_mode_full"
-            ].str.replace("DRIVE", "WLK")
-            + "_DRV"
+        trips.loc[
+            trips.trip_mode.str.startswith("DRIVE_") & ~trips.outbound, "trip_mode_full"
+        ].str.replace("DRIVE", "WLK")
+        + "_DRV"
     )
     for (mode, isOutbound), subdf in trips.groupby(["trip_mode_full", "outbound"]):
         mask = (trips["trip_mode_full"] == mode) & (trips["outbound"] == isOutbound)
@@ -261,13 +263,13 @@ def label_trip_modes(trips, skims):
             for metric in metrics:
                 if isOutbound:
                     val = (
-                            odt_skim_stack_wrapper[f"{mode}_{metric}"].loc[mask]
-                            / multiplier
+                        odt_skim_stack_wrapper[f"{mode}_{metric}"].loc[mask]
+                        / multiplier
                     )
                 else:
                     val = (
-                            dot_skim_stack_wrapper[f"{mode}_{metric}"].loc[mask]
-                            / multiplier
+                        dot_skim_stack_wrapper[f"{mode}_{metric}"].loc[mask]
+                        / multiplier
                     )
                 times.append(val)
             look = pd.concat(times, axis=1)
@@ -327,22 +329,22 @@ def generate_beam_plans(trips_w, tours_w, persons_w, skim_dict, skim_stack):
     trips["tour_end"] = trips.tour_id.map(tours.end)
 
     print("SOORTING TRIPS")
-    trips['isAtWork'] = trips.purpose == "atwork"
+    trips["isAtWork"] = trips.purpose == "atwork"
 
-    trips['actuallyInbound'] = trips["inbound"].copy()
-    trips.loc[(trips.primary_purpose == "work") & (trips.purpose != "Home"), 'actuallyInbound'] = ~trips.loc[
-        (trips.primary_purpose == "work") & (trips.purpose != "Home"), 'inbound'].copy()
-    trips.loc[(trips.purpose == "atwork"), 'actuallyInbound'] = ~trips.loc[
-        (trips.purpose == "atwork"), 'inbound'].copy()
+    trips["actuallyInbound"] = trips["inbound"].copy()
+    trips.loc[
+        (trips.primary_purpose == "work") & (trips.purpose != "Home"), "actuallyInbound"
+    ] = ~trips.loc[
+        (trips.primary_purpose == "work") & (trips.purpose != "Home"), "inbound"
+    ].copy()
+    trips.loc[(trips.purpose == "atwork"), "actuallyInbound"] = ~trips.loc[
+        (trips.purpose == "atwork"), "inbound"
+    ].copy()
 
     trips = trips.sort_values(
         by=[
-            "person_id",
-            "depart",
-            "tour_end",
-            "inbound",
-            "tour_start"
-        ]
+        'person_id', 'depart', 'tour_start', 'tour_end',
+        'tour_id', 'inbound', 'trip_num']
     )
 
     def fix_trip_sequence(df):
@@ -356,9 +358,11 @@ def generate_beam_plans(trips_w, tours_w, persons_w, skim_dict, skim_stack):
 
         try:
             potential_indices = np.argwhere(
-                ((df["depart"] == time_period_to_fix) &
-                 (df["origin"] == destination_of_last_good_trip) &
-                 (np.arange(len(df)) > first_bad_index)).values
+                (
+                    (df["depart"] == time_period_to_fix)
+                    & (df["origin"] == destination_of_last_good_trip)
+                    & (np.arange(len(df)) > first_bad_index)
+                ).values
             )[0]
         except IndexError:
             trips_to_shuffle = df[df["depart"] == time_period_to_fix]
@@ -372,11 +376,13 @@ def generate_beam_plans(trips_w, tours_w, persons_w, skim_dict, skim_stack):
             return df2
 
         trip_index_to_move_up = np.random.choice(potential_indices)
-        trips_to_shuffle = df.iloc[first_bad_index: trip_index_to_move_up].copy()
+        trips_to_shuffle = df.iloc[first_bad_index:trip_index_to_move_up].copy()
 
         df2 = df.copy()
         df2.iloc[first_bad_index] = df2.iloc[trip_index_to_move_up].values
-        df2.iloc[(first_bad_index + 1): (trip_index_to_move_up + 1)] = trips_to_shuffle.sample(frac=1).values
+        df2.iloc[(first_bad_index + 1) : (trip_index_to_move_up + 1)] = (
+            trips_to_shuffle.sample(frac=1).values
+        )
         df2["is_bad"] = ~(df2["origin"] == df2["destination"].shift())
         df2["is_bad"].iloc[0] = False
         if not df2["original_order"].is_unique:
@@ -387,19 +393,25 @@ def generate_beam_plans(trips_w, tours_w, persons_w, skim_dict, skim_stack):
     trips.reset_index(inplace=True)
     trips["original_order"] = np.arange(len(trips))
     topo_sort_mask = (trips["destination"].shift() == trips["origin"]) | (
-            trips["person_id"].shift() != trips["person_id"]
+        trips["person_id"].shift() != trips["person_id"]
     )
     trips["is_bad"] = False
     trips.loc[~topo_sort_mask, "is_bad"] = True
     i = 1
     while (trips["is_bad"].sum() > 0) and (i < 400):
         logger.info(f"Before rearranging: {trips.is_bad.sum()} trips")
-        bad_plans = trips.loc[trips.person_id.isin(trips.loc[~topo_sort_mask, "person_id"]), :]
-        fixed_plans = bad_plans.groupby(["person_id"]).apply(fix_trip_sequence).reset_index(drop=True)
+        bad_plans = trips.loc[
+            trips.person_id.isin(trips.loc[~topo_sort_mask, "person_id"]), :
+        ]
+        fixed_plans = (
+            bad_plans.groupby(["person_id"])
+            .apply(fix_trip_sequence)
+            .reset_index(drop=True)
+        )
         fixed_plans.index = bad_plans.index.copy()
         trips.loc[fixed_plans.index, :] = fixed_plans.copy()
         topo_sort_mask = (trips["destination"].shift() == trips["origin"]) | (
-                trips["person_id"].shift() != trips["person_id"]
+            trips["person_id"].shift() != trips["person_id"]
         )
         trips["is_bad"] = False
         trips.loc[~topo_sort_mask, "is_bad"] = True
@@ -447,7 +459,7 @@ def generate_beam_plans(trips_w, tours_w, persons_w, skim_dict, skim_stack):
         "trip_mode",
         "x",
         "y",
-        "trip_dur_min"
+        "trip_dur_min",
     ]
     sorted_trips = (
         trips[cols].sort_values(["person_id", "departure_time"]).reset_index()
@@ -505,11 +517,13 @@ def generate_beam_plans(trips_w, tours_w, persons_w, skim_dict, skim_stack):
             "x",
             "y",
             "departure_time",
+            "trip_dur_min"
         ]
     ]
 
     # save back to pipeline
     pipeline.replace_table("plans", final_plans)
+
 
 #     # summary stats
 #     input_cars_per_hh = np.round(
