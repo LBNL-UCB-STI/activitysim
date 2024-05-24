@@ -285,11 +285,11 @@ def label_trip_modes(trips, skims):
 
 
 @inject.step()
-def generate_beam_plans(trips_w, tours_w, persons_w, skim_dict, skim_stack):
+def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack):
     # Importing ActivitySim results
-    trips = trips_w.to_frame()
-    tours = tours_w.to_frame()
-    persons = persons_w.to_frame()
+    trips = trips.to_frame()
+    tours = tours.to_frame()
+    persons = persons.to_frame()
 
     if orca.is_table("beam_geoms"):
         beam_geoms = pipeline.get_table("beam_geoms")
