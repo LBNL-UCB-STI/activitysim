@@ -33,27 +33,27 @@ mode_to_time_columns = {
     "WLK_LRF_WLK": (["TOTIVT", "IWAIT", "XWAIT", "WACC", "WAUX", "WEGR"], 100.0),
     "WLK_COM_WLK": (["TOTIVT", "IWAIT", "XWAIT", "WACC", "WAUX", "WEGR"], 100.0),
     "WLK_LOC_DRV": (
-        ["DTIM", "TOTIVT", "IWAIT", "XWAIT", "WACC", "WAUX", "WEGR"],
+        ["DTIM", "TOTIVT", "IWAIT", "XWAIT", "WAUX"],
         100.0,
     ),
     "WLK_HVY_DRV": (
-        ["DTIM", "TOTIVT", "IWAIT", "XWAIT", "WACC", "WAUX", "WEGR"],
+        ["DTIM", "TOTIVT", "IWAIT", "XWAIT", "WAUX"],
         100.0,
     ),
     "WLK_LRF_DRV": (
-        ["DTIM", "TOTIVT", "IWAIT", "XWAIT", "WACC", "WAUX", "WEGR"],
+        ["DTIM", "TOTIVT", "IWAIT", "XWAIT", "WAUX"],
         100.0,
     ),
     "DRV_LOC_WLK": (
-        ["DTIM", "TOTIVT", "IWAIT", "XWAIT", "WACC", "WAUX", "WEGR"],
+        ["DTIM", "TOTIVT", "IWAIT", "XWAIT", "WAUX"],
         100.0,
     ),
     "DRV_HVY_WLK": (
-        ["DTIM", "TOTIVT", "IWAIT", "XWAIT", "WACC", "WAUX", "WEGR"],
+        ["DTIM", "TOTIVT", "IWAIT", "XWAIT", "WAUX"],
         100.0,
     ),
     "DRV_LRF_WLK": (
-        ["DTIM", "TOTIVT", "IWAIT", "XWAIT", "WACC", "WAUX", "WEGR"],
+        ["DTIM", "TOTIVT", "IWAIT", "XWAIT", "WAUX"],
         100.0,
     ),
 }
