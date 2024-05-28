@@ -273,7 +273,7 @@ def label_trip_modes(trips, skims):
                             / multiplier
                         )
                 except AssertionError:
-                    val = np.zeros_like(odt_skim_stack_wrapper["SOV_TIME"].loc[mask])
+                    val = odt_skim_stack_wrapper["SOV_TIME"].loc[mask] * 0.0
                 times.append(val)
             look = pd.concat(times, axis=1)
             trips.loc[mask, "totalTime"] = look.sum(axis=1)
