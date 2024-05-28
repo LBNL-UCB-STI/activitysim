@@ -425,17 +425,18 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack):
 
     trips = label_trip_modes(trips, skims)
     print("LABELING TRIPS")
-    num_true, num_false = topo_sort_mask.value_counts().values
-
-    if num_false > 0:
+    try:
+        num_true, num_false = topo_sort_mask.value_counts().values
         num_trips = len(trips)
         pct_discontinuous_trips = np.round((num_false / num_trips) * 100, 1)
-        print(
+        logger.info(
             "{0} of {1} ({2}%) of trips are topologically inconsistent "
             "after assigning departure times.".format(
                 num_false, num_trips, pct_discontinuous_trips
             )
         )
+    except ValueError:
+        logger.info(f"All {len(trips)} trips are topologically consistent")
 
     # augment trips table with attrs we need to generate plans
     trips = get_trip_coords(trips, zones, persons)
