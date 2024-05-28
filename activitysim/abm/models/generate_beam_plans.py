@@ -261,16 +261,19 @@ def label_trip_modes(trips, skims):
             metrics, multiplier = mode_to_time_columns[mode]
             times = []
             for metric in metrics:
-                if isOutbound:
-                    val = (
-                        odt_skim_stack_wrapper[f"{mode}_{metric}"].loc[mask]
-                        / multiplier
-                    )
-                else:
-                    val = (
-                        dot_skim_stack_wrapper[f"{mode}_{metric}"].loc[mask]
-                        / multiplier
-                    )
+                try:
+                    if isOutbound:
+                        val = (
+                            odt_skim_stack_wrapper[f"{mode}_{metric}"].loc[mask]
+                            / multiplier
+                        )
+                    else:
+                        val = (
+                            dot_skim_stack_wrapper[f"{mode}_{metric}"].loc[mask]
+                            / multiplier
+                        )
+                except AssertionError:
+                    val = np.zeros_like(odt_skim_stack_wrapper["SOV_TIME"].loc[mask])
                 times.append(val)
             look = pd.concat(times, axis=1)
             trips.loc[mask, "totalTime"] = look.sum(axis=1)
