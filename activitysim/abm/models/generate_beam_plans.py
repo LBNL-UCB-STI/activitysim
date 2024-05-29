@@ -7,8 +7,9 @@ import geopandas as gpd
 import logging
 import warnings
 
+from activitysim.abm.models.util import expressions
 from activitysim.abm.models.util.expressions import skim_time_period_label
-from activitysim.core import pipeline, orca
+from activitysim.core import pipeline, orca, config
 from activitysim.core import inject
 from activitysim.core.simulate import set_skim_wrapper_targets
 
@@ -158,7 +159,7 @@ def generate_departure_times(trips, tours):
                 "tour_id",
                 "inbound",
                 "trip_num",
-                "totalTime",
+                "TOTAL_TIME_MINS",
             ]
         ]
         .reset_index()
@@ -175,15 +176,15 @@ def generate_departure_times(trips, tours):
         if cannotSpillIntoNextWindow:
             allowableDuration = 60.0
         else:
-            allowableDuration = 60.0 + df.iloc[-1]["totalTime"]
-        totalBuffer = np.max([(allowableDuration - df["totalTime"].sum()) / 60.0, 0.0])
+            allowableDuration = 60.0 + df.iloc[-1]["TOTAL_TIME_MINS"]
+        totalBuffer = np.max([(allowableDuration - df["TOTAL_TIME_MINS"].sum()) / 60.0, 0.0])
         df["newStartTime"] = (
             df["depart"]
             + df["frac"] * totalBuffer
-            + df["totalTime"].shift(1).fillna(0.0).cumsum() / 60.0
+            + df["TOTAL_TIME_MINS"].shift(1).fillna(0.0).cumsum() / 60.0
         )
         df["gapAfterTrip"] = -(
-            (df["newStartTime"] + df["totalTime"] / 60.0)
+            (df["newStartTime"] + df["TOTAL_TIME_MINS"] / 60.0)
             - df["newStartTime"].shift(-1).fillna(100).values
         )
         i = 0
@@ -196,7 +197,7 @@ def generate_departure_times(trips, tours):
                 .values
             )
             df["gapAfterTrip"] = -(
-                (df["newStartTime"] + df["totalTime"] / 60.0)
+                (df["newStartTime"] + df["TOTAL_TIME_MINS"] / 60.0)
                 - df["newStartTime"].shift(-1).fillna(100).values
             )
             i += 1
@@ -288,11 +289,22 @@ def label_trip_modes(trips, skims):
 
 
 @inject.step()
-def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack):
+def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size, trace_hh_id, locutor):
     # Importing ActivitySim results
     trips = trips.to_frame()
     tours = tours.to_frame()
     persons = persons.to_frame()
+
+    model_settings = config.read_model_settings('generate_beam_plans.yaml')
+    constants = config.get_model_constants(model_settings)
+    # - run preprocessor to annotate choosers
+    preprocessor_settings = model_settings.get('preprocessor', None)
+    if preprocessor_settings:
+
+        locals_d = {}
+        if constants is not None:
+            locals_d.update(constants)
+
 
     if orca.is_table("beam_geoms"):
         beam_geoms = pipeline.get_table("beam_geoms")
@@ -326,6 +338,10 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack):
     trips["trip_period"] = skim_time_period_label(trips.depart)
 
     set_skim_wrapper_targets(trips, skims)
+
+    expressions.annotate_preprocessors(
+        trips, locals_d, skims,
+        model_settings, None)
 
     trips["inbound"] = ~trips.outbound
     trips["tour_start"] = trips.tour_id.map(tours.start)
@@ -423,8 +439,8 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack):
 
     trips.set_index("trip_id", inplace=True)
 
-    trips = label_trip_modes(trips, skims)
-    print("LABELING TRIPS")
+    # trips = label_trip_modes(trips, skims)
+    # print("LABELING TRIPS")
     try:
         num_true, num_false = topo_sort_mask.value_counts().values
         num_trips = len(trips)
@@ -448,7 +464,7 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack):
         tours["number_of_participants"]
     )
     trips["tour_mode"] = trips["tour_id"].map(tours["tour_mode"])
-    trips.rename(columns={"totalTime": "trip_dur_min"}, inplace=True)
+    trips.rename(columns={"TOTAL_TIME_MINS": "trip_dur_min", "TOTAL_COST_DOLLARS":"trip_cost_dollars"}, inplace=True)
 
     # trim trips table
     cols = [
@@ -464,6 +480,7 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack):
         "x",
         "y",
         "trip_dur_min",
+        "trip_cost_dollars"
     ]
     sorted_trips = (
         trips[cols].sort_values(["person_id", "departure_time"]).reset_index()
@@ -503,6 +520,8 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack):
     final_plans["trip_mode"] = final_plans["trip_mode"].shift()
     final_plans["tour_id"] = final_plans["tour_id"].shift()
     final_plans["tour_mode"] = final_plans["tour_mode"].shift()
+    final_plans["trip_dur_min"] = final_plans["trip_dur_min"].shift()
+    final_plans["trip_cost_dollars"] = final_plans["trip_cost_dollars"].shift()
     final_plans["number_of_participants"] = final_plans[
         "number_of_participants"
     ].shift()
@@ -521,7 +540,8 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack):
             "x",
             "y",
             "departure_time",
-            "trip_dur_min"
+            "trip_dur_min",
+            "trip_cost_dollars"
         ]
     ]
 
