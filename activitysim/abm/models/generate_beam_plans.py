@@ -338,8 +338,10 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
 
     set_skim_wrapper_targets(trips, skims)
 
+    constants = config.get_model_constants(model_settings)
+
     expressions.annotate_preprocessors(
-        trips, locals_d, skims,
+        trips, constants, skims,
         model_settings, None)
 
     trips["inbound"] = ~trips.outbound
