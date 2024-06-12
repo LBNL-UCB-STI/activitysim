@@ -411,7 +411,7 @@ def eval_utilities(spec, choosers, locals_d=None, trace_label=None,
         if os.path.isdir('output/trip_mode_choice/'):
             pass 
         else: 
-            os.mkdir('output/trip_mode_choice/')
+            os.makedirs('output/trip_mode_choice/', exist_ok=True)
             
         #Comment: "choosers.index[0]" is the ID of the first trip in the given for loop. 
         # we choose this as the name of the csv file to print out because it will be unique
