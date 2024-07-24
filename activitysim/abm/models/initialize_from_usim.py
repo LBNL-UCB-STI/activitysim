@@ -5,8 +5,6 @@ import geopandas as gpd
 import orca
 from shapely.geometry import Polygon
 from shapely import wkt
-from h3 import h3
-from urbansim.utils import misc
 import requests
 import logging
 from tqdm import tqdm
