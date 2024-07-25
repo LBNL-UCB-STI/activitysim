@@ -60,7 +60,7 @@ input_table_list:
     filename: land_use.csv
     index_col: zone_id
     rename_columns:
-      TAZ: zone_id  # person_id is the required index column
+      MAZ: zone_id  # person_id is the required index column
       COUNTY: county_id
     recode_columns:
       zone_id: zero-based
