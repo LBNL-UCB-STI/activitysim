@@ -3,8 +3,28 @@ read_skim_cache: False
 # write memmapped cached skims to output directory after reading from omx, for use in subsequent runs
 write_skim_cache: True
 
-zone_system: 1
+zone_system: 2
 name: prototype_mtc
+
+zone_system: 2
+
+maz: maz.csv
+
+maz_to_maz:
+  tables:
+    - maz_to_maz_walk.csv
+    - maz_to_maz_bike.csv
+
+  # maz_to_maz blending distance (missing or 0 means no blending)
+  max_blend_distance:
+    DIST: 5
+    # blend distance of 0 means no blending
+    DISTBIKE: 0
+    DISTWALK: 1
+
+  # missing means use the skim value itself rather than DIST skim (e.g. DISTBIKE)
+  blend_distance_skim_name: DIST
+
 
 taz_skims:
     omx: skims.omx
