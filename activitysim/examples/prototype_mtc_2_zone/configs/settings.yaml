@@ -66,14 +66,10 @@ input_table_list:
       zone_id: zero-based
     keep_columns:
       - TAZ
-      - DISTRICT
-      - SD
       - county_id
       - TOTHH
       - TOTPOP
       - TOTACRE
-      - RESACRE
-      - CIACRE
       - TOTEMP
       - AGE0519
       - RETEMPN
