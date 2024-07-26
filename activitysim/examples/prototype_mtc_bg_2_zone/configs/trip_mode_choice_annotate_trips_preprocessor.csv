@@ -42,7 +42,9 @@ dest terminal time not counted at home,_dest_terminal_time,"np.where(inbound & l
 # FIXME no transit subzones so all zones short walk to transit,,
 ,_origin_distance_to_transit,"reindex(land_use.access_dist_transit, df[orig_col_name])"
 ,_destination_distance_to_transit,"reindex(land_use.access_dist_transit, df[dest_col_name])"
-,walk_transit_available,(_origin_distance_to_transit > 0) & (_destination_distance_to_transit > 0)
+,_walk_transit_origin,_origin_distance_to_transit > 0
+,_walk_transit_destination,_destination_distance_to_transit > 0
+,walk_transit_available,_walk_transit_origin & _walk_transit_destination
 ,drive_transit_available,"np.where(df.outbound, _walk_transit_destination, _walk_transit_origin) & (df.auto_ownership > 0)"
 ,origin_walk_time,_origin_distance_to_transit*60/walkSpeed
 ,destination_walk_time,_destination_distance_to_transit*60/walkSpeed
