@@ -60,15 +60,20 @@ input_table_list:
     filename: land_use.csv
     index_col: zone_id
     rename_columns:
-      MAZ: zone_id  # person_id is the required index column
+      MAZ: zone_id
       COUNTY: county_id
     recode_columns:
       zone_id: zero-based
     keep_columns:
+      - TAZ
+      - DISTRICT
+      - SD
       - county_id
       - TOTHH
       - TOTPOP
       - TOTACRE
+      - RESACRE
+      - CIACRE
       - TOTEMP
       - AGE0519
       - RETEMPN
@@ -86,6 +91,11 @@ input_table_list:
       - TOPOLOGY
       - TERMINAL
       - access_dist_transit
+  - tablename: land_use_taz
+    filename: taz.csv
+    index_col: TAZ
+    recode_columns:
+      TAZ: zero-based
 
 # convert input CSVs to HDF5 format and save to outputs directory
 # create_input_store: True
