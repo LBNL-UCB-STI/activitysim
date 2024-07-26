@@ -64,6 +64,7 @@ input_table_list:
       COUNTY: county_id
     recode_columns:
       zone_id: zero-based
+      TAZ: land_use_taz.TAZ
     keep_columns:
       - TAZ
       - county_id
