@@ -33,6 +33,7 @@ input_table_list:
     recode_columns:
       home_zone_id: land_use.zone_id
       TAZ: land_use_taz.TAZ
+      home_zone_id: land_use.zone_id
     keep_columns:
       - TAZ
       - home_zone_id
