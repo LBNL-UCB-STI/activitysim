@@ -16,11 +16,11 @@ maz_to_maz:
     - maz_to_maz_bike.csv
 
   # maz_to_maz blending distance (missing or 0 means no blending)
-  max_blend_distance:
-    DIST: 5
-    # blend distance of 0 means no blending
-    DISTBIKE: 0
-    DISTWALK: 1
+  #  max_blend_distance:
+  #  DIST: 5
+  #  # blend distance of 0 means no blending
+  #  DISTBIKE: 0
+  #  DISTWALK: 1
 
   # missing means use the skim value itself rather than DIST skim (e.g. DISTBIKE)
   blend_distance_skim_name: DIST
@@ -35,17 +35,20 @@ taz_skims:
         - regex: ".*_FAR"
           joint_dict: joined_fare
         - regex: ".*_XWAIT"
-          joint_dict: joined_xwait
         - regex: ".*_WAUX"
-          joint_dict: joined_waux
         - regex: ".*_IWAIT"
-          joint_dict: joined_iwait
         - regex: ".*_KEYIVT"
-          joint_dict: joined_keyivt
         - regex: ".*_WAIT"
-          joint_dict: joined_wait
         - regex: "DISTWALK|DISTBIKE"
-          joint_dict: joined_walkbike
+        - name: SOV_TIME
+        - name: HOV2_TIME
+        - name: HOV3_TIME
+        - name: SOV_TOLL
+          bitwidth: 8
+        - name: HOV2_TOLL
+          bitwidth: 8
+        - name: HOV3_TOLL
+          bitwidth: 8
 
 skim_time_periods:
     time_window: 1440

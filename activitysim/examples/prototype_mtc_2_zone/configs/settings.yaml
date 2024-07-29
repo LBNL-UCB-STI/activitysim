@@ -29,10 +29,12 @@ input_table_list:
       persons: hhsize
       workers: num_workers
       cars: auto_ownership
-      TAZ: home_zone_id
+      MAZ: home_zone_id
     recode_columns:
       home_zone_id: land_use.zone_id
+      TAZ: land_use_taz.TAZ
     keep_columns:
+      - TAZ
       - home_zone_id
       - income
       - hhsize
@@ -105,7 +107,7 @@ skims_file: skims.omx
 beam_geometries: clipped_tazs.csv
 
 # number of households to simulate
-households_sample_size:  0
+households_sample_size:  100
 
 # raise error if any sub-process fails without waiting for others to complete
 fail_fast: True
@@ -142,8 +144,8 @@ log_alt_losers: False
 
 # chooser chunk size in gigabytes
 # target top memory usage during activitysim run (including shared memory, loaded tables, and transient memory usage)
-#chunk_size: 12_000_000_000
-chunk_size: 0
+chunk_size: 800_000_000_000
+#chunk_size: 0
 
 # minimum fraction of total chunk_size to reserve for adaptive chunking
 min_available_chunk_ratio: 0.05
@@ -151,7 +153,7 @@ min_available_chunk_ratio: 0.05
 # initial number of chooser rows for first chunk in training mode
 # when there is no pre-existing chunk_cache to set initial value
 # ordinarily bigger is better as long as it is not so big it causes memory issues (e.g. accessibility with lots of zones)
-default_initial_rows_per_chunk: 500
+default_initial_rows_per_chunk: 2000
 
 # method to calculate memory overhead when chunking is enabled
 chunk_method: hybrid_uss
@@ -171,9 +173,9 @@ keep_mem_logs: True
 ##############
 
 # multiprocessing controls
-multiprocess: True
-chunk_size: 10_000_000_000
-num_processes: 2
+multiprocess: False
+#chunk_size: 2_000_000_000
+num_processes: 1
 stagger: 0
 
 # trace household id; comment out or leave empty for no trace

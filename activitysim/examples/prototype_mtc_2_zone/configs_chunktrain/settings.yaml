@@ -5,13 +5,13 @@ inherit_settings: True
 fail_fast: True
 
 chunk_training_mode: training
-multiprocess: True
+multiprocess: False
 strict: False
 use_shadow_pricing: False
 
 households_sample_size: 4000
 chunk_size: 40_000_000_000
-num_processes: 8
+num_processes: 1
 
 # - -------------------------
 

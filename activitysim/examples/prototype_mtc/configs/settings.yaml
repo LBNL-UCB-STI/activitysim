@@ -97,7 +97,7 @@ skims_file: skims.omx
 beam_geometries: clipped_tazs.csv
 
 # number of households to simulate
-households_sample_size:  0
+households_sample_size:  250000
 
 # raise error if any sub-process fails without waiting for others to complete
 fail_fast: True
@@ -164,8 +164,8 @@ keep_mem_logs: True
 
 # multiprocessing controls
 multiprocess: True
-chunk_size: 10_000_000_000
-num_processes: 2
+chunk_size: 200_000_000_000
+num_processes: 50
 stagger: 0
 
 # trace household id; comment out or leave empty for no trace

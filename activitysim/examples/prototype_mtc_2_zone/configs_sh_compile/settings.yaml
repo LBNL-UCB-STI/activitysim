@@ -1,4 +1,4 @@
-
+resume_after: workplace_location
 inherit_settings: True
 sharrow: test
 chunk_training_mode: disabled
