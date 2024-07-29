@@ -327,8 +327,8 @@ def make_choices(
             trace_choosers=trace_choosers,
             raise_error=False
         )
-        bad_probs.loc[bad_probs, :] = 0
-        bad_probs.loc[bad_probs, 0] = 1
+        probs.loc[bad_probs, :] = 0
+        probs.loc[bad_probs, 0] = 1
 
     rands = state.get_rn_generator().random_for_df(probs)
 
