@@ -68,10 +68,10 @@ def report_bad_choices(
 
     if trace_label:
         logger.info("dumping %s" % trace_label)
-        state.tracing.write_csv(df[:MAX_DUMP], file_name=trace_label, transpose=False)
+        state.tracing.write_csv(df.iloc[:MAX_DUMP], file_name=trace_label, transpose=False)
 
     # log the indexes of the first MAX_DUMP offending rows
-    for idx in df.index[:MAX_PRINT].values:
+    for idx in df.index.iloc[:MAX_PRINT].values:
 
         row_msg = "%s : %s in: %s = %s (hh_id = %s)" % (
             trace_label,
