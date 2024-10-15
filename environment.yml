@@ -13,6 +13,7 @@ dependencies:
   - decorator
   - entrypoints
   - flask
+  - future
   - geopandas
   - hdf4
   - hdf5
