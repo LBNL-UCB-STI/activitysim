@@ -1,4 +1,4 @@
-FROM continuumio/miniconda3
+FROM --platform=linux/amd64 continuumio/miniconda3
 
 ENV CONDA_DIR /opt/conda
 ENV CONDA_ENV asim
@@ -12,6 +12,8 @@ ENV EXEC_NAME simulation.py
 RUN apt-get --allow-releaseinfo-change update \
 	&& apt-get install -y build-essential zip unzip
 RUN conda update conda --yes
+
+RUN echo "UPDATE"
 
 RUN wget https://raw.githubusercontent.com/LBNL-UCB-STI/activitysim/beam-plans-fixes/environment.yml
 
@@ -35,6 +37,8 @@ RUN git clone --depth 1 -b beam-plans-fixes https://github.com/LBNL-UCB-STI/acti
 
 
 RUN cd activitysim && git pull && $FULL_CONDA_PATH/bin/python setup.py install
+
+RUN pip install future
 
 ENV PATH $FULL_CONDA_PATH/bin:$PATH
 ENV CONDA_DEFAULT_ENV $CONDA_ENV

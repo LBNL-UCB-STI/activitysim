@@ -348,7 +348,6 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
     trips["tour_start"] = trips.tour_id.map(tours.start)
     trips["tour_end"] = trips.tour_id.map(tours.end)
 
-    print("SOORTING TRIPS")
     trips["isAtWork"] = trips.purpose == "atwork"
 
     trips["actuallyInbound"] = trips["inbound"].copy()
@@ -441,7 +440,7 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
     trips.set_index("trip_id", inplace=True)
 
     # trips = label_trip_modes(trips, skims)
-    # print("LABELING TRIPS")
+    logger.info("LABELING TRIPS")
     try:
         num_true, num_false = topo_sort_mask.value_counts().values
         num_trips = len(trips)
@@ -457,10 +456,10 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
 
     # augment trips table with attrs we need to generate plans
     trips = get_trip_coords(trips, zones, persons)
-    print("ADDED COORDS")
+    logger.info("ADDED COORDS")
 
     trips["departure_time"] = generate_departure_times(trips, tours)
-    print("ADDED TIMES")
+    logger.info("ADDED TIMES")
     trips["number_of_participants"] = trips["tour_id"].map(
         tours["number_of_participants"]
     )
