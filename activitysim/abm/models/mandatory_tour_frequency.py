@@ -116,6 +116,10 @@ def mandatory_tour_frequency(persons_merged,
     alternatives = simulate.read_model_alts('mandatory_tour_frequency_alternatives.csv', set_index='alt')
     choosers['mandatory_tour_frequency'] = choices.reindex(choosers.index)
 
+    impossibleSchoolTours = choosers.is_student & (choosers.mandatory_tour_frequency == 'work1')
+    if impossibleSchoolTours.sum() > 0:
+        choosers.loc[impossibleSchoolTours, 'mandatory_tour_frequency'] = 'school1'
+
     mandatory_tours = process_mandatory_tours(
         persons=choosers,
         mandatory_tour_frequency_alts=alternatives
