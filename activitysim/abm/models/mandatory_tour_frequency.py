@@ -115,10 +115,6 @@ def mandatory_tour_frequency(persons_merged,
     """
     alternatives = simulate.read_model_alts('mandatory_tour_frequency_alternatives.csv', set_index='alt')
     choosers['mandatory_tour_frequency'] = choices.reindex(choosers.index)
-    impossibleSchoolTours = choosers.is_student & (choosers.mandatory_tour_frequency == 'work1')
-    if impossibleSchoolTours.sum() > 0:
-        logger.warning("Replacing work tours with school1 for persons {}".format(impossibleSchoolTours.index.values))
-        choosers.loc[impossibleSchoolTours, 'mandatory_tour_frequency'] = 'school1'
 
     mandatory_tours = process_mandatory_tours(
         persons=choosers,
@@ -134,6 +130,15 @@ def mandatory_tour_frequency(persons_merged,
 
     # need to reindex as we only handled persons with cdap_activity == 'M'
     persons['mandatory_tour_frequency'] = choices.reindex(persons.index).fillna('').astype(str)
+
+    impossibleSchoolTours = persons.is_student & (persons.mandatory_tour_frequency == 'work1')
+    if impossibleSchoolTours.sum() > 0:
+        logger.warning(
+            "Replacing work tours with school1 for {} persons {}".format(
+                impossibleSchoolTours.sum(),
+                impossibleSchoolTours.loc[impossibleSchoolTours].index.values)
+        )
+        persons.loc[impossibleSchoolTours, 'mandatory_tour_frequency'] = 'school1'
 
     expressions.assign_columns(
         df=persons,
