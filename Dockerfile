@@ -13,9 +13,9 @@ RUN apt-get --allow-releaseinfo-change update \
 	&& apt-get install -y build-essential zip unzip
 RUN conda update conda --yes
 
-RUN echo "UPDATE"
+RUN echo "UPDATE again again"
 
-RUN wget https://raw.githubusercontent.com/LBNL-UCB-STI/activitysim/beam-plans-fixes/environment.yml
+RUN wget https://raw.githubusercontent.com/LBNL-UCB-STI/activitysim/3cdd7a8d622f0636af3f601105a92a5c0d978420/environment.yml
 
 RUN conda install -n base conda-libmamba-solver
 
@@ -30,7 +30,7 @@ RUN export GIT_TRACE=1
 RUN export GIT_CURL_VERBOSE=1
 RUN git config --global core.compression 0
 
-RUN echo "Reset 9"
+RUN echo "Reset 10"
 
 RUN git clone --depth 1 -b beam-plans-fixes https://github.com/LBNL-UCB-STI/activitysim.git
 
@@ -38,7 +38,6 @@ RUN git clone --depth 1 -b beam-plans-fixes https://github.com/LBNL-UCB-STI/acti
 
 RUN cd activitysim && git pull && $FULL_CONDA_PATH/bin/python setup.py install
 
-RUN pip install future
 
 ENV PATH $FULL_CONDA_PATH/bin:$PATH
 ENV CONDA_DEFAULT_ENV $CONDA_ENV
