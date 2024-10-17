@@ -417,7 +417,7 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
     trips["is_bad"] = False
     trips.loc[~topo_sort_mask, "is_bad"] = True
     i = 1
-    while (trips["is_bad"].sum() > 0) and (i < 400):
+    while (trips["is_bad"].sum() > 0) and (i < 50):
         logger.info(f"Before rearranging: {trips.is_bad.sum()} trips")
         bad_plans = trips.loc[
                     trips.person_id.isin(trips.loc[~topo_sort_mask, "person_id"]), :
