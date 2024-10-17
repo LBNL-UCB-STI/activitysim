@@ -540,6 +540,13 @@ def iterate_location_choice(
             inject.add_table(model_settings['MODELED_SIZE_TABLE'], spc.modeled_size)
 
     persons_df = persons.to_frame()
+    bad_choices = choices_df['choice'] < 0
+    n_bad_choices = (bad_choices).sum()
+    if n_bad_choices > 0:
+        logger.warning("Replacing {} bad school location choices with home taz".format(n_bad_choices))
+        home_locations = persons_df.reindex(choices_df.index)['home_taz'].copy()
+        choices_df.loc[bad_choices, 'choice'] = home_locations.loc[bad_choices].values
+
 
     # add the choice values to the dest_choice_column in persons dataframe
     # We only chose school locations for the subset of persons who go to school
