@@ -64,7 +64,6 @@ def mandatory_tour_frequency(persons_merged,
     # - preprocessor
     preprocessor_settings = model_settings.get('preprocessor', None)
     if preprocessor_settings:
-
         locals_dict = {}
 
         expressions.assign_columns(
@@ -125,15 +124,22 @@ def mandatory_tour_frequency(persons_merged,
         mandatory_tour_frequency_alts=alternatives
     )
 
-    tours = pipeline.extend_table("tours", mandatory_tours)
-    tracing.register_traceable_table('tours', mandatory_tours)
-    pipeline.get_rn_generator().add_channel('tours', mandatory_tours)
-
     # - annotate persons
     persons = inject.get_table('persons').to_frame()
 
     # need to reindex as we only handled persons with cdap_activity == 'M'
     persons['mandatory_tour_frequency'] = choices.reindex(persons.index).fillna('').astype(str)
+
+    if (mandatory_tours.destination < 0).sum() > 0:
+        logger.warning(
+            "Replacing {0} bad tour destinations with home taz".format((mandatory_tours.destination < 0).sum()))
+        tour_home_locations = mandatory_tours.merge(persons, left_on="person_id", right_index=True)["home_taz"]
+        mandatory_tours.loc[mandatory_tours.destination < 0, "destination"] = tour_home_locations[
+            mandatory_tours.destination < 0].values
+
+    tours = pipeline.extend_table("tours", mandatory_tours)
+    tracing.register_traceable_table('tours', mandatory_tours)
+    pipeline.get_rn_generator().add_channel('tours', mandatory_tours)
 
     impossibleSchoolTours = persons.is_student & (persons.mandatory_tour_frequency == 'work1')
     if impossibleSchoolTours.sum() > 0:

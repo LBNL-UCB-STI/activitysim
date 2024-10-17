@@ -541,7 +541,7 @@ def iterate_location_choice(
 
     persons_df = persons.to_frame()
     bad_choices = choices_df['choice'] < 0
-    n_bad_choices = (bad_choices).sum()
+    n_bad_choices = bad_choices.sum()
     if n_bad_choices > 0:
         logger.warning("Replacing {} bad school location choices with home taz".format(n_bad_choices))
         home_locations = persons_df.reindex(choices_df.index)['home_taz'].copy()
