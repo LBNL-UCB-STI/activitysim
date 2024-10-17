@@ -99,13 +99,13 @@ def trip_mode_choice(
 
     choices_list = []
     for primary_purpose, trips_segment in trips_merged.groupby('primary_purpose'):
-#         print(primary_purpose, trips_segment)
+        #         print(primary_purpose, trips_segment)
 
         segment_trace_label = tracing.extend_trace_label(trace_label, primary_purpose)
-#         print(segment_trace_label)
+        #         print(segment_trace_label)
 
         logger.info("trip_mode_choice tour_type '%s' (%s trips)" %
-                    (primary_purpose, len(trips_segment.index), ))
+                    (primary_purpose, len(trips_segment.index),))
 
         # name index so tracing knows how to slice
         assert trips_segment.index.name == 'trip_id'
@@ -165,10 +165,16 @@ def trip_mode_choice(
     tracing.print_summary('trip_mode_choice choices',
                           trips_df[mode_column_name], value_counts=True)
 
+    if trips_df[mode_column_name].isna().sum() > 0:
+        logger.warning(
+            "Replacing {0} bad trip modes with SHARED2FREE {1}".format(trips_df[mode_column_name].isna().sum(),
+                                                                       trips_df.loc[trips_df[mode_column_name].isna()]))
+        trips_df.loc[trips_df[mode_column_name].isna(), mode_column_name] = "SHARED2FREE"
+
     assert not trips_df[mode_column_name].isnull().any()
 
     pipeline.replace_table("trips", trips_df)
-    
+
     if trace_hh_id:
         tracing.trace_df(trips_df,
                          label=tracing.extend_trace_label(trace_label, 'trip_mode'),
