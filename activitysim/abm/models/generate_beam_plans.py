@@ -324,7 +324,7 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
 
     # Modify trips dataframe in-place where possible
     _annotate_trips(trips, tours)
-    columns_to_ignore = ["household_id","tour_id","primary_purpose","purpose","destination_logsum","trip_mode","mode_choice_logsum"]
+    columns_to_ignore = ["household_id","primary_purpose","purpose","destination_logsum","trip_mode","mode_choice_logsum"]
     trips_additional_columns = trips[columns_to_ignore].copy()
     trips.drop(columns=columns_to_ignore, inplace=True)
 
