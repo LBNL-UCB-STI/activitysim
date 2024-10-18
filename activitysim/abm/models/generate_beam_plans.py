@@ -327,12 +327,15 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
     columns_to_ignore = ["household_id","primary_purpose","purpose","destination_logsum","trip_mode","mode_choice_logsum"]
     trips_additional_columns = trips[columns_to_ignore].copy()
     trips.drop(columns=columns_to_ignore, inplace=True)
+    trips.reset_index(inplace=True)
 
 
     # Sort trips and fix sequences
     trips = _sort_and_fix_sequences(trips)
 
-    trips = pd.concat([trips, trips_additional_columns.reindex_like(trips)], axis=1)
+    trips = pd.concat([trips, trips_additional_columns.loc[trips.index]], axis=1)
+
+    trips.set_index("trip_id", inplace=True, drop=True)
 
     # Get coordinates and times
     trips = get_trip_coords(trips, zones, persons)
@@ -433,7 +436,6 @@ def _shuffle_trips(df, time_period):
 
 
 def _sort_and_fix_sequences(trips):
-    trips.reset_index(inplace=True)
     trips["original_order"] = np.arange(len(trips))
 
     # Initial sorting
@@ -465,8 +467,6 @@ def _sort_and_fix_sequences(trips):
         trips["is_bad"] = ~topo_sort_mask
         logger.info(f"After: {trips.is_bad.sum()} trips")
         iteration += 1
-
-    trips.set_index("trip_id", inplace=True)
     return trips
 
 
