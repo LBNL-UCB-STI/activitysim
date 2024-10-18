@@ -290,11 +290,12 @@ def label_trip_modes(trips, skims):
 
 @inject.step()
 def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size, trace_hh_id, locutor):
-    # Importing ActivitySim results
+    # Convert to frames only once and work in-place where possible
     trips = trips.to_frame()
     tours = tours.to_frame()
     persons = persons.to_frame()
 
+    # Load configurations
     model_settings = config.read_model_settings('generate_beam_plans.yaml')
     constants = config.get_model_constants(model_settings)
     # - run preprocessor to annotate choosers
@@ -306,36 +307,13 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
             locals_d.update(constants)
 
     if orca.is_table("beam_geoms"):
-        beam_geoms = pipeline.get_table("beam_geoms")
-        beam_geoms["geometry"] = gpd.GeoSeries.from_wkt(beam_geoms["geometry"])
-        zones = gpd.GeoDataFrame(beam_geoms, geometry="geometry", crs="EPSG:4326")
-        zones.geometry = zones.geometry.buffer(0)
+        zones = _process_beam_geoms(pipeline.get_table("beam_geoms"))
     else:
-        land_use = pipeline.get_table("land_use").reset_index()
+        zones = _process_land_use(pipeline.get_table("land_use"))
 
-        # re-create zones shapefile
-        land_use["geometry"] = land_use["geometry"].apply(wkt.loads)
-        zones = gpd.GeoDataFrame(land_use, geometry="geometry", crs="EPSG:4326")
-        zones.geometry = zones.geometry.buffer(0)
-
-    orig_col = "origin"
-    dest_col = "destination"
-
-    odt_skim_stack_wrapper = skim_stack.wrap(
-        left_key=orig_col, right_key=dest_col, skim_key="trip_period"
-    )
-    dot_skim_stack_wrapper = skim_stack.wrap(
-        left_key=dest_col, right_key=orig_col, skim_key="trip_period"
-    )
-    od_skim_wrapper = skim_dict.wrap("origin", "destination")
-
-    skims = {
-        "odt_skims": odt_skim_stack_wrapper,
-        "dot_skims": dot_skim_stack_wrapper,
-        "od_skims": od_skim_wrapper,
-    }
+    # Setup skims
     trips["trip_period"] = skim_time_period_label(trips.depart)
-
+    skims = _setup_skims(skim_stack, skim_dict)
     set_skim_wrapper_targets(trips, skims)
 
     constants = config.get_model_constants(model_settings)
@@ -344,206 +322,192 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
         trips, constants, skims,
         model_settings, None)
 
+    # Modify trips dataframe in-place where possible
+    _annotate_trips(trips, tours)
+
+    # Sort trips and fix sequences
+    trips = _sort_and_fix_sequences(trips)
+
+    # Get coordinates and times
+    trips = get_trip_coords(trips, zones, persons)
+    trips["departure_time"] = generate_departure_times(trips, tours)
+
+    # Add tour information efficiently using map
+    trips["number_of_participants"] = trips["tour_id"].map(tours["number_of_participants"])
+    trips["tour_mode"] = trips["tour_id"].map(tours["tour_mode"])
+    trips.rename(columns={
+        "TOTAL_TIME_MINS": "trip_dur_min",
+        "TOTAL_COST_DOLLARS": "trip_cost_dollars"
+    }, inplace=True)
+
+    # Create final plans more efficiently
+    return _create_final_plans(trips)
+
+
+def _process_beam_geoms(beam_geoms):
+    beam_geoms["geometry"] = gpd.GeoSeries.from_wkt(beam_geoms["geometry"])
+    zones = gpd.GeoDataFrame(beam_geoms, geometry="geometry", crs="EPSG:4326")
+    zones.geometry = zones.geometry.buffer(0)
+    return zones
+
+
+def _process_land_use(land_use):
+    land_use = land_use.reset_index()
+    land_use["geometry"] = land_use["geometry"].apply(wkt.loads)
+    zones = gpd.GeoDataFrame(land_use, geometry="geometry", crs="EPSG:4326")
+    zones.geometry = zones.geometry.buffer(0)
+    return zones
+
+
+def _setup_skims(skim_stack, skim_dict):
+    orig_col, dest_col = "origin", "destination"
+    return {
+        "odt_skims": skim_stack.wrap(left_key=orig_col, right_key=dest_col, skim_key="trip_period"),
+        "dot_skims": skim_stack.wrap(left_key=dest_col, right_key=orig_col, skim_key="trip_period"),
+        "od_skims": skim_dict.wrap("origin", "destination")
+    }
+
+
+def _annotate_trips(trips, tours):
     trips["inbound"] = ~trips.outbound
     trips["tour_start"] = trips.tour_id.map(tours.start)
     trips["tour_end"] = trips.tour_id.map(tours.end)
-
     trips["isAtWork"] = trips.purpose == "atwork"
 
+    # Handle actuallyInbound calculation
     trips["actuallyInbound"] = trips["inbound"].copy()
-    trips.loc[
-        (trips.primary_purpose == "work") & (trips.purpose != "Home"), "actuallyInbound"
-    ] = ~trips.loc[
-        (trips.primary_purpose == "work") & (trips.purpose != "Home"), "inbound"
-    ].copy()
-    trips.loc[(trips.purpose == "atwork"), "actuallyInbound"] = ~trips.loc[
-        (trips.purpose == "atwork"), "inbound"
-    ].copy()
+    mask_work = (trips.primary_purpose == "work") & (trips.purpose != "Home")
+    trips.loc[mask_work, "actuallyInbound"] = ~trips.loc[mask_work, "inbound"]
+    mask_atwork = (trips.purpose == "atwork")
+    trips.loc[mask_atwork, "actuallyInbound"] = ~trips.loc[mask_atwork, "inbound"]
 
-    trips = trips.sort_values(
-        by=[
-            'person_id', 'depart', 'tour_start', 'tour_end',
-            'tour_id', 'inbound', 'trip_num']
-    )
 
-    def fix_trip_sequence(df):
-        bad_indices = np.nonzero(df.is_bad.values)[0]
-        if len(bad_indices) == 0:
-            return df
+def _fix_trip_sequence(df):
+    bad_indices = np.nonzero(df.is_bad.values)[0]
+    if len(bad_indices) == 0:
+        return df
 
-        first_bad_index = bad_indices[0]
-        destination_of_last_good_trip = df.iloc[first_bad_index - 1]["destination"]
-        time_period_to_fix = df.iloc[first_bad_index]["depart"]
+    first_bad_index = bad_indices[0]
+    dest_last_good = df.iloc[first_bad_index - 1]["destination"]
+    time_period = df.iloc[first_bad_index]["depart"]
 
-        try:
-            potential_indices = np.argwhere(
-                (
-                        (df["depart"] == time_period_to_fix)
-                        & (df["origin"] == destination_of_last_good_trip)
-                        & (np.arange(len(df)) > first_bad_index)
-                ).values
-            )[0]
-        except IndexError:
-            trips_to_shuffle = df[df["depart"] == time_period_to_fix]
-            df2 = df.copy()
-            df2.loc[trips_to_shuffle.index] = trips_to_shuffle.sample(frac=1).values
-            df2["is_bad"] = ~(df2["origin"] == df2["destination"].shift())
-            df2["is_bad"].iloc[0] = False
-            if not df2["original_order"].is_unique:
-                logger.error("Original order is not unique after shuffling")
-                return df
-            return df2
+    mask = ((df["depart"] == time_period) &
+            (df["origin"] == dest_last_good) &
+            (np.arange(len(df)) > first_bad_index))
 
-        trip_index_to_move_up = np.random.choice(potential_indices)
-        trips_to_shuffle = df.iloc[first_bad_index:trip_index_to_move_up].copy()
+    try:
+        potential_indices = np.argwhere(mask.values)[0]
+        trip_index_to_move = np.random.choice(potential_indices)
+        return _reorder_trips(df, first_bad_index, trip_index_to_move)
+    except IndexError:
+        return _shuffle_trips(df, time_period)
 
-        df2 = df.copy()
-        df2.iloc[first_bad_index] = df2.iloc[trip_index_to_move_up].values
-        df2.iloc[(first_bad_index + 1): (trip_index_to_move_up + 1)] = (
-            trips_to_shuffle.sample(frac=1).values
-        )
-        df2["is_bad"] = ~(df2["origin"] == df2["destination"].shift())
-        df2["is_bad"].iloc[0] = False
-        if not df2["original_order"].is_unique:
-            logger.error("Original order is not unique after moving up")
-            return df
-        return df2
 
+def _reorder_trips(df, first_bad_index, trip_index_to_move):
+    df2 = df.copy()
+    trips_to_shuffle = df.iloc[first_bad_index:trip_index_to_move].copy()
+
+    df2.iloc[first_bad_index] = df2.iloc[trip_index_to_move].values
+    df2.iloc[(first_bad_index + 1):(trip_index_to_move + 1)] = trips_to_shuffle.sample(frac=1).values
+
+    df2["is_bad"] = ~(df2["origin"] == df2["destination"].shift())
+    df2["is_bad"].iloc[0] = False
+
+    return df2 if df2["original_order"].is_unique else df
+
+
+def _shuffle_trips(df, time_period):
+    trips_to_shuffle = df[df["depart"] == time_period]
+    df2 = df.copy()
+    df2.loc[trips_to_shuffle.index] = trips_to_shuffle.sample(frac=1).values
+    df2["is_bad"] = ~(df2["origin"] == df2["destination"].shift())
+    df2["is_bad"].iloc[0] = False
+    return df2 if df2["original_order"].is_unique else df
+
+
+def _sort_and_fix_sequences(trips):
     trips.reset_index(inplace=True)
     trips["original_order"] = np.arange(len(trips))
-    topo_sort_mask = (trips["destination"].shift() == trips["origin"]) | (
-            trips["person_id"].shift() != trips["person_id"]
+
+    # Initial sorting
+    trips.sort_values(
+        by=['person_id', 'depart', 'tour_start', 'tour_end', 'tour_id', 'inbound', 'trip_num'],
+        inplace=True
     )
-    trips["is_bad"] = False
-    trips.loc[~topo_sort_mask, "is_bad"] = True
-    i = 1
-    while (trips["is_bad"].sum() > 0) and (i < 50):
+
+    # Fix sequences
+    topo_sort_mask = ((trips["destination"].shift() == trips["origin"]) |
+                      (trips["person_id"].shift() != trips["person_id"]))
+    trips["is_bad"] = ~topo_sort_mask
+
+    iteration = 0
+    while (trips["is_bad"].sum() > 0) and (iteration < 50):
         logger.info(f"Before rearranging: {trips.is_bad.sum()} trips")
-        bad_plans = trips.loc[
-                    trips.person_id.isin(trips.loc[~topo_sort_mask, "person_id"]), :
-                    ]
-        fixed_plans = (
-            bad_plans.groupby(["person_id"])
-            .apply(fix_trip_sequence)
-            .reset_index(drop=True)
-        )
-        fixed_plans.index = bad_plans.index.copy()
-        trips.loc[fixed_plans.index, :] = fixed_plans.copy()
-        topo_sort_mask = (trips["destination"].shift() == trips["origin"]) | (
-                trips["person_id"].shift() != trips["person_id"]
-        )
-        trips["is_bad"] = False
-        trips.loc[~topo_sort_mask, "is_bad"] = True
+        bad_person_ids = trips.loc[~topo_sort_mask, "person_id"]
+        bad_plans = trips.loc[trips.person_id.isin(bad_person_ids)]
+
+        fixed_plans = (bad_plans.groupby("person_id")
+                       .apply(_fix_trip_sequence)
+                       .reset_index(drop=True))
+
+        fixed_plans.index = bad_plans.index
+        trips.loc[fixed_plans.index] = fixed_plans
+
+        topo_sort_mask = ((trips["destination"].shift() == trips["origin"]) |
+                          (trips["person_id"].shift() != trips["person_id"]))
+        trips["is_bad"] = ~topo_sort_mask
         logger.info(f"After: {trips.is_bad.sum()} trips")
-        i += 1
+        iteration += 1
 
     trips.set_index("trip_id", inplace=True)
+    return trips
 
-    # trips = label_trip_modes(trips, skims)
-    logger.info("LABELING TRIPS")
-    try:
-        num_true, num_false = topo_sort_mask.value_counts().values
-        num_trips = len(trips)
-        pct_discontinuous_trips = np.round((num_false / num_trips) * 100, 1)
-        logger.info(
-            "{0} of {1} ({2}%) of trips are topologically inconsistent "
-            "after assigning departure times.".format(
-                num_false, num_trips, pct_discontinuous_trips
-            )
-        )
-    except ValueError:
-        logger.info(f"All {len(trips)} trips are topologically consistent")
 
-    # augment trips table with attrs we need to generate plans
-    trips = get_trip_coords(trips, zones, persons)
-    logger.info("ADDED COORDS")
+def _create_final_plans(trips):
+    # Select necessary columns
+    cols = ["person_id", "tour_id", "departure_time", "purpose", "origin",
+            "destination", "number_of_participants", "tour_mode", "trip_mode",
+            "x", "y", "trip_dur_min", "trip_cost_dollars"]
 
-    trips["departure_time"] = generate_departure_times(trips, tours)
-    logger.info("ADDED TIMES")
-    trips["number_of_participants"] = trips["tour_id"].map(
-        tours["number_of_participants"]
-    )
-    trips["tour_mode"] = trips["tour_id"].map(tours["tour_mode"])
-    trips.rename(columns={"TOTAL_TIME_MINS": "trip_dur_min", "TOTAL_COST_DOLLARS": "trip_cost_dollars"}, inplace=True)
+    sorted_trips = trips[cols].sort_values(["person_id", "departure_time"]).reset_index()
 
-    # trim trips table
-    cols = [
-        "person_id",
-        "tour_id",
-        "departure_time",
-        "purpose",
-        "origin",
-        "destination",
-        "number_of_participants",
-        "tour_mode",
-        "trip_mode",
-        "x",
-        "y",
-        "trip_dur_min",
-        "trip_cost_dollars"
-    ]
-    sorted_trips = (
-        trips[cols].sort_values(["person_id", "departure_time"]).reset_index()
-    )
+    # Create return trips efficiently
+    return_trip = sorted_trips.groupby("person_id").agg({
+        "x": "first",
+        "y": "first"
+    }).reset_index()
 
-    return_trip = pd.DataFrame(
-        sorted_trips.groupby("person_id").agg({"x": "first", "y": "first"}),
-        index=sorted_trips.person_id.unique(),
-    )
-
-    plans = sorted_trips.append(return_trip)
-    plans.reset_index(inplace=True)
-    plans.person_id.fillna(plans["index"], inplace=True)
-
-    # Creating the Plan Element activity Index
-    # Activities have odd indices and legs (actual trips) will be even
+    # Combine trips and create plan elements
+    plans = pd.concat([sorted_trips, return_trip])
     plans["PlanElementIndex"] = plans.groupby("person_id").cumcount() * 2 + 1
-    plans = plans.sort_values(["person_id", "departure_time"]).reset_index(drop=True)
 
-    # Shifting type one row down
-    plans["ActivityType"] = (
-        plans.groupby("person_id")["purpose"].shift(periods=1).fillna("Home")
-    )
+    # Create activities
+    plans["ActivityType"] = plans.groupby("person_id")["purpose"].shift(1).fillna("Home")
     plans["ActivityElement"] = "activity"
 
-    # Creating legs (trips between activities)
-    legs = pd.DataFrame(
-        {"PlanElementIndex": plans.PlanElementIndex - 1, "person_id": plans.person_id}
-    )
+    # Create legs efficiently
+    legs = pd.DataFrame({
+        "PlanElementIndex": plans.PlanElementIndex - 1,
+        "person_id": plans.person_id
+    })
     legs = legs[legs.PlanElementIndex != 0]
+    legs["ActivityElement"] = "leg"
 
-    # Adding the legs to the main table
-    final_plans = plans.append(legs).sort_values(["person_id", "PlanElementIndex"])
-    final_plans.ActivityElement.fillna("leg", inplace=True)
+    # Combine and sort final plans
+    final_plans = pd.concat([plans, legs]).sort_values(["person_id", "PlanElementIndex"])
 
-    final_plans["trip_id"] = final_plans["trip_id"].shift()
-    final_plans["trip_mode"] = final_plans["trip_mode"].shift()
-    final_plans["tour_id"] = final_plans["tour_id"].shift()
-    final_plans["tour_mode"] = final_plans["tour_mode"].shift()
-    final_plans["trip_dur_min"] = final_plans["trip_dur_min"].shift()
-    final_plans["trip_cost_dollars"] = final_plans["trip_cost_dollars"].shift()
-    final_plans["number_of_participants"] = final_plans[
-        "number_of_participants"
-    ].shift()
+    # Shift relevant columns
+    shift_cols = ["trip_id", "trip_mode", "tour_id", "tour_mode", "trip_dur_min",
+                  "trip_cost_dollars", "number_of_participants"]
+    final_plans[shift_cols] = final_plans[shift_cols].shift()
 
-    final_plans = final_plans[
-        [
-            "tour_id",
-            "trip_id",
-            "person_id",
-            "number_of_participants",
-            "tour_mode",
-            "trip_mode",
-            "PlanElementIndex",
-            "ActivityElement",
-            "ActivityType",
-            "x",
-            "y",
-            "departure_time",
-            "trip_dur_min",
-            "trip_cost_dollars"
-        ]
-    ]
+    # Select final columns in desired order
+    final_plans = final_plans[[
+        "tour_id", "trip_id", "person_id", "number_of_participants",
+        "tour_mode", "trip_mode", "PlanElementIndex", "ActivityElement",
+        "ActivityType", "x", "y", "departure_time", "trip_dur_min",
+        "trip_cost_dollars"
+    ]]
 
     # save back to pipeline
     pipeline.replace_table("plans", final_plans)
