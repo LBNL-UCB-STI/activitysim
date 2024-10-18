@@ -324,16 +324,11 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
 
     # Modify trips dataframe in-place where possible
     _annotate_trips(trips, tours)
-    columns_to_ignore = ["household_id","primary_purpose","purpose","destination_logsum","trip_mode","mode_choice_logsum"]
-    trips_additional_columns = trips[columns_to_ignore].copy()
-    trips.drop(columns=columns_to_ignore, inplace=True)
     trips.reset_index(inplace=True)
 
 
     # Sort trips and fix sequences
     trips = _sort_and_fix_sequences(trips)
-
-    trips = pd.concat([trips, trips_additional_columns.loc[trips.index]], axis=1)
 
     trips.set_index("trip_id", inplace=True, drop=True)
 
