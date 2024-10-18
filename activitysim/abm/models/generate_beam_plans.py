@@ -324,13 +324,20 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
 
     # Modify trips dataframe in-place where possible
     _annotate_trips(trips, tours)
+    columns_to_ignore = ["household_id","tour_id","primary_purpose","purpose","destination_logsum","trip_mode","mode_choice_logsum"]
+    trips_additional_columns = trips[columns_to_ignore].copy()
+    trips.drop(columns=columns_to_ignore, inplace=True)
+
 
     # Sort trips and fix sequences
     trips = _sort_and_fix_sequences(trips)
 
+    trips = pd.concat([trips, trips_additional_columns.reindex_like(trips)], axis=1)
+
     # Get coordinates and times
     trips = get_trip_coords(trips, zones, persons)
     trips["departure_time"] = generate_departure_times(trips, tours)
+
 
     # Add tour information efficiently using map
     trips["number_of_participants"] = trips["tour_id"].map(tours["number_of_participants"])
@@ -370,8 +377,8 @@ def _setup_skims(skim_stack, skim_dict):
 
 def _annotate_trips(trips, tours):
     trips["inbound"] = ~trips.outbound
-    trips["tour_start"] = trips.tour_id.map(tours.start)
-    trips["tour_end"] = trips.tour_id.map(tours.end)
+    trips["tour_start"] = trips.tour_id.map(tours.start).astype(pd.Int16Dtype())
+    trips["tour_end"] = trips.tour_id.map(tours.end).astype(pd.Int16Dtype())
     trips["isAtWork"] = trips.purpose == "atwork"
 
     # Handle actuallyInbound calculation
@@ -388,8 +395,8 @@ def _fix_trip_sequence(df):
         return df
 
     first_bad_index = bad_indices[0]
-    dest_last_good = df.iloc[first_bad_index - 1]["destination"]
-    time_period = df.iloc[first_bad_index]["depart"]
+    dest_last_good = df.loc[df.index[first_bad_index - 1],"destination"]
+    time_period = df.loc[df.index[first_bad_index],"depart"]
 
     mask = ((df["depart"] == time_period) &
             (df["origin"] == dest_last_good) &
@@ -411,7 +418,7 @@ def _reorder_trips(df, first_bad_index, trip_index_to_move):
     df2.iloc[(first_bad_index + 1):(trip_index_to_move + 1)] = trips_to_shuffle.sample(frac=1).values
 
     df2["is_bad"] = ~(df2["origin"] == df2["destination"].shift())
-    df2["is_bad"].iloc[0] = False
+    df2.at[df2.index[0], "is_bad"] = False
 
     return df2 if df2["original_order"].is_unique else df
 
@@ -421,7 +428,7 @@ def _shuffle_trips(df, time_period):
     df2 = df.copy()
     df2.loc[trips_to_shuffle.index] = trips_to_shuffle.sample(frac=1).values
     df2["is_bad"] = ~(df2["origin"] == df2["destination"].shift())
-    df2["is_bad"].iloc[0] = False
+    df2.at[df2.index[0], "is_bad"] = False
     return df2 if df2["original_order"].is_unique else df
 
 
@@ -438,7 +445,7 @@ def _sort_and_fix_sequences(trips):
     # Fix sequences
     topo_sort_mask = ((trips["destination"].shift() == trips["origin"]) |
                       (trips["person_id"].shift() != trips["person_id"]))
-    trips["is_bad"] = ~topo_sort_mask
+    trips.loc[:, "is_bad"] = ~topo_sort_mask
 
     iteration = 0
     while (trips["is_bad"].sum() > 0) and (iteration < 50):
