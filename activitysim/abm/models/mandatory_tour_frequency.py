@@ -151,8 +151,6 @@ def mandatory_tour_frequency(persons_merged,
         persons.loc[impossibleSchoolTours, 'mandatory_tour_frequency'] = 'school1'
     persons.loc[persons.is_student & (persons.school_taz == -1), "school_taz"] = persons.loc[
         persons.is_student & (persons.school_taz == -1), "home_taz"].values
-    persons.loc[persons.is_student & (persons.school_id == -1), "school_id"] = persons.loc[
-        persons.is_student & (persons.school_id == -1), "home_taz"].values
 
     expressions.assign_columns(
         df=persons,
