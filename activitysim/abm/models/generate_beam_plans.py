@@ -330,10 +330,6 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
 
     constants = config.get_model_constants(model_settings)
 
-    expressions.annotate_preprocessors(
-        trips, constants, skims,
-        model_settings, None)
-
     # Modify trips dataframe in-place where possible
     _annotate_trips(trips, tours)
     trips.reset_index(inplace=True)
@@ -344,6 +340,15 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
     trips = _sort_and_fix_sequences(trips)
 
     trips.set_index("trip_id", inplace=True, drop=True)
+
+    trips['origin'] = trips['origin'].astype(str)
+    trips['destination'] = trips['destination'].astype(str)
+    trips['trip_mode'] = trips['trip_mode'].astype(str)
+
+    expressions.annotate_preprocessors(
+        trips, constants, skims,
+        model_settings, None)
+
 
     # Get coordinates and times
     trips = get_trip_coords(trips, zones, persons)
