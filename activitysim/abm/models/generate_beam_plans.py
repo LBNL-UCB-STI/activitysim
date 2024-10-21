@@ -147,7 +147,7 @@ def generatePersonStartTimes(df):
     return df
 
 
-def generate_departure_times(trips, tours):
+def generate_departure_times(trips):
     # TO DO: fractional times must respect the original order of trips!!!!
     ordered_trips2 = (
         trips[
@@ -352,7 +352,7 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
 
     # Get coordinates and times
     trips = get_trip_coords(trips, zones, persons)
-    trips["departure_time"] = generate_departure_times(trips, tours)
+    trips["departure_time"] = generate_departure_times(trips)
 
 
     # Add tour information efficiently using map
