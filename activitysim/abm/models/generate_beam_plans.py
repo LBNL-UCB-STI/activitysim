@@ -333,7 +333,7 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
     # Modify trips dataframe in-place where possible
     _annotate_trips(trips, tours)
     trips.reset_index(inplace=True)
-    trips.drop(columns=['tour_id', 'isAtWork', 'actuallyInbound'], inplace=True)
+    trips.drop(columns=['isAtWork', 'actuallyInbound'], inplace=True)
     del tours
 
     # Sort trips and fix sequences
