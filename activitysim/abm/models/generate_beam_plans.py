@@ -341,8 +341,8 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
 
     trips.set_index("trip_id", inplace=True, drop=True)
 
-    trips['origin'] = trips['origin'].astype(str)
-    trips['destination'] = trips['destination'].astype(str)
+    trips['origin'] = trips['origin'].astype(int)
+    trips['destination'] = trips['destination'].astype(int)
     trips['trip_mode'] = trips['trip_mode'].astype(str)
 
     expressions.annotate_preprocessors(
