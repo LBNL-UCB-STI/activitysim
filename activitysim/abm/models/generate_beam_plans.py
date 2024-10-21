@@ -126,7 +126,7 @@ def get_trip_coords(trips, zones, persons, size=500):
         grp["origin_y"] = z[1]
         return grp
 
-    trips = trips.groupby(["household_id", "origin", "purpose"]).apply(assignLoc)
+    trips = trips.groupby(["person_id", "origin", "purpose"]).apply(assignLoc)
 
     # retain home coords from urbansim data bc they will typically be
     # higher resolution than zone, so we don't need the semi-random coords
