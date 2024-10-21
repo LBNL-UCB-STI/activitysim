@@ -202,7 +202,8 @@ def generate_departure_times(trips, tours):
             )
             i += 1
             if i > 15:
-                raise ValueError
+                logger.warning("Bad trip times still {0}".format(df.loc[df["gapAfterTrip"] < 0, :]))
+                return df
         return df
 
     def process(df):
@@ -294,6 +295,17 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
     trips = trips.to_frame()
     tours = tours.to_frame()
     persons = persons.to_frame()
+    col_to_keep = ['trip_id', 'person_id', 'tour_id',
+       'trip_num', 'outbound','purpose', 'primary_purpose','destination',
+       'origin', 'depart', 'trip_mode']
+    trips.drop(columns=[col for col in trips.columns if col not in col_to_keep], inplace=True)
+    trips['trip_mode'] = trips['trip_mode'].astype("category")
+    trips['purpose'] = trips['purpose'].astype("category")
+    trips['primary_purpose'] = trips['primary_purpose'].astype("category")
+    trips['origin'] = trips['origin'].astype("category")
+    trips['destination'] = trips['destination'].astype("category")
+    trips['trip_num'] = trips['trip_num'].astype(pd.Int16Dtype())
+    trips['depart'] = trips['depart'].astype(np.float32)
 
     # Load configurations
     model_settings = config.read_model_settings('generate_beam_plans.yaml')
@@ -325,7 +337,8 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
     # Modify trips dataframe in-place where possible
     _annotate_trips(trips, tours)
     trips.reset_index(inplace=True)
-
+    trips.drop(columns=['tour_id', 'isAtWork', 'actuallyInbound'], inplace=True)
+    del tours
 
     # Sort trips and fix sequences
     trips = _sort_and_fix_sequences(trips)
@@ -456,6 +469,7 @@ def _sort_and_fix_sequences(trips):
 
         fixed_plans.index = bad_plans.index
         trips.loc[fixed_plans.index] = fixed_plans
+        trips.reset_index(inplace=True, drop=True)
 
         topo_sort_mask = ((trips["destination"].shift() == trips["origin"]) |
                           (trips["person_id"].shift() != trips["person_id"]))
