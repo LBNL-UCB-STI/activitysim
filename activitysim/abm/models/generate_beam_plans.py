@@ -183,27 +183,30 @@ def generate_departure_times(trips):
                 + df["frac"] * totalBuffer
                 + df["TOTAL_TIME_MINS"].shift(1).fillna(0.0).cumsum() / 60.0
         )
-        df["gapAfterTrip"] = -(
-                (df["newStartTime"] + df["TOTAL_TIME_MINS"] / 60.0)
-                - df["newStartTime"].shift(-1).fillna(100).values
-        )
+
         i = 0
-        while not np.all(df["gapAfterTrip"].values >= 0):
-            df.loc[
-                ~(df["gapAfterTrip"].shift(1).fillna(100).values > 0), "newStartTime"
-            ] -= (
-                df.loc[~(df["gapAfterTrip"].values > 0), "gapAfterTrip"]
-                .fillna(0.0)
-                .values
-            )
+        while True:
+            # Calculate gaps between trips
             df["gapAfterTrip"] = -(
                     (df["newStartTime"] + df["TOTAL_TIME_MINS"] / 60.0)
                     - df["newStartTime"].shift(-1).fillna(100).values
             )
+
+            # If all gaps are non-negative, we're done
+            if np.all(df["gapAfterTrip"].values >= 0):
+                break
+
+            # Find problematic trips (negative gaps)
+            negative_gaps = df["gapAfterTrip"] < 0
+
+            # Adjust start times for trips that need fixing
+            df.loc[negative_gaps, "newStartTime"] += df.loc[negative_gaps, "gapAfterTrip"]
+
             i += 1
             if i > 15:
                 logger.warning("Bad trip times still {0}".format(df.loc[df["gapAfterTrip"] < 0, :]))
-                return df
+                break
+
         return df
 
     def process(df):
