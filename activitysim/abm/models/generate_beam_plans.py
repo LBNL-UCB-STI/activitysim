@@ -302,6 +302,8 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
        'trip_num', 'outbound','purpose', 'primary_purpose','destination',
        'origin', 'depart', 'trip_mode']
     trips.drop(columns=[col for col in trips.columns if col not in col_to_keep], inplace=True)
+    tour_col_to_keep = ['tour_id','person_id','number_of_participants','start','end','tour_mode']
+    tours.drop(columns=[col for col in tours.columns if col not in tour_col_to_keep], inplace=True)
     trips['trip_mode'] = trips['trip_mode'].astype("category")
     trips['purpose'] = trips['purpose'].astype("category")
     trips['primary_purpose'] = trips['primary_purpose'].astype("category")
@@ -337,7 +339,7 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
     _annotate_trips(trips, tours)
     trips.reset_index(inplace=True)
     trips.drop(columns=['isAtWork', 'actuallyInbound'], inplace=True)
-    del tours
+
 
     # Sort trips and fix sequences
     trips = _sort_and_fix_sequences(trips)
