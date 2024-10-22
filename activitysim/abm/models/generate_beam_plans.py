@@ -17,49 +17,6 @@ from activitysim.core.simulate import set_skim_wrapper_targets
 logger = logging.getLogger("activitysim")
 warnings.filterwarnings("ignore", "GeoSeries.isna", UserWarning)
 
-mode_to_spd = {
-    "WALK": 1.25,
-    "BIKE": 3.0,
-}
-fallback_car_mode = "SOV"
-
-mode_to_time_columns = {
-    "WLK_LOC_WLK": (["TOTIVT", "IWAIT", "XWAIT", "WACC", "WAUX", "WEGR"], 100.0),
-    "HOV2TOLL": (["TIME"], 1.0),
-    "HOV3": (["TIME"], 1.0),
-    "SOV": (["TIME"], 1.0),
-    "SOVTOLL": (["TIME"], 1.0),
-    "WLK_HVY_WLK": (["TOTIVT", "IWAIT", "XWAIT", "WACC", "WAUX", "WEGR"], 100.0),
-    "HOV2": (["TIME"], 1.0),
-    "HOV3TOLL": (["TIME"], 1.0),
-    "WLK_LRF_WLK": (["TOTIVT", "IWAIT", "XWAIT", "WACC", "WAUX", "WEGR"], 100.0),
-    "WLK_COM_WLK": (["TOTIVT", "IWAIT", "XWAIT", "WACC", "WAUX", "WEGR"], 100.0),
-    "WLK_LOC_DRV": (
-        ["DTIM", "TOTIVT", "IWAIT", "XWAIT", "WAUX"],
-        100.0,
-    ),
-    "WLK_HVY_DRV": (
-        ["DTIM", "TOTIVT", "IWAIT", "XWAIT", "WAUX"],
-        100.0,
-    ),
-    "WLK_LRF_DRV": (
-        ["DTIM", "TOTIVT", "IWAIT", "XWAIT", "WAUX"],
-        100.0,
-    ),
-    "DRV_LOC_WLK": (
-        ["DTIM", "TOTIVT", "IWAIT", "XWAIT", "WAUX"],
-        100.0,
-    ),
-    "DRV_HVY_WLK": (
-        ["DTIM", "TOTIVT", "IWAIT", "XWAIT", "WAUX"],
-        100.0,
-    ),
-    "DRV_LRF_WLK": (
-        ["DTIM", "TOTIVT", "IWAIT", "XWAIT", "WAUX"],
-        100.0,
-    ),
-}
-
 
 def random_points_in_polygon(number, polygon):
     """
@@ -224,76 +181,6 @@ def generate_departure_times(trips):
     return df2.newStartTime.rename("depart")
 
 
-def label_trip_modes(trips, skims):
-    odt_skim_stack_wrapper = skims["odt_skims"]
-    dot_skim_stack_wrapper = skims["dot_skims"]
-    od_skim_wrapper = skims["od_skims"]
-
-    trips["totalTime"] = -1.0
-    trips["trip_mode_full"] = trips["trip_mode"].replace(
-        {
-            "SHARED2PAY": "HOV2TOLL",
-            "SHARED3PAY": "HOV3TOLL",
-            "SHARED2FREE": "HOV2",
-            "SHARED3FREE": "HOV3",
-            "DRIVEALONEFREE": "SOV",
-            "DRIVEALONEPAY": "SOVTOLL",
-        }
-    )
-    trips.loc[trips.trip_mode.str.startswith("WALK_"), "trip_mode_full"] = (
-            trips.loc[
-                trips.trip_mode.str.startswith("WALK_"), "trip_mode_full"
-            ].str.replace("WALK", "WLK")
-            + "_WLK"
-    )
-    trips.loc[
-        trips.trip_mode.str.startswith("DRIVE_") & trips.outbound, "trip_mode_full"
-    ] = (
-            trips.loc[
-                trips.trip_mode.str.startswith("DRIVE_") & trips.outbound, "trip_mode_full"
-            ].str.replace("DRIVE", "DRV")
-            + "_WLK"
-    )
-    trips.loc[
-        trips.trip_mode.str.startswith("DRIVE_") & ~trips.outbound, "trip_mode_full"
-    ] = (
-            trips.loc[
-                trips.trip_mode.str.startswith("DRIVE_") & ~trips.outbound, "trip_mode_full"
-            ].str.replace("DRIVE", "WLK")
-            + "_DRV"
-    )
-    for (mode, isOutbound), subdf in trips.groupby(["trip_mode_full", "outbound"]):
-        mask = (trips["trip_mode_full"] == mode) & (trips["outbound"] == isOutbound)
-        if mode in mode_to_time_columns:
-            metrics, multiplier = mode_to_time_columns[mode]
-            times = []
-            for metric in metrics:
-                try:
-                    if isOutbound:
-                        val = (
-                                odt_skim_stack_wrapper[f"{mode}_{metric}"].loc[mask]
-                                / multiplier
-                        )
-                    else:
-                        val = (
-                                dot_skim_stack_wrapper[f"{mode}_{metric}"].loc[mask]
-                                / multiplier
-                        )
-                except AssertionError:
-                    val = odt_skim_stack_wrapper["SOV_TIME"].loc[mask] * 0.0
-                times.append(val)
-            look = pd.concat(times, axis=1)
-            trips.loc[mask, "totalTime"] = look.sum(axis=1)
-        elif mode in mode_to_spd:
-            spd = mode_to_spd[mode]
-            dist = od_skim_wrapper[f"DIST{mode}"].loc[mask]
-            trips.loc[mask, "totalTime"] = dist / spd
-        else:
-            fallback_time = odt_skim_stack_wrapper["SOV_TIME"].loc[mask]
-            trips.loc[mask, "totalTime"] = fallback_time * 1.1
-    return trips
-
-
 @inject.step()
 def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size, trace_hh_id, locutor):
     # Convert to frames only once and work in-place where possible
@@ -337,6 +224,30 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
 
     constants = config.get_model_constants(model_settings)
 
+    processed_trips = []
+
+    inner_chunk_size = 10000
+    nChunks, lastChunkSize = divmod(trips.shape[0], inner_chunk_size)
+    lastInd = 0
+
+    for ii in range(nChunks):
+        logger.info("Starting on {0} of {1} chunks".format(ii, nChunks))
+        splitPerson = trips['person_id'].values[inner_chunk_size * (ii + 1)]
+        splitInd = np.argmax(trips['person_id'].values == splitPerson)
+        trips_sub = trips.iloc[lastInd:(splitInd-1)].copy()
+        _process_trip_chunk(trips_sub, tours, persons, zones, constants, skims, model_settings)
+        processed_trips.append(trips_sub)
+        lastInd = splitInd
+    if lastChunkSize > 0:
+        trips_sub = trips.iloc[lastInd:].copy()
+        _process_trip_chunk(trips_sub, tours, persons, zones, constants, skims, model_settings)
+        processed_trips.append(trips_sub)
+
+    trips = pd.concat(processed_trips, axis=0)
+    # Create final plans more efficiently
+    return _create_final_plans(trips)
+
+def _process_trip_chunk(trips, tours, persons, zones, constants, skims, model_settings):
     # Modify trips dataframe in-place where possible
     _annotate_trips(trips, tours)
     trips.reset_index(inplace=True)
@@ -375,9 +286,7 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
         "TOTAL_TIME_MINS": "trip_dur_min",
         "TOTAL_COST_DOLLARS": "trip_cost_dollars"
     }, inplace=True)
-
-    # Create final plans more efficiently
-    return _create_final_plans(trips)
+    return trips
 
 
 def _process_beam_geoms(beam_geoms):
@@ -476,7 +385,7 @@ def _sort_and_fix_sequences(trips):
     trips.loc[:, "is_bad"] = ~topo_sort_mask
 
     iteration = 0
-    while (trips["is_bad"].sum() > 0) and (iteration < 50):
+    while (trips["is_bad"].sum() > 0) and (iteration < 15):
         logger.info(f"Before rearranging: {trips.is_bad.sum()} trips")
         bad_person_ids = trips.loc[~topo_sort_mask, "person_id"]
         bad_plans = trips.loc[trips.person_id.isin(bad_person_ids)]
