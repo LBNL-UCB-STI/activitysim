@@ -11,6 +11,7 @@ from activitysim.abm.models.util import expressions
 from activitysim.abm.models.util.expressions import skim_time_period_label
 from activitysim.core import pipeline, orca, config
 from activitysim.core import inject
+from activitysim.core.mem import force_garbage_collect
 from activitysim.core.simulate import set_skim_wrapper_targets
 
 logger = logging.getLogger("activitysim")
@@ -216,6 +217,7 @@ def generate_departure_times(trips):
         df = df.groupby("depart").apply(getTotalTime)
         return df
 
+    force_garbage_collect()
     df2 = ordered_trips2.groupby(["person_id"]).apply(process)
     df2.set_index("trip_id", inplace=True)
     df2 = df2.reindex(trips.index)
@@ -343,6 +345,7 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
 
     # Sort trips and fix sequences
     trips = _sort_and_fix_sequences(trips)
+    logger.info("Done rearranging trips")
 
     trips.set_index("trip_id", inplace=True, drop=True)
 
@@ -350,13 +353,18 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
     trips['destination'] = trips['destination'].astype(int)
     trips['trip_mode'] = trips['trip_mode'].astype(str)
 
+    logger.info("Annotating from skims")
     expressions.annotate_preprocessors(
         trips, constants, skims,
         model_settings, None)
 
+    force_garbage_collect()
+    logger.info("Adding trip coordinates")
 
     # Get coordinates and times
     trips = get_trip_coords(trips, zones, persons)
+
+    logger.info("Generating departure times")
     trips["departure_time"] = generate_departure_times(trips)
 
 
@@ -486,6 +494,7 @@ def _sort_and_fix_sequences(trips):
         trips["is_bad"] = ~topo_sort_mask
         logger.info(f"After: {trips.is_bad.sum()} trips")
         iteration += 1
+    force_garbage_collect()
     return trips
 
 
