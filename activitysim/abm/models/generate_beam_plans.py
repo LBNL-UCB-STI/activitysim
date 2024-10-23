@@ -450,9 +450,9 @@ def _create_final_plans(trips):
         "trip_cost_dollars"
     ]]
 
-    final_plans["tour_id"] = final_plans["tour_id"].astype(pd.Int64Dtype())
-    final_plans["trip_id"] = final_plans["trip_id"].astype(pd.Int64Dtype())
-    final_plans["person_id"] = final_plans["person_id"].astype(pd.Int64Dtype())
+    final_plans["tour_id"] = final_plans["tour_id"].fillna(-1).astype(np.int64)
+    final_plans["trip_id"] = final_plans["trip_id"].fillna(-1).astype(np.int64)
+    final_plans["person_id"] = final_plans["person_id"].fillna(-1).astype(np.int64)
 
     # save back to pipeline
     pipeline.replace_table("plans", final_plans)
