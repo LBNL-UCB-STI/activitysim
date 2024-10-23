@@ -325,6 +325,7 @@ def _annotate_trips(trips, tours):
     trips.loc[mask_atwork, "actuallyInbound"] = ~trips.loc[mask_atwork, "inbound"]
     trips['TOTAL_COST_DOLLARS'] = np.float32(0.0)
     trips['TOTAL_TIME_MINS'] = np.float32(0.0)
+    trips['departure_time'] = np.float32(0.0)
 
 
 def _fix_trip_sequence(df):
