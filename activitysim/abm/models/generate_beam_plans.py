@@ -219,65 +219,35 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
 
     # Setup skims
     trips["trip_period"] = skim_time_period_label(trips.depart)
-    skims = _setup_skims(skim_stack, skim_dict)
-    set_skim_wrapper_targets(trips, skims)
 
-    constants = config.get_model_constants(model_settings)
-
-    processed_trips = []
+    # Modify trips dataframe in-place where possible
+    _annotate_trips(trips, tours)
+    trips.reset_index(inplace=True)
+    trips.drop(columns=['isAtWork', 'actuallyInbound'], inplace=True)
 
     inner_chunk_size = 10000
     nChunks, lastChunkSize = divmod(trips.shape[0], inner_chunk_size)
     lastInd = 0
+
+    skims = _setup_skims(skim_stack, skim_dict)
+
+    constants = config.get_model_constants(model_settings)
 
     for ii in range(nChunks):
         logger.info("Starting on {0} of {1} chunks".format(ii, nChunks))
         splitPerson = trips['person_id'].values[inner_chunk_size * (ii + 1)]
         splitInd = np.argmax(trips['person_id'].values == splitPerson)
         trips_sub = trips.iloc[lastInd:(splitInd-1)].copy()
-        _process_trip_chunk(trips_sub, tours, persons, zones, constants, skims, model_settings)
-        processed_trips.append(trips_sub)
+        _process_trip_chunk(trips_sub, constants, skims, model_settings)
+        trips.iloc[lastInd:(splitInd-1)] = trips_sub[trips.columns].values
         lastInd = splitInd
     if lastChunkSize > 0:
         trips_sub = trips.iloc[lastInd:].copy()
-        _process_trip_chunk(trips_sub, tours, persons, zones, constants, skims, model_settings)
-        processed_trips.append(trips_sub)
-
-    trips = pd.concat(processed_trips, axis=0)
-    # Create final plans more efficiently
-    return _create_final_plans(trips)
-
-def _process_trip_chunk(trips, tours, persons, zones, constants, skims, model_settings):
-    # Modify trips dataframe in-place where possible
-    _annotate_trips(trips, tours)
-    trips.reset_index(inplace=True)
-    trips.drop(columns=['isAtWork', 'actuallyInbound'], inplace=True)
-
-
-    # Sort trips and fix sequences
-    trips = _sort_and_fix_sequences(trips)
-    logger.info("Done rearranging trips")
-
-    trips.set_index("trip_id", inplace=True, drop=True)
-
-    trips['origin'] = trips['origin'].astype(int)
-    trips['destination'] = trips['destination'].astype(int)
-    trips['trip_mode'] = trips['trip_mode'].astype(str)
-
-    logger.info("Annotating from skims")
-    expressions.annotate_preprocessors(
-        trips, constants, skims,
-        model_settings, None)
-
-    force_garbage_collect()
-    logger.info("Adding trip coordinates")
+        _process_trip_chunk(trips_sub, constants, skims, model_settings)
+        trips.iloc[lastInd:] = trips_sub[trips.columns].values
 
     # Get coordinates and times
     trips = get_trip_coords(trips, zones, persons)
-
-    logger.info("Generating departure times")
-    trips["departure_time"] = generate_departure_times(trips)
-
 
     # Add tour information efficiently using map
     trips["number_of_participants"] = trips["tour_id"].map(tours["number_of_participants"])
@@ -286,6 +256,34 @@ def _process_trip_chunk(trips, tours, persons, zones, constants, skims, model_se
         "TOTAL_TIME_MINS": "trip_dur_min",
         "TOTAL_COST_DOLLARS": "trip_cost_dollars"
     }, inplace=True)
+
+    # Create final plans more efficiently
+    return _create_final_plans(trips)
+
+def _process_trip_chunk(trips, constants, skims, model_settings):
+
+    # Sort trips and fix sequences
+    trips = _sort_and_fix_sequences(trips)
+    logger.info("Done rearranging trips")
+
+    trips['origin'] = trips['origin'].astype(int)
+    trips['destination'] = trips['destination'].astype(int)
+    trips['trip_mode'] = trips['trip_mode'].astype(str)
+
+    logger.info("Annotating from skims")
+    set_skim_wrapper_targets(trips, skims)
+
+    expressions.annotate_preprocessors(
+        trips, constants, skims,
+        model_settings, None)
+
+    force_garbage_collect()
+    logger.info("Adding trip coordinates")
+
+    logger.info("Generating departure times")
+    trips["departure_time"] = generate_departure_times(trips)
+
+
     return trips
 
 
@@ -325,6 +323,8 @@ def _annotate_trips(trips, tours):
     trips.loc[mask_work, "actuallyInbound"] = ~trips.loc[mask_work, "inbound"]
     mask_atwork = (trips.purpose == "atwork")
     trips.loc[mask_atwork, "actuallyInbound"] = ~trips.loc[mask_atwork, "inbound"]
+    trips['TOTAL_COST_DOLLARS'] = np.float32(0.0)
+    trips['TOTAL_TIME_MINS'] = np.float32(0.0)
 
 
 def _fix_trip_sequence(df):
