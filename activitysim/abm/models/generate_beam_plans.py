@@ -106,9 +106,7 @@ def generatePersonStartTimes(df):
 
 
 def generate_departure_times(trips):
-    # TO DO: fractional times must respect the original order of trips!!!!
-    ordered_trips2 = (
-        trips[
+    ordered_trips2 = trips[
             [
                 "person_id",
                 "depart",
@@ -119,10 +117,8 @@ def generate_departure_times(trips):
                 "trip_num",
                 "TOTAL_TIME_MINS",
             ]
-        ]
-        .reset_index()
-        .drop_duplicates("trip_id")
-    )
+        ].reset_index()
+
     ordered_trips2["frac"] = np.random.rand(
         len(ordered_trips2),
     )
@@ -247,7 +243,13 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
         trips.iloc[lastInd:] = trips_sub[trips.columns].values
 
     # Get coordinates and times
+    logger.info("Adding trip coordinates")
     trips = get_trip_coords(trips, zones, persons)
+
+    trips.set_index("trip_id", inplace=True)
+
+    logger.info("Generating departure times")
+    trips["departure_time"] = generate_departure_times(trips)
 
     # Add tour information efficiently using map
     trips["number_of_participants"] = trips["tour_id"].map(tours["number_of_participants"])
@@ -278,12 +280,6 @@ def _process_trip_chunk(trips, constants, skims, model_settings):
         model_settings, None)
 
     force_garbage_collect()
-    logger.info("Adding trip coordinates")
-
-    logger.info("Generating departure times")
-    trips["departure_time"] = generate_departure_times(trips)
-
-
     return trips
 
 
