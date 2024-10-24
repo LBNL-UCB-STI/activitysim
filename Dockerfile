@@ -30,9 +30,11 @@ RUN export GIT_TRACE=1
 RUN export GIT_CURL_VERBOSE=1
 RUN git config --global core.compression 0
 
-RUN echo "Reset 39"
+RUN echo "Reset 41"
 
 RUN git clone --depth 1 -b beam-plans-fixes https://github.com/LBNL-UCB-STI/activitysim.git
+
+RUN mamba update numpy pandas -y
 
 
 

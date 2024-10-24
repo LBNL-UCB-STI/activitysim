@@ -145,6 +145,10 @@ def generate_departure_times(trips):
                     (df["newStartTime"] + df["TOTAL_TIME_MINS"] / 60.0)
                     - df["newStartTime"].shift(-1).fillna(100).values
             )
+            if i > 15:
+                logger.warning("Bad trip times still {0}".format(df.loc[df["gapAfterTrip"] < 0, :]))
+
+                break
 
             # If all gaps are non-negative, we're done
             if np.all(df["gapAfterTrip"].values >= 0):
@@ -157,9 +161,7 @@ def generate_departure_times(trips):
             df.loc[negative_gaps, "newStartTime"] += df.loc[negative_gaps, "gapAfterTrip"]
 
             i += 1
-            if i > 15:
-                logger.warning("Bad trip times still {0}".format(df.loc[df["gapAfterTrip"] < 0, :]))
-                break
+
 
         return df
 
@@ -221,7 +223,7 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
     trips.reset_index(inplace=True)
     trips.drop(columns=['isAtWork', 'actuallyInbound'], inplace=True)
 
-    inner_chunk_size = 10000
+    inner_chunk_size = 20000
     nChunks, lastChunkSize = divmod(trips.shape[0], inner_chunk_size)
     lastInd = 0
 
