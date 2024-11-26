@@ -92,10 +92,10 @@ def get_trip_coords(trips, zones, persons, size=500):
         trips, persons[["home_x", "home_y"]], left_on="person_id", right_index=True
     )
     trips["origin_purpose"] = (
-        trips.groupby("person_id")["purpose"].shift(periods=1).fillna("Home")
+        trips.groupby("person_id")["purpose"].shift(periods=1).fillna("home")
     )
-    trips["x"] = trips.origin_x.where(trips.origin_purpose != "Home", trips.home_x)
-    trips["y"] = trips.origin_y.where(trips.origin_purpose != "Home", trips.home_y)
+    trips["x"] = trips.origin_x.where(trips.origin_purpose.str.lower() != "home", trips.home_x)
+    trips["y"] = trips.origin_y.where(trips.origin_purpose.str.lower() != "home", trips.home_y)
 
     return trips
 
@@ -317,7 +317,7 @@ def _annotate_trips(trips, tours):
 
     # Handle actuallyInbound calculation
     trips["actuallyInbound"] = trips["inbound"].copy()
-    mask_work = (trips.primary_purpose == "work") & (trips.purpose != "Home")
+    mask_work = (trips.primary_purpose == "work") & (trips.purpose.str.lower() != "home")
     trips.loc[mask_work, "actuallyInbound"] = ~trips.loc[mask_work, "inbound"]
     mask_atwork = (trips.purpose == "atwork")
     trips.loc[mask_atwork, "actuallyInbound"] = ~trips.loc[mask_atwork, "inbound"]
@@ -425,7 +425,7 @@ def _create_final_plans(trips):
     plans["PlanElementIndex"] = plans.groupby("person_id").cumcount() * 2 + 1
 
     # Create activities
-    plans["ActivityType"] = plans.groupby("person_id")["purpose"].shift(1).fillna("Home")
+    plans["ActivityType"] = plans.groupby("person_id")["purpose"].shift(1).fillna("home")
     plans["ActivityElement"] = "activity"
 
     # Create legs efficiently
@@ -455,6 +455,9 @@ def _create_final_plans(trips):
     final_plans["tour_id"] = final_plans["tour_id"].fillna(-1).astype(np.int64)
     final_plans["trip_id"] = final_plans["trip_id"].fillna(-1).astype(np.int64)
     final_plans["person_id"] = final_plans["person_id"].fillna(-1).astype(np.int64)
+    final_plans["trip_mode"] = final_plans["trip_mode"].astype(str)
+    final_plans["tour_mode"] = final_plans["tour_mode"].astype(str)
+    final_plans["ActivityType"] = final_plans["ActivityType"].astype(str)
 
     # save back to pipeline
     pipeline.replace_table("plans", final_plans)
