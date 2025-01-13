@@ -158,6 +158,16 @@ def _interaction_sample_simulate(
             locals_d,
             custom_chooser=None,
             sharrow_enabled=sharrow_enabled,
+            additional_columns=compute_settings.protect_columns,
+        )
+
+        alternatives = util.drop_unused_columns(
+            alternatives,
+            spec,
+            locals_d,
+            custom_chooser=None,
+            sharrow_enabled=sharrow_enabled,
+            additional_columns=["tdd"] + compute_settings.protect_columns,
         )
 
     interaction_df = alternatives.join(choosers, how="left", rsuffix="_chooser")
@@ -402,6 +412,7 @@ def interaction_sample_simulate(
     trace_choice_name=None,
     estimator=None,
     skip_choice=False,
+    explicit_chunk_size=0,
     *,
     compute_settings: ComputeSettings | None = None,
 ):
@@ -445,6 +456,9 @@ def interaction_sample_simulate(
     skip_choice: bool
         This skips the logit choice step and simply returns the alternatives table with logsums
         (used in disaggregate accessibility)
+    explicit_chunk_size : float, optional
+        If > 0, specifies the chunk size to use when chunking the interaction
+        simulation. If < 1, specifies the fraction of the total number of choosers.
 
     Returns
     -------
@@ -474,7 +488,13 @@ def interaction_sample_simulate(
         chunk_trace_label,
         chunk_sizer,
     ) in chunk.adaptive_chunked_choosers_and_alts(
-        state, choosers, alternatives, trace_label, chunk_tag, chunk_size=chunk_size
+        state,
+        choosers,
+        alternatives,
+        trace_label,
+        chunk_tag,
+        chunk_size=chunk_size,
+        explicit_chunk_size=explicit_chunk_size,
     ):
         choices = _interaction_sample_simulate(
             state,

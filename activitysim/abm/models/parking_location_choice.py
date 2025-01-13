@@ -147,6 +147,7 @@ def parking_destination_simulate(
         chunk_size=chunk_size,
         trace_label=trace_label,
         trace_choice_name="parking_loc",
+        explicit_chunk_size=model_settings.explicit_chunk,
     )
 
     # drop any failed zero_prob destinations
@@ -186,9 +187,19 @@ def choose_parking_location(
     locals_dict["PARKING"] = skims["op_skims"].dest_key
 
     spec = get_spec_for_segment(state, model_settings, segment_name)
-    trips = drop_unused_columns(trips, spec, locals_dict, custom_chooser=None)
+    trips = drop_unused_columns(
+        trips,
+        spec,
+        locals_dict,
+        custom_chooser=None,
+        additional_columns=model_settings.compute_settings.protect_columns,
+    )
     alternatives = drop_unused_columns(
-        alternatives, spec, locals_dict, custom_chooser=None
+        alternatives,
+        spec,
+        locals_dict,
+        custom_chooser=None,
+        additional_columns=model_settings.compute_settings.protect_columns,
     )
 
     destination_sample = logit.interaction_dataset(
@@ -344,6 +355,12 @@ class ParkingLocationSettings(LogitComponentSettings, extra="forbid"):
     AUTO_MODES: list[str]
     """List of auto modes that use parking. AUTO_MODES are used in write_trip_matrices to make sure
     parking locations are accurately represented in the output trip matrices."""
+
+    explicit_chunk: float = 0
+    """
+    If > 0, use this chunk size instead of adaptive chunking.
+    If less than 1, use this fraction of the total number of rows.
+    """
 
 
 @workflow.step

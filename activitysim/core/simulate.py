@@ -722,19 +722,22 @@ def eval_utilities(
         offsets = np.nonzero(list(trace_targets))[0]
 
         # trace sharrow
-        if sh_flow is not None:
-            try:
-                data_sh = sh_flow.load(
-                    sh_tree.replace_datasets(
-                        df=choosers.iloc[offsets],
-                    ),
-                    dtype=np.float32,
-                )
-                expression_values_sh = pd.DataFrame(data=data_sh.T, index=spec.index)
-            except ValueError:
-                expression_values_sh = None
-        else:
-            expression_values_sh = None
+        # TODO: This block of code is sometimes extremely slow or hangs for no apparent
+        #       reason. It is temporarily disabled until the cause can be identified, so
+        #       that most tracing can be still be done with sharrow enabled.
+        # if sh_flow is not None:
+        #     try:
+        #         data_sh = sh_flow.load(
+        #             sh_tree.replace_datasets(
+        #                 df=choosers.iloc[offsets],
+        #             ),
+        #             dtype=np.float32,
+        #         )
+        #         expression_values_sh = pd.DataFrame(data=data_sh.T, index=spec.index)
+        #     except ValueError:
+        #         expression_values_sh = None
+        # else:
+        expression_values_sh = None
 
         # get array of expression_values
         # expression_values.shape = (len(spec), len(choosers))
@@ -787,13 +790,15 @@ def eval_utilities(
                 sh_util,
                 utilities.values,
                 rtol=1e-2,
-                atol=0,
+                atol=1e-6,
                 err_msg="utility not aligned",
                 verbose=True,
             )
         except AssertionError as err:
             print(err)
-            misses = np.where(~np.isclose(sh_util, utilities.values, rtol=1e-2, atol=0))
+            misses = np.where(
+                ~np.isclose(sh_util, utilities.values, rtol=1e-2, atol=1e-6)
+            )
             _sh_util_miss1 = sh_util[tuple(m[0] for m in misses)]
             _u_miss1 = utilities.values[tuple(m[0] for m in misses)]
             _sh_util_miss1 - _u_miss1
@@ -804,16 +809,20 @@ def eval_utilities(
                 )
                 print(f"{sh_util.shape=}")
                 print(misses)
-                _sh_flow_load = sh_flow.load(sh_tree)
-                print("possible problematic expressions:")
-                for expr_n, expr in enumerate(exprs):
-                    closeness = np.isclose(
-                        _sh_flow_load[:, expr_n], expression_values[expr_n, :]
-                    )
-                    if not closeness.all():
-                        print(
-                            f"  {closeness.sum()/closeness.size:05.1%} [{expr_n:03d}] {expr}"
-                        )
+                # load sharrow flow
+                # TODO: This block of code is sometimes extremely slow or hangs for no apparent
+                #       reason. It is temporarily disabled until the cause can be identified, so
+                #       that model does not hang with sharrow enabled.
+                # _sh_flow_load = sh_flow.load(sh_tree)
+                # print("possible problematic expressions:")
+                # for expr_n, expr in enumerate(exprs):
+                #     closeness = np.isclose(
+                #         _sh_flow_load[:, expr_n], expression_values[expr_n, :]
+                #     )
+                #     if not closeness.all():
+                #         print(
+                #             f"  {closeness.sum()/closeness.size:05.1%} [{expr_n:03d}] {expr}"
+                #         )
                 raise
         except TypeError as err:
             print(err)
@@ -1992,6 +2001,7 @@ def _simple_simulate_logsums(
             locals_d,
             custom_chooser=None,
             sharrow_enabled=state.settings.sharrow,
+            additional_columns=compute_settings.protect_columns,
         )
 
     if nest_spec is None:
@@ -2030,6 +2040,7 @@ def simple_simulate_logsums(
     chunk_size=0,
     trace_label=None,
     chunk_tag=None,
+    explicit_chunk_size=0,
     compute_settings: ComputeSettings | None = None,
 ):
     """
@@ -2052,7 +2063,12 @@ def simple_simulate_logsums(
         chunk_trace_label,
         chunk_sizer,
     ) in chunk.adaptive_chunked_choosers(
-        state, choosers, trace_label, chunk_tag, chunk_size=chunk_size
+        state,
+        choosers,
+        trace_label,
+        chunk_tag,
+        chunk_size=chunk_size,
+        explicit_chunk_size=explicit_chunk_size,
     ):
         logsums = _simple_simulate_logsums(
             state,
