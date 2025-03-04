@@ -83,22 +83,26 @@ def get_trip_coords(trips, zones, persons, size=500):
     def assignLoc(grp):
         zs = rand_point_zones[grp.iloc[0]["origin"]]
         z = random.choice(zs)
-        grp["origin_x"] = z[0]
-        grp["origin_y"] = z[1]
+        grp["x"] = z[0]
+        grp["y"] = z[1]
         return grp
+
+    logger.info("Done generating random points in zones. Assigning trip locations.")
 
     trips = trips.groupby(["person_id", "origin", "purpose"]).apply(assignLoc)
 
     # retain home coords from urbansim data bc they will typically be
     # higher resolution than zone, so we don't need the semi-random coords
-    trips = pd.merge(
-        trips, persons[["home_x", "home_y"]], left_on="person_id", right_index=True
+
+    logger.info("Done assigning trip locations. Adopting home trip locations.")
+
+    origin_purpose_is_home = (
+        trips.groupby("person_id")["purpose"].shift(periods=1).fillna("home") == "home"
     )
-    trips["origin_purpose"] = (
-        trips.groupby("person_id")["purpose"].shift(periods=1).fillna("home")
-    )
-    trips["x"] = trips.origin_x.where(trips.origin_purpose.str.lower() != "home", trips.home_x)
-    trips["y"] = trips.origin_y.where(trips.origin_purpose.str.lower() != "home", trips.home_y)
+    trips.loc[origin_purpose_is_home, ["x", "y"]] = persons[["home_x", "home_y"]].reindex(
+        trips.person_id).values
+
+    logger.info("Done adopting home trip locations.")
 
     return trips
 
