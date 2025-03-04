@@ -91,6 +91,10 @@ def get_trip_coords(trips, zones, persons, size=500):
 
     trips = trips.groupby(["person_id", "origin", "purpose"]).apply(assignLoc)
 
+    # Clear dictionary and force garbage collection
+    del rand_point_zones
+    force_garbage_collect()
+
     # retain home coords from urbansim data bc they will typically be
     # higher resolution than zone, so we don't need the semi-random coords
 
