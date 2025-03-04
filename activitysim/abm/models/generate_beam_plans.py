@@ -402,6 +402,9 @@ def _sort_and_fix_sequences(trips):
         trips["is_bad"] = ~topo_sort_mask
         logger.info(f"After: {trips.is_bad.sum()} trips")
         iteration += 1
+    if iteration == 0:
+        logger.info(f"Before rearranging: {trips.is_bad.sum()} trips -- Guess we're good!")
+        trips.reset_index(inplace=True, drop=True)
     force_garbage_collect()
     return trips
 
