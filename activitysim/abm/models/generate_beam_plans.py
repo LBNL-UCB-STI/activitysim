@@ -57,9 +57,12 @@ def sample_geoseries(geoseries, size, overestimate=2):
     min_x, min_y, max_x, max_y = polygon.bounds
     ratio = polygon.area / polygon.envelope.area
     overestimate = 2
-    samples = np.random.uniform(
-        (min_x, min_y), (max_x, max_y), (int(size / ratio * overestimate), 2)
-    )
+    # np.random.uniform can't specify dtype, so let's try a different method
+    # samples = np.random.uniform(
+    #     (min_x, min_y), (max_x, max_y), (int(size / ratio * overestimate), 2)
+    # )
+    samples = np.random.default_rng().random(size=(int(size / ratio * overestimate), 2), dtype=np.float32) * np.array(
+        [(max_x - min_x), (max_y - min_y)]) + np.array([min_x, min_y])
     multipoint = MultiPoint(samples)
     multipoint = multipoint.intersection(polygon)
     samples = np.array(multipoint)
@@ -72,7 +75,7 @@ def get_trip_coords(trips, zones, persons, size=500):
     trips["purpose"] = trips["purpose"].str.lower()
     rand_point_zones = {}
     for zone in zones[~(zones["geometry"].is_empty | zones["geometry"].isna())].TAZ:
-        size = 500
+        size = 200
         polygon = zones[zones.TAZ == zone].geometry
         points = sample_geoseries(polygon, size, overestimate=2)
         rand_point_zones[zone] = points
@@ -107,17 +110,17 @@ def generatePersonStartTimes(df):
 
 def generate_departure_times(trips):
     ordered_trips2 = trips[
-            [
-                "person_id",
-                "depart",
-                "tour_start",
-                "tour_end",
-                "tour_id",
-                "inbound",
-                "trip_num",
-                "TOTAL_TIME_MINS",
-            ]
-        ].reset_index()
+        [
+            "person_id",
+            "depart",
+            "tour_start",
+            "tour_end",
+            "tour_id",
+            "inbound",
+            "trip_num",
+            "TOTAL_TIME_MINS",
+        ]
+    ].reset_index()
 
     ordered_trips2["frac"] = np.random.rand(
         len(ordered_trips2),
@@ -162,7 +165,6 @@ def generate_departure_times(trips):
 
             i += 1
 
-
         return df
 
     def process(df):
@@ -186,10 +188,10 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
     tours = tours.to_frame()
     persons = persons.to_frame()
     col_to_keep = ['trip_id', 'person_id', 'tour_id',
-       'trip_num', 'outbound','purpose', 'primary_purpose','destination',
-       'origin', 'depart', 'trip_mode']
+                   'trip_num', 'outbound', 'purpose', 'primary_purpose', 'destination',
+                   'origin', 'depart', 'trip_mode']
     trips.drop(columns=[col for col in trips.columns if col not in col_to_keep], inplace=True)
-    tour_col_to_keep = ['tour_id','person_id','number_of_participants','start','end','tour_mode']
+    tour_col_to_keep = ['tour_id', 'person_id', 'number_of_participants', 'start', 'end', 'tour_mode']
     tours.drop(columns=[col for col in tours.columns if col not in tour_col_to_keep], inplace=True)
     trips['trip_mode'] = trips['trip_mode'].astype("category")
     trips['purpose'] = trips['purpose'].astype("category")
@@ -235,9 +237,9 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
         logger.info("Starting on {0} of {1} chunks".format(ii, nChunks))
         splitPerson = trips['person_id'].values[inner_chunk_size * (ii + 1)]
         splitInd = np.argmax(trips['person_id'].values == splitPerson)
-        trips_sub = trips.iloc[lastInd:(splitInd-1)].copy()
+        trips_sub = trips.iloc[lastInd:(splitInd - 1)].copy()
         _process_trip_chunk(trips_sub, constants, skims, model_settings)
-        trips.iloc[lastInd:(splitInd-1)] = trips_sub[trips.columns].values
+        trips.iloc[lastInd:(splitInd - 1)] = trips_sub[trips.columns].values
         lastInd = splitInd
     if lastChunkSize > 0:
         trips_sub = trips.iloc[lastInd:].copy()
@@ -264,8 +266,8 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
     # Create final plans more efficiently
     return _create_final_plans(trips)
 
-def _process_trip_chunk(trips, constants, skims, model_settings):
 
+def _process_trip_chunk(trips, constants, skims, model_settings):
     # Sort trips and fix sequences
     trips = _sort_and_fix_sequences(trips)
     logger.info("Done rearranging trips")
@@ -332,8 +334,8 @@ def _fix_trip_sequence(df):
         return df
 
     first_bad_index = bad_indices[0]
-    dest_last_good = df.loc[df.index[first_bad_index - 1],"destination"]
-    time_period = df.loc[df.index[first_bad_index],"depart"]
+    dest_last_good = df.loc[df.index[first_bad_index - 1], "destination"]
+    time_period = df.loc[df.index[first_bad_index], "depart"]
 
     mask = ((df["depart"] == time_period) &
             (df["origin"] == dest_last_good) &

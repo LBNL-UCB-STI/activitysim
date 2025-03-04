@@ -4,6 +4,7 @@ import logging
 import warnings
 import os
 import pandas as pd
+import geopandas as gpd
 
 from activitysim.core import tracing
 from activitysim.core import config
@@ -17,7 +18,6 @@ from activitysim.core.steps.output import track_skim_usage
 from .util import expressions
 
 from activitysim.abm.tables import shadow_pricing
-
 
 # We are using the naming conventions in the mtc_asim.h5 example
 # file for our default list. This provides backwards compatibility
@@ -39,7 +39,6 @@ logger = logging.getLogger(__name__)
 
 
 def annotate_tables(model_settings, trace_label):
-
     annotate_tables = model_settings.get('annotate_tables', [])
 
     if not annotate_tables:
@@ -55,7 +54,6 @@ def annotate_tables(model_settings, trace_label):
         # - rename columns
         column_map = table_info.get('column_map', None)
         if column_map:
-
             warnings.warn("annotate_tables option 'column_map' renamed 'rename_columns' and moved"
                           "to settings.yaml. Support for 'column_map' in annotate_tables will be "
                           "removed in future versions.",
@@ -81,7 +79,6 @@ def annotate_tables(model_settings, trace_label):
 
 @inject.step()
 def initialize_landuse():
-
     trace_label = 'initialize_landuse'
 
     model_settings = config.read_model_settings('initialize_landuse.yaml', mandatory=True)
@@ -90,7 +87,14 @@ def initialize_landuse():
     data_file_path = config.data_file_path(beam_geometries_path, mandatory=True)
 
     beam_geom_dataframe = pd.read_csv(data_file_path)
-    pipeline.rewrap("beam_geoms", beam_geom_dataframe)
+    gdf = gpd.GeoDataFrame(
+        beam_geom_dataframe,
+        geometry=gpd.GeoSeries.from_wkt(beam_geom_dataframe.geometry),
+        crs=4326).to_crs(
+        model_settings.get('local_crs', "ESRI:102009"))
+    gdf.geometry = gdf.geometry.simplify(
+        tolerance=model_settings.get('simplify_tolerance', 20.0))
+    pipeline.rewrap("beam_geoms", pd.DataFrame(gdf))
 
     annotate_tables(model_settings, trace_label)
 
@@ -102,7 +106,6 @@ def initialize_landuse():
 
 @inject.step()
 def initialize_households():
-
     trace_label = 'initialize_households'
 
     model_settings = config.read_model_settings('initialize_households.yaml', mandatory=True)
