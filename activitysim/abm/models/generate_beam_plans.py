@@ -112,7 +112,7 @@ def get_trip_coords(trips, zones, persons, size=500):
         trips.groupby("person_id")["purpose"].shift(periods=1).fillna("home") == "home"
     )
     trips.loc[origin_purpose_is_home, ["x", "y"]] = persons[["home_x", "home_y"]].reindex(
-        trips.person_id).values
+        trips.loc[origin_purpose_is_home, "person_id"]).values
 
     logger.info("Done adopting home trip locations.")
 
