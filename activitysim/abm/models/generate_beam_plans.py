@@ -89,7 +89,15 @@ def get_trip_coords(trips, zones, persons, size=500):
 
     logger.info("Done generating random points in zones. Assigning trip locations.")
 
-    trips = trips.groupby(["person_id", "origin", "purpose"]).apply(assignLoc)
+    # trips = trips.groupby(["person_id", "origin", "purpose"]).apply(assignLoc)
+    # Process in chunks to reduce memory usage
+    trips = trips.sort_values(["person_id", "origin", "purpose"])
+    for (person_id, origin, purpose), group in trips.groupby(["person_id", "origin", "purpose"]):
+        if origin in rand_point_zones:
+            zs = rand_point_zones[origin]
+            z = random.choice(zs)
+            trips.loc[group.index, "x"] = z[0]
+            trips.loc[group.index, "y"] = z[1]
 
     # Clear dictionary and force garbage collection
     del rand_point_zones
