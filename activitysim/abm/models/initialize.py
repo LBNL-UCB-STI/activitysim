@@ -94,7 +94,7 @@ def initialize_landuse():
         model_settings.get('local_crs', "ESRI:102009"))
     gdf.geometry = gdf.geometry.simplify(
         tolerance=model_settings.get('simplify_tolerance', 20.0))
-    pipeline.rewrap("beam_geoms", pd.DataFrame(gdf).assign(geometry=gdf.geometry.to_wkt()))
+    pipeline.rewrap("beam_geoms", pd.DataFrame(gdf.to_crs(4326)).assign(geometry=gdf.geometry.to_wkt()))
 
     annotate_tables(model_settings, trace_label)
 
