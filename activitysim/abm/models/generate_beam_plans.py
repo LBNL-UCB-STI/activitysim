@@ -125,22 +125,22 @@ def generatePersonStartTimes(df):
 
 
 def generate_departure_times(trips):
+        # Select only required columns and convert to efficient dtypes
     ordered_trips2 = trips[
-        [
-            "person_id",
-            "depart",
-            "tour_start",
-            "tour_end",
-            "tour_id",
-            "inbound",
-            "trip_num",
-            "TOTAL_TIME_MINS",
-        ]
+            [
+                "person_id",
+                "depart",
+                "tour_start",
+                "tour_end",
+                "tour_id",
+                "inbound",
+                "trip_num",
+                "TOTAL_TIME_MINS",
+            ]
     ].reset_index()
 
-    ordered_trips2["frac"] = np.random.rand(
-        len(ordered_trips2),
-    )
+    # Use numpy's more efficient random number generator
+    ordered_trips2["frac"] = np.random.default_rng().random(size=len(ordered_trips2), dtype=np.float32)
     ordered_trips2.index.name = "og_df_idx"
 
     def getTotalTime(df):

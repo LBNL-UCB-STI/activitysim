@@ -30,16 +30,13 @@ RUN export GIT_TRACE=1
 RUN export GIT_CURL_VERBOSE=1
 RUN git config --global core.compression 0
 
-RUN echo "Reset 50"
+RUN echo "Reset 51"
 
 RUN git clone --depth 1 -b beam-plans-fixes https://github.com/LBNL-UCB-STI/activitysim.git
 
 RUN conda update numpy pandas -y --solver=libmamba -p $FULL_CONDA_PATH
 
-
-
 RUN cd activitysim && git pull && $FULL_CONDA_PATH/bin/python setup.py install
-
 
 ENV PATH $FULL_CONDA_PATH/bin:$PATH
 ENV CONDA_DEFAULT_ENV $CONDA_ENV
@@ -47,9 +44,5 @@ ENV CONDA_DEFAULT_ENV $CONDA_ENV
 ENV EXAMPLE bay_area
 
 WORKDIR $ASIM_PATH/$EXAMPLE
-
-RUN echo "Update"
-
-
 
 ENTRYPOINT ["python", "-u", "simulation.py"]
