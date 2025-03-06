@@ -95,7 +95,8 @@ def initialize_landuse():
     gdf.geometry = gdf.geometry.simplify(
         tolerance=model_settings.get('simplify_tolerance', 20.0))
     gdf = gdf.to_crs(4326)
-    beam_geom_dataframe = pd.DataFrame(gdf).assign(geometry=gdf.geometry.to_wkt())
+    beam_geom_dataframe = pd.DataFrame(gdf)
+    beam_geom_dataframe["geometry"] = gdf.geometry.to_wkt()
     pipeline.rewrap("beam_geoms", beam_geom_dataframe)
     logger.info("Loaded beam geometries: {0}".format(beam_geom_dataframe.head()))
 
