@@ -254,12 +254,12 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
         splitPerson = trips['person_id'].values[inner_chunk_size * (ii + 1)]
         splitInd = np.argmax(trips['person_id'].values == splitPerson)
         trips_sub = trips.iloc[lastInd:(splitInd - 1)].copy()
-        _process_trip_chunk(trips_sub, constants, skims, model_settings)
+        trips_sub = _process_trip_chunk(trips_sub, constants, skims, model_settings)
         trips.iloc[lastInd:(splitInd - 1)] = trips_sub[trips.columns].values
         lastInd = splitInd
     if lastChunkSize > 0:
         trips_sub = trips.iloc[lastInd:].copy()
-        _process_trip_chunk(trips_sub, constants, skims, model_settings)
+        trips_sub = _process_trip_chunk(trips_sub, constants, skims, model_settings)
         trips.iloc[lastInd:] = trips_sub[trips.columns].values
 
     # Get coordinates and times
