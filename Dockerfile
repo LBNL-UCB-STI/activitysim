@@ -23,14 +23,14 @@ RUN conda env create --quiet -p $FULL_CONDA_PATH --file environment.yml --solver
 
 RUN apt-get upgrade git -y
 
-RUN git config --global http.postBuffer 157286400
+RUN git config --global http.postBuffer 2048576000
 
 RUN export GIT_TRACE_PACKET=1
 RUN export GIT_TRACE=1
 RUN export GIT_CURL_VERBOSE=1
 RUN git config --global core.compression 0
 
-RUN echo "Reset 56"
+RUN echo "Reset 57"
 
 RUN git clone --depth 1 -b beam-plans-fixes https://github.com/LBNL-UCB-STI/activitysim.git
 
