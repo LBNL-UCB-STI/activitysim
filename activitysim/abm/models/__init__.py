@@ -12,6 +12,7 @@ from . import (
     cdap,
     disaggregate_accessibility,
     free_parking,
+    generate_beam_plans,
     initialize,
     initialize_los,
     initialize_tours,

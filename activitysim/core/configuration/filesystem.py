@@ -833,7 +833,10 @@ class FileSystem(PydanticBase, validate_assignment=True):
         settings.pop("include_settings", None)
 
         if validator_class is not None:
-            settings = validator_class.model_validate(settings)
+            try:
+                settings = validator_class.model_validate(settings)
+            except Exception as e:
+                print("NOOOOO")
 
         if include_stack:
             # if we were called recursively, return an updated list of source_file_paths

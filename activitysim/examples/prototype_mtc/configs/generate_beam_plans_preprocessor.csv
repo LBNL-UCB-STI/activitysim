@@ -1,0 +1,71 @@
+Description,Target,Expression
+# add additional fields,,
+,distance,od_skims['DIST']
+# ea trips,,
+,DRIVEALONEFREE,((trips.trip_mode == 'DRIVEALONEFREE'))
+,DRIVEALONEFREE_TIME,"np.where(DRIVEALONEFREE, odt_skims['SOV_TIME'], 0.0)"
+,DRIVEALONEPAY,((trips.trip_mode == 'DRIVEALONEPAY'))
+,DRIVEALONEPAY_TIME,"np.where(DRIVEALONEPAY, odt_skims['SOVTOLL_TIME'], 0.0)"
+,DRIVEALONEPAY_COST,"np.where(DRIVEALONEPAY, odt_skims['SOVTOLL_BTOLL'] + odt_skims['SOVTOLL_VTOLL'], 0.0)"
+,SHARED2FREE,((trips.trip_mode == 'SHARED2FREE'))
+,SHARED2FREE_TIME,"np.where(SHARED2FREE, odt_skims['HOV2_TIME'], 0.0)"
+,SHARED2PAY,((trips.trip_mode == 'SHARED2PAY'))
+,SHARED2PAY_TIME,"np.where(SHARED2PAY, odt_skims['HOV2TOLL_TIME'], 0.0)"
+,SHARED2PAY_COST,"np.where(SHARED2PAY, odt_skims['HOV2TOLL_BTOLL'] + odt_skims['HOV2TOLL_VTOLL'], 0.0)"
+,SHARED3FREE,((trips.trip_mode == 'SHARED3FREE'))
+,SHARED3FREE_TIME,"np.where(SHARED3FREE, odt_skims['HOV3_TIME'], 0.0)"
+,SHARED3PAY,((trips.trip_mode == 'SHARED3PAY'))
+,SHARED3PAY_TIME,"np.where(SHARED3PAY, odt_skims['HOV3TOLL_TIME'], 0.0)"
+,SHARED3PAY_COST,"np.where(SHARED3PAY, odt_skims['HOV3TOLL_BTOLL'] + odt_skims['HOV3TOLL_VTOLL'], 0.0)"
+,WALK,((trips.trip_mode == 'WALK'))
+,WALK_TIME,"np.where(WALK, distance / 1.25 * 60.0, 0.0)"
+,BIKE,((trips.trip_mode == 'BIKE'))
+,BIKE_TIME,"np.where(BIKE, distance / 3.0 * 60.0, 0.0)"
+,DRV_LOC_WLK,((trips.trip_mode == 'DRIVE_LOC') & trips.outbound)
+,DRV_LOC_WLK_TIME,"np.where(DRV_LOC_WLK, (odt_skims['DRV_LOC_WLK_TOTIVT'] + odt_skims['DRV_LOC_WLK_IWAIT'] + odt_skims['DRV_LOC_WLK_XWAIT'] + odt_skims['DRV_LOC_WLK_DTIM']) / 100.0, 0.0)"
+,DRV_LOC_WLK_COST,"np.where(DRV_LOC_WLK, odt_skims['DRV_LOC_WLK_FAR'] / 100.0, 0.0)"
+,DRV_LRF_WLK,((trips.trip_mode == 'DRIVE_LRF') & trips.outbound)
+,DRV_LRF_WLK_TIME,"np.where(DRV_LRF_WLK, (odt_skims['DRV_LRF_WLK_TOTIVT'] + odt_skims['DRV_LRF_WLK_IWAIT'] + odt_skims['DRV_LRF_WLK_XWAIT'] + odt_skims['DRV_LRF_WLK_DTIM']) / 100.0, 0.0)"
+,DRV_LRF_WLK_COST,"np.where(DRV_LRF_WLK, odt_skims['DRV_LRF_WLK_FAR'] / 100.0, 0.0)"
+,DRV_EXP_WLK,((trips.trip_mode == 'DRIVE_EXP') & trips.outbound)
+,DRV_EXP_WLK_TIME,"np.where(DRV_EXP_WLK, (odt_skims['DRV_EXP_WLK_TOTIVT'] + odt_skims['DRV_EXP_WLK_IWAIT'] + odt_skims['DRV_EXP_WLK_XWAIT'] + odt_skims['DRV_EXP_WLK_DTIM']) / 100.0, 0.0)"
+,DRV_EXP_WLK_COST,"np.where(DRV_EXP_WLK, odt_skims['DRV_EXP_WLK_FAR'] / 100.0, 0.0)"
+,DRV_HVY_WLK,((trips.trip_mode == 'DRIVE_HVY') & trips.outbound)
+,DRV_HVY_WLK_TIME,"np.where(DRV_HVY_WLK, (odt_skims['DRV_HVY_WLK_TOTIVT'] + odt_skims['DRV_HVY_WLK_IWAIT'] + odt_skims['DRV_HVY_WLK_XWAIT'] + odt_skims['DRV_HVY_WLK_DTIM']) / 100.0, 0.0)"
+,DRV_HVY_WLK_COST,"np.where(DRV_EXP_WLK, odt_skims['DRV_HVY_WLK_FAR'] / 100.0, 0.0)"
+,DRV_COM_WLK,((trips.trip_mode == 'DRIVE_COM') & trips.outbound)
+,DRV_COM_WLK_TIME,"np.where(DRV_COM_WLK, (odt_skims['DRV_COM_WLK_TOTIVT'] + odt_skims['DRV_COM_WLK_IWAIT'] + odt_skims['DRV_COM_WLK_XWAIT'] + odt_skims['DRV_COM_WLK_DTIM']) / 100.0, 0.0)"
+,DRV_COM_WLK_COST,"np.where(DRV_EXP_WLK, odt_skims['DRV_COM_WLK_FAR'] / 100.0, 0.0)"
+,WLK_LOC_WLK,((trips.trip_mode == 'WALK_LOC'))
+,WLK_LOC_WLK_TIME,"np.where(WLK_LOC_WLK, (odt_skims['WLK_LOC_WLK_TOTIVT'] + odt_skims['WLK_LOC_WLK_IWAIT'] + odt_skims['WLK_LOC_WLK_XWAIT'] + odt_skims['WLK_LOC_WLK_WAUX']) / 100.0, 0.0)"
+,WLK_LOC_WLK_COST,"np.where(DRV_EXP_WLK, odt_skims['WLK_LOC_WLK_FAR'] / 100.0, 0.0)"
+,WLK_LRF_WLK,((trips.trip_mode == 'WALK_LRF'))
+,WLK_LRF_WLK_TIME,"np.where(WLK_LRF_WLK, (odt_skims['WLK_LRF_WLK_TOTIVT'] + odt_skims['WLK_LRF_WLK_IWAIT'] + odt_skims['WLK_LRF_WLK_XWAIT'] + odt_skims['WLK_LRF_WLK_WAUX']) / 100.0, 0.0)"
+,WLK_LRF_WLK_COST,"np.where(DRV_EXP_WLK, odt_skims['WLK_LRF_WLK_FAR'] / 100.0, 0.0)"
+,WLK_EXP_WLK,((trips.trip_mode == 'WALK_EXP'))
+,WLK_EXP_WLK_TIME,"np.where(WLK_EXP_WLK, (odt_skims['WLK_EXP_WLK_TOTIVT'] + odt_skims['WLK_EXP_WLK_IWAIT'] + odt_skims['WLK_EXP_WLK_XWAIT'] + odt_skims['WLK_EXP_WLK_WAUX']) / 100.0, 0.0)"
+,WLK_EXP_WLK_COST,"np.where(DRV_EXP_WLK, odt_skims['WLK_EXP_WLK_FAR'] / 100.0, 0.0)"
+,WLK_HVY_WLK,((trips.trip_mode == 'WALK_HVY'))
+,WLK_HVY_WLK_TIME,"np.where(WLK_HVY_WLK, (odt_skims['WLK_HVY_WLK_TOTIVT'] + odt_skims['WLK_HVY_WLK_IWAIT'] + odt_skims['WLK_HVY_WLK_XWAIT'] + odt_skims['WLK_HVY_WLK_WAUX']) / 100.0, 0.0)"
+,WLK_HVY_WLK_COST,"np.where(DRV_EXP_WLK, odt_skims['WLK_HVY_WLK_FAR'] / 100.0, 0.0)"
+,WLK_COM_WLK,((trips.trip_mode == 'WALK_COM'))
+,WLK_COM_WLK_TIME,"np.where(WLK_COM_WLK, (odt_skims['WLK_COM_WLK_TOTIVT'] + odt_skims['WLK_COM_WLK_IWAIT'] + odt_skims['WLK_COM_WLK_XWAIT'] + odt_skims['WLK_COM_WLK_WAUX']) / 100.0, 0.0)"
+,WLK_COM_WLK_COST,"np.where(DRV_EXP_WLK, odt_skims['WLK_COM_WLK_FAR'] / 100.0, 0.0)"
+,WLK_LOC_DRV,((trips.trip_mode == 'DRIVE_LOC') & ~trips.outbound)
+,WLK_LOC_DRV_TIME,"np.where(WLK_LOC_DRV, (odt_skims['WLK_LOC_DRV_TOTIVT'] + odt_skims['WLK_LOC_DRV_IWAIT'] + odt_skims['WLK_LOC_DRV_XWAIT'] + odt_skims['WLK_LOC_DRV_DTIM']) / 100.0, 0.0)"
+,WLK_LOC_DRV_COST,"np.where(DRV_EXP_WLK, odt_skims['WLK_LOC_DRV_FAR'] / 100.0, 0.0)"
+,WLK_LRF_DRV,((trips.trip_mode == 'DRIVE_LRF') & ~trips.outbound)
+,WLK_LRF_DRV_COST,"np.where(WLK_LRF_DRV, (odt_skims['WLK_LRF_DRV_TOTIVT'] + odt_skims['WLK_LRF_DRV_IWAIT'] + odt_skims['WLK_LRF_DRV_XWAIT'] + odt_skims['WLK_LRF_DRV_DTIM']) / 100.0, 0.0)"
+,WLK_LRF_DRV_TIME,"np.where(DRV_EXP_WLK, odt_skims['WLK_LRF_DRV_FAR'] / 100.0, 0.0)"
+,WLK_EXP_DRV,((trips.trip_mode == 'DRIVE_EXP') & ~trips.outbound)
+,WLK_EXP_DRV_TIME,"np.where(WLK_EXP_DRV, (odt_skims['WLK_EXP_DRV_TOTIVT'] + odt_skims['WLK_EXP_DRV_IWAIT'] + odt_skims['WLK_EXP_DRV_XWAIT'] + odt_skims['WLK_EXP_DRV_DTIM']) / 100.0, 0.0)"
+,WLK_EXP_DRV_COST,"np.where(DRV_EXP_WLK, odt_skims['DRV_EXP_WLK_FAR'] / 100.0, 0.0)"
+,WLK_HVY_DRV,((trips.trip_mode == 'DRIVE_HVY') & ~trips.outbound)
+,WLK_HVY_DRV_TIME,"np.where(WLK_HVY_DRV, (odt_skims['WLK_HVY_DRV_TOTIVT'] + odt_skims['WLK_HVY_DRV_IWAIT'] + odt_skims['WLK_HVY_DRV_XWAIT'] + odt_skims['WLK_HVY_DRV_DTIM']) / 100.0, 0.0)"
+,WLK_HVY_DRV_COST,"np.where(DRV_EXP_WLK, odt_skims['WLK_HVY_DRV_FAR'] / 100.0, 0.0)"
+,WLK_COM_DRV,((trips.trip_mode == 'DRIVE_COM') & ~trips.outbound)
+,WLK_COM_DRV_TIME,"np.where(WLK_COM_DRV, (odt_skims['WLK_COM_DRV_TOTIVT'] + odt_skims['WLK_COM_DRV_IWAIT'] + odt_skims['WLK_COM_DRV_XWAIT'] + odt_skims['WLK_COM_DRV_DTIM']) / 100.0, 0.0)"
+,WLK_COM_DRV_COST,"np.where(DRV_EXP_WLK, odt_skims['WLK_COM_DRV_FAR'] / 100.0, 0.0)"
+,_TOTAL_TIME_MINS, DRIVEALONEFREE_TIME + DRIVEALONEPAY_TIME + SHARED2FREE_TIME + SHARED2PAY_TIME + SHARED3FREE_TIME + SHARED3PAY_TIME + WALK_TIME + BIKE_TIME + WLK_LOC_WLK_TIME + WLK_LRF_WLK_TIME + WLK_EXP_WLK_TIME + WLK_HVY_WLK_TIME + WLK_COM_WLK_TIME + DRV_LOC_WLK_TIME + DRV_LRF_WLK_TIME + DRV_EXP_WLK_TIME + DRV_HVY_WLK_TIME + DRV_COM_WLK_TIME + WLK_LOC_DRV_TIME + WLK_LRF_DRV_TIME + WLK_EXP_DRV_TIME + WLK_HVY_DRV_TIME + WLK_COM_DRV_TIME
+,TOTAL_COST_DOLLARS, DRIVEALONEPAY_COST + SHARED2PAY_COST + SHARED3PAY_COST + WLK_LOC_WLK_COST + WLK_LRF_WLK_COST + WLK_EXP_WLK_COST + WLK_HVY_WLK_COST + WLK_COM_WLK_COST + DRV_LOC_WLK_COST + DRV_LRF_WLK_COST + DRV_EXP_WLK_COST + DRV_HVY_WLK_COST + DRV_COM_WLK_COST + WLK_LOC_DRV_COST + WLK_LRF_DRV_COST + WLK_EXP_DRV_COST + WLK_HVY_DRV_COST + WLK_COM_DRV_COST
+,TOTAL_TIME_MINS,"np.where(_TOTAL_TIME_MINS > 0, _TOTAL_TIME_MINS, distance * 3.0)"

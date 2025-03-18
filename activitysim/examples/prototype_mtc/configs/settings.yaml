@@ -56,6 +56,8 @@ input_table_list:
       - pemploy
       - pstudent
       - ptype
+      - home_x
+      - home_y
   - tablename: land_use
     filename: land_use.csv
     index_col: zone_id
@@ -65,6 +67,7 @@ input_table_list:
     recode_columns:
       zone_id: zero-based
     keep_columns:
+      - geometry
       - county_id
       - TOTHH
       - TOTPOP
@@ -127,6 +130,8 @@ log_alt_losers: False
 # used for skim cache, tvpb, and chunk_log caches
 #cache_dir: data/cache
 
+omx_ignore_patterns: ['.*_TRIPS$','.*_FAILURES$']
+
 ##############
 #
 # chunking
@@ -165,7 +170,7 @@ keep_mem_logs: True
 # multiprocessing controls
 multiprocess: True
 chunk_size: 200_000_000_000
-num_processes: 50
+num_processes: 5
 stagger: 0
 
 # trace household id; comment out or leave empty for no trace
@@ -226,6 +231,7 @@ models:
   - trip_purpose_and_destination
   - trip_scheduling
   - trip_mode_choice
+  - generate_beam_plans
   ### mp_summarize step
   - write_data_dictionary
   - track_skim_usage

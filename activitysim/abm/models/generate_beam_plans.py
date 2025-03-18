@@ -1,3 +1,6 @@
+from pathlib import Path
+from typing import Dict, List, Any
+
 import numpy as np
 import pandas as pd
 import random
@@ -7,11 +10,12 @@ import geopandas as gpd
 import logging
 import warnings
 
-from activitysim.abm.models.util import expressions
-from activitysim.abm.models.util.expressions import skim_time_period_label
-from activitysim.core import pipeline, orca, config
-from activitysim.core import inject
-from activitysim.core.mem import force_garbage_collect
+from activitysim.core.configuration import PydanticReadable
+from activitysim.core import config, los, workflow, expressions, mem
+from activitysim.core.configuration.base import PreprocessorSettings
+# from activitysim.core import pipeline, orca, config
+# from activitysim.core import inject
+# from activitysim.core.mem import force_garbage_collect
 from activitysim.core.simulate import set_skim_wrapper_targets
 
 logger = logging.getLogger("activitysim")
@@ -65,18 +69,18 @@ def sample_geoseries(geoseries, size, overestimate=2):
         [(max_x - min_x), (max_y - min_y)]) + np.array([min_x, min_y])
     multipoint = MultiPoint(samples)
     multipoint = multipoint.intersection(polygon)
-    samples = np.array(multipoint)
+    samples = np.array(multipoint.geoms)
     return samples[np.random.choice(len(samples), size)]
 
 
-def get_trip_coords(trips, zones, persons, size=500):
+def get_trip_coords(trips, zones, persons, state, size=500):
     # Generates random points within each zone for zones
     # that are not empty geometries (i.e. contain no blocks)
     trips["purpose"] = trips["purpose"].str.lower()
     rand_point_zones = {}
-    for zone in zones[~(zones["geometry"].is_empty | zones["geometry"].isna())].TAZ:
+    for zone in zones[~(zones["geometry"].is_empty | zones["geometry"].isna())].zone_id:
         size = 200
-        polygon = zones[zones.TAZ == zone].geometry
+        polygon = zones[zones.zone_id == zone].geometry
         points = sample_geoseries(polygon, size, overestimate=2)
         rand_point_zones[zone] = points
 
@@ -96,12 +100,12 @@ def get_trip_coords(trips, zones, persons, size=500):
         if origin in rand_point_zones:
             zs = rand_point_zones[origin]
             z = random.choice(zs)
-            trips.loc[group.index, "x"] = z[0]
-            trips.loc[group.index, "y"] = z[1]
+            trips.loc[group.index, "x"] = z.x
+            trips.loc[group.index, "y"] = z.y
 
     # Clear dictionary and force garbage collection
     del rand_point_zones
-    force_garbage_collect()
+    mem.trace_memory_info("Just generated random points", force_garbage_collect=True, state=state)
 
     # retain home coords from urbansim data bc they will typically be
     # higher resolution than zone, so we don't need the semi-random coords
@@ -124,7 +128,7 @@ def generatePersonStartTimes(df):
     return df
 
 
-def generate_departure_times(trips):
+def generate_departure_times(trips, state):
         # Select only required columns and convert to efficient dtypes
     ordered_trips2 = trips[
             [
@@ -190,19 +194,55 @@ def generate_departure_times(trips):
         df = df.groupby("depart").apply(getTotalTime)
         return df
 
-    force_garbage_collect()
+    mem.trace_memory_info("Just generated debarture times", force_garbage_collect=True, state=state)
     df2 = ordered_trips2.groupby(["person_id"]).apply(process)
     df2.set_index("trip_id", inplace=True)
     df2 = df2.reindex(trips.index)
     return df2.newStartTime.rename("depart")
 
+class MatrixTableSettings(PydanticReadable):
+    name: str
+    data_field: str
 
-@inject.step()
-def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size, trace_hh_id, locutor):
+class MatrixSettings(PydanticReadable):
+    file_name: Path
+    tables: List[MatrixTableSettings] = []
+    is_tap: bool = False
+
+class TimePeriodSettings(PydanticReadable):
+    first_hour: int
+    last_hour: int
+
+class ConstantsSettings(PydanticReadable):
+    time_periods: Dict[str, TimePeriodSettings] = {}
+    OCC_SHARED2: float = 0.0
+    OCC_SHARED3: float = 0.0
+
+
+class GenerateBeamPlansSettings(PydanticReadable):
+    """
+    Settings for generating beam plans.
+    """
+
+    preprocessor: PreprocessorSettings | None = None
+    HH_EXPANSION_WEIGHT_COL: str = "sample_rate"
+    SAVE_TRIPS_TABLE: bool = False
+    MATRICES: List[MatrixSettings] = []
+    CONSTANTS: Dict[str, Any] = {}
+
+
+@workflow.step
+def generate_beam_plans(
+        state: workflow.State,
+        trips,
+        tours,
+        persons,
+        network_los: los.Network_LOS,
+        model_settings: GenerateBeamPlansSettings | None = None,
+        model_settings_file_name: str = "generate_beam_plans.yaml",
+        trace_label: str = "generate_beam_plans",
+) -> None:
     # Convert to frames only once and work in-place where possible
-    trips = trips.to_frame()
-    tours = tours.to_frame()
-    persons = persons.to_frame()
     col_to_keep = ['trip_id', 'person_id', 'tour_id',
                    'trip_num', 'outbound', 'purpose', 'primary_purpose', 'destination',
                    'origin', 'depart', 'trip_mode']
@@ -217,24 +257,28 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
     trips['trip_num'] = trips['trip_num'].astype(pd.Int16Dtype())
     trips['depart'] = trips['depart'].astype(np.float32)
 
-    # Load configurations
-    model_settings = config.read_model_settings('generate_beam_plans.yaml')
+    if model_settings is None:
+        model_settings = GenerateBeamPlansSettings.read_settings_file(
+            state.filesystem,
+            model_settings_file_name,
+        )
+
     constants = config.get_model_constants(model_settings)
     # - run preprocessor to annotate choosers
-    preprocessor_settings = model_settings.get('preprocessor', None)
+    preprocessor_settings = model_settings.preprocessor
     if preprocessor_settings:
 
         locals_d = {}
         if constants is not None:
             locals_d.update(constants)
 
-    if orca.is_table("beam_geoms"):
-        zones = _process_beam_geoms(pipeline.get_table("beam_geoms"))
+    if state.is_table("beam_geoms"):
+        zones = _process_beam_geoms(state.get_table("beam_geoms"))
     else:
-        zones = _process_land_use(pipeline.get_table("land_use"))
+        zones = _process_land_use(state.get_table("land_use"))
 
     # Setup skims
-    trips["trip_period"] = skim_time_period_label(trips.depart)
+    trips["trip_period"] = network_los.skim_time_period_label(trips.depart)
 
     # Modify trips dataframe in-place where possible
     _annotate_trips(trips, tours)
@@ -245,7 +289,8 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
     nChunks, lastChunkSize = divmod(trips.shape[0], inner_chunk_size)
     lastInd = 0
 
-    skims = _setup_skims(skim_stack, skim_dict)
+    skim_dict = network_los.get_default_skim_dict()
+    skims = _setup_skims(skim_dict)
 
     constants = config.get_model_constants(model_settings)
 
@@ -254,22 +299,22 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
         splitPerson = trips['person_id'].values[inner_chunk_size * (ii + 1)]
         splitInd = np.argmax(trips['person_id'].values == splitPerson)
         trips_sub = trips.iloc[lastInd:(splitInd - 1)].copy()
-        trips_sub = _process_trip_chunk(trips_sub, constants, skims, model_settings)
+        trips_sub = _process_trip_chunk(trips_sub, constants, skims, model_settings, state, trace_label)
         trips.iloc[lastInd:(splitInd - 1)] = trips_sub[trips.columns].values
         lastInd = splitInd
     if lastChunkSize > 0:
         trips_sub = trips.iloc[lastInd:].copy()
-        trips_sub = _process_trip_chunk(trips_sub, constants, skims, model_settings)
+        trips_sub = _process_trip_chunk(trips_sub, constants, skims, model_settings, state, trace_label)
         trips.iloc[lastInd:] = trips_sub[trips.columns].values
 
     # Get coordinates and times
     logger.info("Adding trip coordinates")
-    trips = get_trip_coords(trips, zones, persons)
+    trips = get_trip_coords(trips, zones, persons, state)
 
     trips.set_index("trip_id", inplace=True)
 
     logger.info("Generating departure times")
-    trips["departure_time"] = generate_departure_times(trips)
+    trips["departure_time"] = generate_departure_times(trips, state)
 
     # Add tour information efficiently using map
     trips["number_of_participants"] = trips["tour_id"].map(tours["number_of_participants"])
@@ -280,12 +325,14 @@ def generate_beam_plans(trips, tours, persons, skim_dict, skim_stack, chunk_size
     }, inplace=True)
 
     # Create final plans more efficiently
-    return _create_final_plans(trips)
+    final_plans =  _create_final_plans(trips)
+    # save back to pipeline
+    state.add_table("beam_plans", final_plans)
 
 
-def _process_trip_chunk(trips, constants, skims, model_settings):
+def _process_trip_chunk(trips, constants, skims, model_settings, state, trace_label):
     # Sort trips and fix sequences
-    trips = _sort_and_fix_sequences(trips)
+    trips = _sort_and_fix_sequences(trips, state)
     logger.info("Done rearranging trips")
 
     trips['origin'] = trips['origin'].astype(int)
@@ -296,10 +343,11 @@ def _process_trip_chunk(trips, constants, skims, model_settings):
     set_skim_wrapper_targets(trips, skims)
 
     expressions.annotate_preprocessors(
+        state,
         trips, constants, skims,
-        model_settings, None)
+        model_settings, trace_label=trace_label)
 
-    force_garbage_collect()
+    mem.trace_memory_info("Just processed trip chunk", force_garbage_collect=True, state=state)
     return trips
 
 
@@ -318,11 +366,15 @@ def _process_land_use(land_use):
     return zones
 
 
-def _setup_skims(skim_stack, skim_dict):
+def _setup_skims(skim_dict):
     orig_col, dest_col = "origin", "destination"
     return {
-        "odt_skims": skim_stack.wrap(left_key=orig_col, right_key=dest_col, skim_key="trip_period"),
-        "dot_skims": skim_stack.wrap(left_key=dest_col, right_key=orig_col, skim_key="trip_period"),
+        "odt_skims": skim_dict.wrap_3d(
+        orig_key=orig_col, dest_key=dest_col, dim3_key="trip_period"
+    ),
+        "dot_skims": skim_dict.wrap_3d(
+        orig_key=dest_col, dest_key=orig_col, dim3_key="trip_period"
+    ),
         "od_skims": skim_dict.wrap("origin", "destination")
     }
 
@@ -387,7 +439,7 @@ def _shuffle_trips(df, time_period):
     return df2 if df2["original_order"].is_unique else df
 
 
-def _sort_and_fix_sequences(trips):
+def _sort_and_fix_sequences(trips, state):
     trips["original_order"] = np.arange(len(trips))
 
     # Initial sorting
@@ -423,7 +475,7 @@ def _sort_and_fix_sequences(trips):
     if iteration == 0:
         logger.info(f"Before rearranging: {trips.is_bad.sum()} trips -- Guess we're good!")
         trips.reset_index(inplace=True, drop=True)
-    force_garbage_collect()
+    mem.trace_memory_info("Just fixed trip sequence", force_garbage_collect=True, state=state)
     return trips
 
 
@@ -480,34 +532,4 @@ def _create_final_plans(trips):
     final_plans["tour_mode"] = final_plans["tour_mode"].astype(str)
     final_plans["ActivityType"] = final_plans["ActivityType"].astype(str)
 
-    # save back to pipeline
-    pipeline.replace_table("plans", final_plans)
-
-#     # summary stats
-#     input_cars_per_hh = np.round(
-#         households['VEHICL'].sum() / len(households), 2)
-#     simulated_cars_per_hh = np.round(
-#         households['auto_ownership'].sum() / len(households), 2)
-#     logger.warning(
-#         "AUTO OWNERSHIP -- input: {0} cars/hh // output: {1} cars/hh".format(
-#             input_cars_per_hh, simulated_cars_per_hh))
-
-#     trips['number_of_participants'] = trips['tour_id'].map(
-#         tours['number_of_participants'])
-#     trips['mode_type'] = 'drive'
-#     transit_modes = ['COM', 'EXP', 'HVY', 'LOC', 'LRF', 'TRN']
-#     active_modes = ['WALK', 'BIKE']
-#     trips.loc[
-#         trips['trip_mode'].str.contains('|'.join(transit_modes)),
-#         'mode_type'] = 'transit'
-#     trips.loc[trips['trip_mode'].isin(active_modes), 'mode_type'] = 'active'
-#     expanded_trips = trips.loc[
-#         trips.index.repeat(trips['number_of_participants'])]
-#     mode_shares = expanded_trips[
-#         'mode_type'].value_counts() / len(expanded_trips)
-#     mode_shares = np.round(mode_shares * 100, 1)
-#     mode_shares.keys()
-#     logger.warning(
-#         "MODE SHARES -- drive: {0}% // transit: {1}% // active: {2}%".format(
-#             mode_shares['drive'], mode_shares['transit'],
-#             mode_shares['active']))
+    return final_plans

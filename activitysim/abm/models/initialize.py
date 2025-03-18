@@ -110,6 +110,8 @@ class InitializeTableSettings(PydanticReadable):
     Settings for the `initialize_landuse` component.
     """
 
+    # beam_geometries_path: str
+
     annotate_tables: list[AnnotateTableSettings] = []
 
 
@@ -136,6 +138,10 @@ def initialize_landuse(
             )
 
         annotate_tables(state, model_settings, trace_label, chunk_sizer)
+
+        # beam_geometries_path = model_settings.
+        #
+        # state.add_table("beam_geoms", )
 
         # instantiate accessibility (must be checkpointed to be be used to slice accessibility)
         accessibility = state.get_dataframe("accessibility")
