@@ -372,7 +372,7 @@ def trip_mode_choice(
         logger.error("Finding {0} null values in the trip dataframe, "
                        "with purposes {1}. "
                        "Filling with {2}".format(bad_idx.sum(),
-                                                  trips_df[bad_idx,"primary_purpose"].value_counts(),
+                                                  trips_df.loc[bad_idx,"primary_purpose"].value_counts(),
                                                   most_common_mode))
         trips_df.loc[bad_idx, mode_column_name] = most_common_mode
 
