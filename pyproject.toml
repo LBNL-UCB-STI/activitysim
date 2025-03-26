@@ -45,6 +45,7 @@ exclude = [
     "activitysim/abm/test*",
     "activitysim/cli/test*",
     "activitysim/core/test*",
+    "activitysim/examples/",
     "activitysim/abm/models/util/test*",
 ]
 

@@ -59,6 +59,8 @@ input_table_list:
       - pemploy
       - pstudent
       - ptype
+      - home_x
+      - home_y
   - tablename: land_use
     filename: land_use.csv
     index_col: zone_id
@@ -137,6 +139,8 @@ log_alt_losers: False
 # alternate dir to read/write cache (defaults to output_dir)
 # used for skim cache, tvpb, and chunk_log caches
 #cache_dir: data/cache
+
+omx_ignore_patterns: ['.*_TRIPS$','.*_FAILURES$']
 
 ##############
 #
@@ -237,11 +241,8 @@ models:
   - trip_purpose_and_destination
   - trip_scheduling
   - trip_mode_choice
+  - generate_beam_plans
   ### mp_summarize step
-  - write_data_dictionary
-  - track_skim_usage
-  - write_trip_matrices
-  - write_tables
   - summarize
 
 multiprocess_steps:
@@ -254,7 +255,7 @@ multiprocess_steps:
         - households
         - persons
   - name: mp_summarize
-    begin: write_data_dictionary
+    begin: summarize
 
 output_tables:
   h5_store: False

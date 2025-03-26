@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 continuumio/miniconda3
+FROM --platform=linux/amd64 continuumio/miniconda3 as builder
 
 ENV CONDA_DIR /opt/conda
 ENV CONDA_ENV asim
@@ -9,40 +9,34 @@ ENV ASIM_PATH /activitysim
 ENV ASIM_SUBDIR examples
 ENV EXEC_NAME simulation.py
 
+# Install system dependencies and configure build flags
 RUN apt-get --allow-releaseinfo-change update \
-	&& apt-get install -y build-essential zip unzip
-RUN conda update conda --yes
-
-
-
-RUN wget https://raw.githubusercontent.com/LBNL-UCB-STI/activitysim/3cdd7a8d622f0636af3f601105a92a5c0d978420/environment.yml
+    && apt-get install -y build-essential zip unzip gcc g++ \
+    && rm -rf /var/lib/apt/lists/* \
+    && export MAKEFLAGS="-j$(nproc)"
+# Update conda and configure pip
+RUN conda update conda --yes \
+    && conda install -n base conda-libmamba-solver \
+    && pip config set global.no-cache-dir true
 
 RUN conda install -n base conda-libmamba-solver
 
-RUN conda env create --quiet -p $FULL_CONDA_PATH --file environment.yml --solver=libmamba
+COPY activitysim $ASIM_PATH/activitysim
+COPY conda-environments/ $ASIM_PATH/conda-environments/
+RUN sed -i '/-e \.\./d' $ASIM_PATH/conda-environments/activitysim-dev.yml \
+    && conda env create -p $FULL_CONDA_PATH --file $ASIM_PATH/conda-environments/activitysim-dev.yml --solver=libmamba \
+    && $FULL_CONDA_PATH/bin/pip install --only-binary pandas "pandas>=1.4.0,<2"
 
-RUN apt-get upgrade git -y
+COPY pyproject.toml $ASIM_PATH/pyproject.toml
 
-RUN git config --global http.postBuffer 2048576000
-
-RUN export GIT_TRACE_PACKET=1
-RUN export GIT_TRACE=1
-RUN export GIT_CURL_VERBOSE=1
-RUN git config --global core.compression 0
-
-RUN echo "Reset 57"
-
-RUN git clone --depth 1 -b beam-plans-fixes https://github.com/LBNL-UCB-STI/activitysim.git
-
-RUN conda update numpy pandas -y --solver=libmamba -p $FULL_CONDA_PATH
-
-RUN cd activitysim && git pull && $FULL_CONDA_PATH/bin/python setup.py install
+RUN $FULL_CONDA_PATH/bin/pip install --no-deps --only-binary :all: $ASIM_PATH/
 
 ENV PATH $FULL_CONDA_PATH/bin:$PATH
 ENV CONDA_DEFAULT_ENV $CONDA_ENV
+ENV PYTHONPATH $ASIM_PATH:$PYTHONPATH
 
-ENV EXAMPLE bay_area
+ENV EXAMPLE prototype_mtc
 
-WORKDIR $ASIM_PATH/$EXAMPLE
+WORKDIR $ASIM_PATH/activitysim/examples/$EXAMPLE
 
 ENTRYPOINT ["python", "-u", "simulation.py"]

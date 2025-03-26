@@ -366,6 +366,16 @@ def trip_mode_choice(
         "trip_mode_choice choices", trips_df[mode_column_name], value_counts=True
     )
 
+    if trips_df[mode_column_name].isnull().any():
+        bad_idx = trips_df[mode_column_name].isnull()
+        most_common_mode = trips_df[mode_column_name].value_counts().index[0]
+        logger.error("Finding {0} null values in the trip dataframe, "
+                       "with purposes {1}. "
+                       "Filling with {2}".format(bad_idx.sum(),
+                                                  trips_df[bad_idx,"primary_purpose"].value_counts(),
+                                                  most_common_mode))
+        trips_df.loc[bad_idx, mode_column_name] = most_common_mode
+
     assert not trips_df[mode_column_name].isnull().any()
 
     state.add_table("trips", trips_df)

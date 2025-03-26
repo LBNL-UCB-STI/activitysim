@@ -233,10 +233,6 @@ models:
   - trip_mode_choice
   - generate_beam_plans
   ### mp_summarize step
-  - write_data_dictionary
-  - track_skim_usage
-  - write_trip_matrices
-  - write_tables
   - summarize
 
 multiprocess_steps:
@@ -249,7 +245,7 @@ multiprocess_steps:
         - households
         - persons
   - name: mp_summarize
-    begin: write_data_dictionary
+    begin: summarize
 
 output_tables:
   h5_store: False
