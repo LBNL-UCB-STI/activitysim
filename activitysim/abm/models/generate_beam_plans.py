@@ -95,13 +95,16 @@ def get_trip_coords(trips, zones, persons, state, size=500):
 
     # trips = trips.groupby(["person_id", "origin", "purpose"]).apply(assignLoc)
     # Process in chunks to reduce memory usage
-    trips = trips.sort_values(["person_id", "origin", "purpose"])
+    original_index = trips.index.copy()
+    trips.sort_values(["person_id", "origin", "purpose"], inplace=True)
     for (person_id, origin, purpose), group in trips.groupby(["person_id", "origin", "purpose"]):
         if origin in rand_point_zones:
             zs = rand_point_zones[origin]
             z = random.choice(zs)
             trips.loc[group.index, "x"] = z.x
             trips.loc[group.index, "y"] = z.y
+
+    trips = trips.reindex(original_index)
 
     # Clear dictionary and force garbage collection
     del rand_point_zones
@@ -121,11 +124,6 @@ def get_trip_coords(trips, zones, persons, state, size=500):
     logger.info("Done adopting home trip locations.")
 
     return trips
-
-
-def generatePersonStartTimes(df):
-    df["mustEndBy"] = np.minimum(df["depart"].shift(-1).fillna(25), df["tour_end"]) + 1
-    return df
 
 
 def generate_departure_times(trips, state):
@@ -192,7 +190,7 @@ def generate_departure_times(trips, state):
                 df["depart"] >= df["depart"].shift(-1).fillna(24) - 1
         )
         df = df.groupby("depart").apply(getTotalTime)
-        return df
+        return df[["trip_id","newStartTime"]]
 
     mem.trace_memory_info("Just generated debarture times", force_garbage_collect=True, state=state)
     df2 = ordered_trips2.groupby(["person_id"]).apply(process)
@@ -403,6 +401,7 @@ def _fix_trip_sequence(df):
 
     first_bad_index = bad_indices[0]
     dest_last_good = df.loc[df.index[first_bad_index - 1], "destination"]
+    # TODO: allow a window around time period if you don't succeed at first
     time_period = df.loc[df.index[first_bad_index], "depart"]
 
     mask = ((df["depart"] == time_period) &
@@ -440,13 +439,14 @@ def _shuffle_trips(df, time_period):
 
 
 def _sort_and_fix_sequences(trips, state):
-    trips["original_order"] = np.arange(len(trips))
 
     # Initial sorting
     trips.sort_values(
-        by=['person_id', 'depart', 'tour_start', 'tour_end', 'tour_id', 'inbound', 'trip_num'],
+        by=['person_id', 'depart', 'tour_id', 'inbound', 'trip_num'],
         inplace=True
     )
+
+    trips["original_order"] = np.arange(len(trips))
 
     # Fix sequences
     topo_sort_mask = ((trips["destination"].shift() == trips["origin"]) |
