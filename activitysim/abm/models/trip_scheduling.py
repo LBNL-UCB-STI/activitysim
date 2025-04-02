@@ -349,8 +349,8 @@ def schedule_trips_in_leg(
                 .fillna(trips[ADJUST_NEXT_DEPART_COL])
                 .values
             )
-
-        result_list.append(choices)
+        if not choices.empty:
+            result_list.append(choices)
 
         chunk_sizer.log_df(trace_label, "result_list", result_list)
 
