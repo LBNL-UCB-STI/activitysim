@@ -762,13 +762,15 @@ def load_skim_dataset_to_shared_memory(state, skim_tag="taz") -> xr.Dataset:
 
             logger.info("found zarr skims, loading them")
             d = sh.dataset.from_zarr_with_attr(zarr_file)
-            zarr_write_time = d.attrs.get("ZARR_WRITE_TIME", 0)
-            if zarr_write_time < latest_file_modification_time(omx_file_paths):
-                logger.warning("zarr skims older than omx, not using them")
-                do_not_save_zarr = True
-                d = None
-            else:
-                d = d.max_float_precision(max_float_precision)
+            d = d.max_float_precision(max_float_precision)
+            # NOTE: Update for lbl -- we're not checking zarr age
+            # zarr_write_time = d.attrs.get("ZARR_WRITE_TIME", 0)
+            # if zarr_write_time < latest_file_modification_time(omx_file_paths):
+            #     logger.warning("zarr skims older than omx, not using them")
+            #     do_not_save_zarr = True
+            #     d = None
+            # else:
+            #     d = d.max_float_precision(max_float_precision)
         if d is None:
             if zarr_file and not do_not_save_zarr:
                 logger.info("did not find zarr skims, loading omx")
