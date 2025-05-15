@@ -250,7 +250,7 @@ class DatasetWrapper:
             if (
                 not df[self.time_key].dtype == "category"
                 and np.issubdtype(df[self.time_key].dtype, np.integer)
-                and df[self.time_key].max() < self.dataset.dims["time_period"]
+                and df[self.time_key].max() < self.dataset.sizes["time_period"]
             ):
                 logger.info(f"natural use for time_period={self.time_key}")
                 positions["time_period"] = df[self.time_key]

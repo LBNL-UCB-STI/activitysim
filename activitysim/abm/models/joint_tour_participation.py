@@ -116,7 +116,7 @@ def get_tour_satisfaction(candidates, participate):
         satisfaction = pd.Series(dtype=bool)
 
     # ensure we return a result for every joint tour, even if no participants
-    satisfaction = satisfaction.reindex(tour_ids).fillna(False).astype(bool)
+    satisfaction = satisfaction.reindex(tour_ids, fill_value=False).fillna(False).astype(bool)
 
     return satisfaction
 
