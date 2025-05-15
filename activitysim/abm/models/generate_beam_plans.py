@@ -398,6 +398,9 @@ def generate_beam_plans(
     trips['trip_num'] = trips['trip_num'].astype(pd.Int16Dtype())
     tours['tour_num'] = tours['tour_num'].astype(pd.Int16Dtype())
     trips['depart'] = trips['depart'].astype(np.float32)
+    trips['activity_code'] = np.zeros(len(trips), dtype=np.int8)
+    trips.loc[trips['purpose'] == 'home', 'activity_code'] = 1
+    trips.loc[trips['purpose'] == 'work', 'activity_code'] = 2
 
     trips = pd.merge(trips.reset_index(), tours[['tour_num', 'parent_tour_num', 'tour_mode', 'tour_ordinal']],
                      on="tour_id")
@@ -483,8 +486,43 @@ def generate_beam_plans(
     state.add_table("beam_plans", final_plans)
 
 
+def identify_persons_with_problems(trips):
+    """
+    Identify persons who have problems with their trip sequences:
+    1. Topological inconsistencies (destination ≠ next origin)
+    2. Invalid activity sequences (consecutive home or work activities)
+
+    Returns a list of person_ids that need fixing
+    """
+    problematic_persons = set()
+
+    # First add persons with topological issues (already calculated)
+    problematic_persons.update(trips[trips["is_bad"]]["person_id"].unique())
+
+    # Then check for invalid activity sequences
+    for person_id, person_trips in trips.groupby("person_id"):
+        # Skip if already flagged with topo issues
+        if person_id in problematic_persons:
+            continue
+
+        # Sort person's trips to ensure correct sequence
+        person_trips = person_trips.sort_values('depart')
+
+        # Check for consecutive home/work activities
+        prev_purpose = None
+        for idx, trip in person_trips.iterrows():
+            curr_purpose = trip['purpose']
+
+            if prev_purpose in ['home', 'work'] and curr_purpose == prev_purpose:
+                problematic_persons.add(person_id)
+                break
+
+            prev_purpose = curr_purpose
+
+    return list(problematic_persons)
+
 def _fix_sequence_fast(person_trips, trip_indices, origins, destinations, depart_times, time_to_trips, tour_starts,
-                       tour_ends):
+                       tour_ends, activity_codes):
     """Fix sequence respecting tour time windows with statistical tracking"""
     # Number of trips
     n_trips = len(origins)
@@ -511,6 +549,7 @@ def _fix_sequence_fast(person_trips, trip_indices, origins, destinations, depart
 
         # Find the destination from the last trip of previous time period
         prev_destination = None
+        prev_activity_code = None
         if t_idx > 0:
             for prev_t_idx in range(t_idx - 1, -1, -1):
                 prev_time = time_periods[prev_t_idx]
@@ -520,6 +559,7 @@ def _fix_sequence_fast(person_trips, trip_indices, origins, destinations, depart
                     prev_period_indices.sort(key=lambda i: fixed_idx_mapping.tolist().index(i))
                     last_prev_idx = prev_period_indices[-1]
                     prev_destination = destinations[last_prev_idx]
+                    prev_activity_code = activity_codes[last_prev_idx]
                     break
 
         # Identify separate chains in this time period
@@ -529,6 +569,13 @@ def _fix_sequence_fast(person_trips, trip_indices, origins, destinations, depart
         # First, find chain that connects with previous time period
         if prev_destination is not None:
             # Find trips that start at prev_destination
+            connecting_trips = []
+            for i in period_indices:
+                if origins[i] == prev_destination:
+                    if (prev_activity_code == activity_codes[i]) and ((prev_activity_code or 1) > 0):
+                        continue
+                    else:
+                        connecting_trips.append(i)
             connecting_trips = [i for i in period_indices if origins[i] == prev_destination]
 
             if connecting_trips:
@@ -778,12 +825,11 @@ def _fix_trips_chunk(trips_chunk):
     trips_chunk["is_bad"] = ~topo_mask
 
     # Find which persons have inconsistencies
-    persons_with_bad_trips = trips_chunk[trips_chunk["is_bad"]]["person_id"].unique()
+    persons_with_bad_trips = identify_persons_with_problems(trips_chunk)
+    logger.info(f"Found {len(persons_with_bad_trips)} persons with inconsistent trips")
 
     if len(persons_with_bad_trips) == 0:
         return trips_chunk  # No inconsistencies to fix
-
-    logger.info(f"Found {len(persons_with_bad_trips)} persons with inconsistent trips")
 
     # Process only those persons who have inconsistencies
     all_fixed_trips = []
@@ -976,6 +1022,9 @@ def _sort_and_fix_sequences(trips, state):
     topo_sort_mask = ((trips["destination"].shift() == trips["origin"]) |
                       (trips["person_id"].shift() != trips["person_id"]))
     trips.loc[:, "is_bad"] = ~topo_sort_mask
+    bad_activities = ((trips["activity_code"].shift() == trips["activity_code"]) &
+                      (trips["person_id"].shift() == trips["person_id"]) &
+                      (trips["activity_code"] > 0))
     initial_bad_count = trips["is_bad"].sum()
 
     if initial_bad_count == 0:
@@ -993,7 +1042,8 @@ def _sort_and_fix_sequences(trips, state):
     total_hours_shifted = 0
 
     # Find which persons have inconsistencies
-    persons_with_bad_trips = trips[trips["is_bad"]]["person_id"].unique()
+    persons_with_bad_trips = identify_persons_with_problems(trips)
+    logger.info(f"Found {len(persons_with_bad_trips)} persons with inconsistent trips")
 
     # Process only those persons who have inconsistencies
     all_fixed_trips = []
@@ -1015,6 +1065,7 @@ def _sort_and_fix_sequences(trips, state):
         depart_times = np.array(person_trips["depart"])
         tour_starts = np.array(person_trips["tour_start"])
         tour_ends = np.array(person_trips["tour_end"])
+        activity_codes = np.array(person_trips["activity_code"])
 
         # Create a fast lookup dictionary for each time period
         time_to_trips = {}
@@ -1032,7 +1083,8 @@ def _sort_and_fix_sequences(trips, state):
             depart_times,
             time_to_trips,
             tour_starts,
-            tour_ends
+            tour_ends,
+            activity_codes
         )
         # Update our statistics
         if stats["status"] == "fixed_without_shifts":
