@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Dict, List, Any
 
+import networkx as nx
 import numpy as np
 import pandas as pd
 import random
@@ -114,7 +115,7 @@ def get_trip_coords(trips, zones, persons, state, max_points_per_zone=300):
     trips.sort_values(["person_id", "origin", "purpose"], inplace=True)
 
     # Use vectorized approach with capped number of points
-    for (person_id, origin, purpose), group in trips.groupby(["person_id", "origin", "purpose"]):
+    for (person_id, origin, purpose), group in trips.groupby(["person_id", "origin", "purpose"], observed=True):
         if origin in rand_point_zones:
             zs = rand_point_zones[origin]
             if len(zs) > 0:  # Make sure we have points
@@ -255,6 +256,7 @@ def generate_departure_times(trips, state):
 
     mem.trace_memory_info("Generated departure times", force_garbage_collect=True, state=state)
     return result_times
+
 
 def generate_departure_times_old(trips, state):
     orig_index = trips.index.copy()
@@ -399,8 +401,8 @@ def generate_beam_plans(
     tours['tour_num'] = tours['tour_num'].astype(pd.Int16Dtype())
     trips['depart'] = trips['depart'].astype(np.float32)
     trips['activity_code'] = np.zeros(len(trips), dtype=np.int8)
-    trips.loc[trips['purpose'] == 'home', 'activity_code'] = 1
-    trips.loc[trips['purpose'] == 'work', 'activity_code'] = 2
+    trips.loc[trips['purpose'] == 'home', 'activity_code'] = np.int8(1)
+    trips.loc[trips['purpose'] == 'work', 'activity_code'] = np.int8(2)
 
     trips = pd.merge(trips.reset_index(), tours[['tour_num', 'parent_tour_num', 'tour_mode', 'tour_ordinal']],
                      on="tour_id")
@@ -486,388 +488,410 @@ def generate_beam_plans(
     state.add_table("beam_plans", final_plans)
 
 
-def identify_persons_with_problems(trips):
+def identify_persons_with_problems(trips, pre=True):
     """
-    Identify persons who have problems with their trip sequences:
-    1. Topological inconsistencies (destination ≠ next origin)
-    2. Invalid activity sequences (consecutive home or work activities)
-
-    Returns a list of person_ids that need fixing
+    Vectorized function to identify persons with problematic trip sequences
     """
-    problematic_persons = set()
 
-    # First add persons with topological issues (already calculated)
-    problematic_persons.update(trips[trips["is_bad"]]["person_id"].unique())
+    # Calculate initial inconsistencies with vectorized operations
+    topo_sort_mask = ((trips["destination"].shift() == trips["origin"]) |
+                      (trips["person_id"].shift() != trips["person_id"]))
+    topologically_bad = ~topo_sort_mask
+    repeated_activities = ((trips["activity_code"].shift() == trips["activity_code"]) &
+                           (trips["person_id"].shift() == trips["person_id"]) &
+                           (trips["destination"].shift() == trips["destination"]) &
+                           (trips["activity_code"] > 0))
+    topologically_bad_count = topologically_bad.sum()
+    repeated_bad_count = repeated_activities.sum()
 
-    # Then check for invalid activity sequences
-    for person_id, person_trips in trips.groupby("person_id"):
-        # Skip if already flagged with topo issues
-        if person_id in problematic_persons:
-            continue
+    if topologically_bad_count + repeated_bad_count == 0:
+        logger.info("No inconsistent trips found - sequence already valid")
+        trips.reset_index(inplace=True, drop=True)
+        return trips
 
-        # Sort person's trips to ensure correct sequence
-        person_trips = person_trips.sort_values('depart')
+    if pre:
+        logger.info(
+            f"Pre-sorting left {topologically_bad_count} mismatched trips "
+            f"and {repeated_bad_count} repeated destinations to fix")
+    else:
+        logger.info(
+            f"Ended with {topologically_bad_count} mismatched trips "
+            f"and {repeated_bad_count} repeated destinations to fix")
 
-        # Check for consecutive home/work activities
-        prev_purpose = None
-        for idx, trip in person_trips.iterrows():
-            curr_purpose = trip['purpose']
+    # 1. Get persons with topological inconsistencies (if is_bad already calculated)
+    problematic_persons_topo = trips.loc[topologically_bad]["person_id"].unique()
+    problematic_persons_repeat = trips.loc[repeated_activities]["person_id"].unique()
+    problematic_persons_total = set(problematic_persons_topo) | set(problematic_persons_repeat)
 
-            if prev_purpose in ['home', 'work'] and curr_purpose == prev_purpose:
-                problematic_persons.add(person_id)
-                break
+    logger.info(
+        f"These are from {len(problematic_persons_topo)} and {len(problematic_persons_repeat)} persons, respectively,"
+        f"leaving {len(problematic_persons_total)} total people with plans to fix.")
 
-            prev_purpose = curr_purpose
+    return list(problematic_persons_total), topologically_bad | repeated_activities
 
-    return list(problematic_persons)
 
-def _fix_sequence_fast(person_trips, trip_indices, origins, destinations, depart_times, time_to_trips, tour_starts,
-                       tour_ends, activity_codes):
-    """Fix sequence respecting tour time windows with statistical tracking"""
-    # Number of trips
-    n_trips = len(origins)
+def build_trip_sequence_graph(person_trips):
+    """
+    Build a directed graph representing all possible valid trip sequences.
+    Topology is the hard constraint, while time sequence can be violated if necessary.
+    Additionally enforces that paths should end at home locations.
+
+    Parameters
+    ----------
+    person_trips : pd.DataFrame
+        Trips for a single person
+
+    Returns
+    -------
+    nx.DiGraph
+        Graph with trips as nodes and edges representing valid sequences
+    dict
+        Information about home locations for constraint checking
+    """
+    G = nx.DiGraph()
+
+    # Add all trips as nodes
+    for idx, trip in person_trips.iterrows():
+        G.add_node(idx, **trip.to_dict())
+
+    # Identify home trips (purpose = "home")
+    home_trips = person_trips[person_trips['purpose'] == 'home']
+
+    # If no home trips exist, we'll relax this constraint
+    if len(home_trips) == 0:
+        home_locations = []
+        logger.warning(f"Person {person_trips['person_id'].iloc[0]} has no home trips. Home constraint relaxed.")
+    else:
+        # Get all possible home locations (destinations of home trips)
+        home_locations = home_trips['destination'].unique().tolist()
+
+    # Create weighted edges between valid trip pairs
+    for i, trip1 in person_trips.iterrows():
+        for j, trip2 in person_trips.iterrows():
+            if i == j:
+                continue
+
+            # Base edge weight - prefers original sequence order
+            weight = abs(j - i) * 10  # Small penalty for deviating from original order
+
+            # TOPOLOGICAL CONSTRAINT (HARD)
+            # Skip if destination doesn't match origin (our primary hard constraint)
+            if trip1['destination'] != trip2['origin']:
+                continue  # No edge created - this is truly hard
+
+            # TIME SEQUENCE CONSTRAINT (STRONG BUT VIOLATABLE)
+            # Add high penalty if trip2 starts before trip1 ends (backward in time)
+            trip1_end_time = trip1['depart'] + trip1['TOTAL_TIME_MINS'] / 60.0
+            if trip2['depart'] < trip1_end_time:
+                # Calculate how severe the violation is (in hours)
+                time_violation = trip1_end_time - trip2['depart']
+                weight += 500 + (time_violation * 100)  # Strong penalty, but not impossible
+
+            # REPEATED ACTIVITIES CONSTRAINT (MODERATE)
+            # Add penalty for repeated activities (soft constraint)
+            if (trip1['activity_code'] > 0 and
+                    trip1['activity_code'] == trip2['activity_code'] and
+                    trip1['destination'] == trip2['destination']):
+                weight += 1000  # Significant but lower than time violation
+
+            # TOUR WINDOW CONSTRAINT (MODERATE)
+            # Check if trip would be outside its allowed tour window
+            tour_start2 = trip2['tour_start']
+            tour_end2 = trip2['tour_end']
+
+            # If this edge would force trip2 outside its window, add penalty
+            if trip1_end_time > tour_end2:
+                window_violation = trip1_end_time - tour_end2
+                weight += 800 + (window_violation * 500)  # Significant penalty
+
+            # DEPARTURE TIME SHIFT MINIMIZATION (WEAK)
+            # Add small penalty for shifting departure times (minimize disruption)
+            if trip1_end_time > trip2['depart']:
+                # Penalize how much we need to shift trip2 later
+                time_shift = trip1_end_time - trip2['depart']
+                weight += time_shift * 100  # Scale based on hours shifted
+
+            # Add the edge with computed weight
+            G.add_edge(i, j, weight=weight)
+
+    return G, home_locations
+
+
+def fix_person_sequence_with_graph(person_trips):
+    """
+    Fix a single person's trip sequence using a graph-based approach,
+    enforcing home start/end constraints.
+
+    Parameters
+    ----------
+    person_trips : pd.DataFrame
+        DataFrame containing trips for a single person
+
+    Returns
+    -------
+    pd.DataFrame
+        Fixed trips for the person
+    dict
+        Statistics about the fixing process
+    """
+    # Extract person data
+    n_trips = len(person_trips)
+    person_id = person_trips['person_id'].iloc[0]
+
+    # Store original values - create a dictionary mapping from trip index to departure time
+    # This avoids index alignment issues later
+    original_departures = {idx: time for idx, time in zip(person_trips.index, person_trips['depart'])}
+
+    # If only 0-1 trips, nothing to fix
     if n_trips <= 1:
-        return person_trips, {"status": "no_fix_needed", "trips_shifted": 0, "hours_shifted": 0}
+        return person_trips, {'persons_fixed': 1, 'trips_shifted': 0, 'total_time_shifts': 0}
 
-    # Create a mapping to keep track of reordering
-    fixed_idx_mapping = np.arange(n_trips)
+    # Build the graph for this person
+    G, home_locations = build_trip_sequence_graph(person_trips)
 
-    # Group trips by departure time
-    time_periods = sorted(time_to_trips.keys())
+    # Check if graph is empty (no valid paths possible)
+    if G.number_of_edges() == 0:
+        logger.warning(f"Person {person_id}: No valid sequence possible with current constraints")
+        return person_trips, {'persons_failed': 1, 'trips_shifted': 0, 'total_time_shifts': 0}
 
-    # Track if we've modified departure times
-    modified_depart_times = {}  # {trip_idx: (original_time, new_time)}
-    # Track which trips have been moved to avoid double-processing
-    moved_trips = set()
+    # Find valid chains that start and end at appropriate locations
+    valid_chains = []
 
-    # Process each time period
-    for t_idx, time_period in enumerate(time_periods):
-        # Get indices of trips in this time period
-        period_indices = [i for i in time_to_trips[time_period] if i not in moved_trips]
-        if len(period_indices) <= 1:
-            continue
+    # Get all trips that could be valid as first trip (origin is a home location)
+    if home_locations:
+        # If we have home locations, only consider trips starting from home
+        potential_starts = [idx for idx in G.nodes() if idx in person_trips.index and
+                            person_trips.loc[idx, 'origin'] in home_locations]
+    else:
+        # Otherwise, any trip could be a start
+        potential_starts = [idx for idx in G.nodes() if idx in person_trips.index]
 
-        # Find the destination from the last trip of previous time period
-        prev_destination = None
-        prev_activity_code = None
-        if t_idx > 0:
-            for prev_t_idx in range(t_idx - 1, -1, -1):
-                prev_time = time_periods[prev_t_idx]
-                prev_period_indices = [i for i in time_to_trips[prev_time] if i not in moved_trips]
-                if prev_period_indices:
-                    # Sort by current mapping order
-                    prev_period_indices.sort(key=lambda i: fixed_idx_mapping.tolist().index(i))
-                    last_prev_idx = prev_period_indices[-1]
-                    prev_destination = destinations[last_prev_idx]
-                    prev_activity_code = activity_codes[last_prev_idx]
-                    break
+    # Get all trips that could be valid as last trip (purpose = "home")
+    home_trip_indices = person_trips[person_trips['purpose'] == 'home'].index.tolist()
+    potential_ends = home_trip_indices if home_trip_indices else [idx for idx in G.nodes() if idx in person_trips.index]
 
-        # Identify separate chains in this time period
-        chains = []
-        remaining_indices = set(period_indices)
+    # Try to find paths between all potential start/end pairs
+    for start_idx in potential_starts:
+        for end_idx in potential_ends:
+            if start_idx == end_idx:
+                continue
 
-        # First, find chain that connects with previous time period
-        if prev_destination is not None:
-            # Find trips that start at prev_destination
-            connecting_trips = []
-            for i in period_indices:
-                if origins[i] == prev_destination:
-                    if (prev_activity_code == activity_codes[i]) and ((prev_activity_code or 1) > 0):
-                        continue
-                    else:
-                        connecting_trips.append(i)
-            connecting_trips = [i for i in period_indices if origins[i] == prev_destination]
+            try:
+                # Check if there's a path from start to end
+                paths = nx.all_simple_paths(G, start_idx, end_idx)
+                these_paths = []
 
-            if connecting_trips:
-                # Start a chain with the connecting trip
-                first_trip = connecting_trips[0]
-                first_chain = [first_trip]
-                remaining_indices.remove(first_trip)
+                for path in paths:
+                    # Verify the first-last location constraint: first trip origin = last trip destination
+                    first_trip_origin = person_trips.loc[path[0], 'origin']
+                    last_trip_dest = person_trips.loc[path[-1], 'destination']
 
-                # Build the chain
-                current_dest = destinations[first_trip]
-                while True:
-                    next_trips = [i for i in remaining_indices if origins[i] == current_dest]
-                    if not next_trips:
-                        break
-                    next_trip = next_trips[0]
-                    first_chain.append(next_trip)
-                    remaining_indices.remove(next_trip)
-                    current_dest = destinations[next_trip]
-
-                chains.append(first_chain)
-            else:
-                # Look for connecting trips in other time periods within tour window
-                connecting_across_time = []
-
-                for adj_time in time_periods:
-                    if adj_time != time_period:  # Don't recheck current time period
-                        adj_period_indices = [i for i in time_to_trips[adj_time] if i not in moved_trips]
-                        for idx in adj_period_indices:
-                            # Check if trip connects and can be moved to current time
-                            if origins[idx] == prev_destination and \
-                                    tour_starts[idx] <= time_period <= tour_ends[idx]:
-                                connecting_across_time.append((idx, abs(adj_time - time_period)))
-
-                if connecting_across_time:
-                    # Sort by time difference to minimize schedule disruption
-                    connecting_across_time.sort(key=lambda x: x[1])
-                    adj_trip = connecting_across_time[0][0]
-                    orig_time = depart_times[adj_trip]
-
-                    # Prevent removing from the list twice
-                    if adj_trip in time_to_trips[orig_time] and adj_trip not in moved_trips:
-                        # Remove from original time period
-                        time_to_trips[orig_time].remove(adj_trip)
-                        # Mark as moved
-                        moved_trips.add(adj_trip)
-
-                        # Add to current time period
-                        if adj_trip not in time_to_trips[time_period]:
-                            time_to_trips[time_period].append(adj_trip)
-
-                        # Mark for departure time update
-                        modified_depart_times[adj_trip] = time_period
-
-                        # Start a chain with this trip
-                        first_chain = [adj_trip]
-                        if adj_trip in remaining_indices:
-                            remaining_indices.remove(adj_trip)
-
-                        # Build the chain
-                        current_dest = destinations[adj_trip]
-                        while True:
-                            next_trips = [i for i in remaining_indices if origins[i] == current_dest]
-                            if not next_trips:
+                    if len(path) == n_trips:
+                        if first_trip_origin == last_trip_dest:
+                            # This path forms a closed loop - perfect!
+                            path_weight = nx.path_weight(G, path, weight='weight')
+                            these_paths.append((path, path_weight))
+                            if len(these_paths) >= 10:  # Stop after finding 10 complete paths
                                 break
-                            next_trip = next_trips[0]
-                            first_chain.append(next_trip)
-                            remaining_indices.remove(next_trip)
-                            current_dest = destinations[next_trip]
+                these_paths.sort(key=lambda x: (-len(x[0]), x[1]))
+                if these_paths:
+                    valid_chains.append(these_paths[0])
 
-                        chains.append(first_chain)
+            except nx.NetworkXNoPath:
+                continue
 
-        # Now identify other separate chains
-        while remaining_indices:
-            # Start a new chain
-            start_trip = list(remaining_indices)[0]
-            current_chain = [start_trip]
-            remaining_indices.remove(start_trip)
+    # If no valid chains were found, relax constraints and try again
+    if not valid_chains:
+        logger.warning(f"Person {person_id}: No valid chains with home constraints. Relaxing requirements.")
 
-            # Forward building - add trips that follow this one
-            current_dest = destinations[start_trip]
-            while True:
-                next_trips = [i for i in remaining_indices if origins[i] == current_dest]
-                if not next_trips:
-                    # Check other time periods
-                    next_across_time = []
+        # Try again without the home constraint
+        for start_idx in G.nodes():
+            if start_idx not in person_trips.index:
+                continue
 
-                    for adj_time in time_periods:
-                        if adj_time != time_period:
-                            adj_period_indices = [i for i in time_to_trips[adj_time] if i not in moved_trips]
-                            for idx in adj_period_indices:
-                                if origins[idx] == current_dest and \
-                                        tour_starts[idx] <= time_period <= tour_ends[idx]:
-                                    next_across_time.append((idx, abs(adj_time - time_period)))
-
-                    if next_across_time:
-                        next_across_time.sort(key=lambda x: x[1])
-                        adj_trip = next_across_time[0][0]
-                        orig_time = depart_times[adj_trip]
-
-                        # Safely remove from original time period
-                        if adj_trip in time_to_trips[orig_time] and adj_trip not in moved_trips:
-                            time_to_trips[orig_time].remove(adj_trip)
-                            moved_trips.add(adj_trip)
-
-                            # Add to current time period
-                            if adj_trip not in time_to_trips[time_period]:
-                                time_to_trips[time_period].append(adj_trip)
-
-                            # Mark for departure time update
-                            modified_depart_times[adj_trip] = time_period
-
-                            # Add to chain
-                            current_chain.append(adj_trip)
-                            current_dest = destinations[adj_trip]
-                        else:
-                            break  # Trip already moved, can't use it
-                    else:
-                        break  # No more connecting trips
-                else:
-                    next_trip = next_trips[0]
-                    current_chain.append(next_trip)
-                    remaining_indices.remove(next_trip)
-                    current_dest = destinations[next_trip]
-
-            # Backward building - add trips that precede this one
-            current_orig = origins[start_trip]
-            while True:
-                prev_trips = [i for i in remaining_indices if destinations[i] == current_orig]
-                if not prev_trips:
-                    # Check other time periods
-                    prev_across_time = []
-
-                    for adj_time in time_periods:
-                        if adj_time != time_period:
-                            adj_period_indices = [i for i in time_to_trips[adj_time] if i not in moved_trips]
-                            for idx in adj_period_indices:
-                                if destinations[idx] == current_orig and \
-                                        tour_starts[idx] <= time_period <= tour_ends[idx]:
-                                    prev_across_time.append((idx, abs(adj_time - time_period)))
-
-                    if prev_across_time:
-                        prev_across_time.sort(key=lambda x: x[1])
-                        adj_trip = prev_across_time[0][0]
-                        orig_time = depart_times[adj_trip]
-
-                        # Safely remove from original time period
-                        if adj_trip in time_to_trips[orig_time] and adj_trip not in moved_trips:
-                            time_to_trips[orig_time].remove(adj_trip)
-                            moved_trips.add(adj_trip)
-
-                            # Add to current time period
-                            if adj_trip not in time_to_trips[time_period]:
-                                time_to_trips[time_period].append(adj_trip)
-
-                            # Mark for departure time update
-                            modified_depart_times[adj_trip] = time_period
-
-                            # Add to chain
-                            current_chain.insert(0, adj_trip)
-                            current_orig = origins[adj_trip]
-                        else:
-                            break  # Trip already moved, can't use it
-                    else:
-                        break  # No more connecting trips
-                else:
-                    prev_trip = prev_trips[0]
-                    current_chain.insert(0, prev_trip)
-                    remaining_indices.remove(prev_trip)
-                    current_orig = origins[prev_trip]
-
-            chains.append(current_chain)
-
-        # Now reorder the trips within this time period based on the chains
-        new_order = []
-        for chain in chains:
-            new_order.extend(chain)
-
-        # Update the fixed_idx_mapping for this time period
-        if new_order:  # Only proceed if we have trips to reorder
-            # Get positions of all trips currently in this time period (including moved trips)
-            all_period_trips = time_to_trips[time_period].copy()
-            period_positions = []
-
-            for idx in all_period_trips:
-                try:
-                    # Find position in the fixed_idx_mapping
-                    pos = np.where(fixed_idx_mapping == idx)[0][0]
-                    period_positions.append(pos)
-                except IndexError:
-                    # Skip if not found - shouldn't happen but being defensive
-                    logger.warning(f"Trip index {idx} not found in fixed_idx_mapping")
+            for end_idx in G.nodes():
+                if end_idx not in person_trips.index or start_idx == end_idx:
                     continue
 
-            period_positions.sort()
+                try:
+                    # Check if there's a path from start to end
+                    path = nx.shortest_path(G, start_idx, end_idx, weight='weight')
+                    valid_chains.append((path, nx.path_weight(G, path,
+                                                              weight='weight') + 3000))  # Penalty for not meeting home requirements
+                except nx.NetworkXNoPath:
+                    continue
 
-            # Apply the new ordering
-            for new_idx, trip_idx in enumerate(new_order):
-                if new_idx < len(period_positions):
-                    pos = period_positions[new_idx]
-                    fixed_idx_mapping[pos] = trip_idx
+    # If still no valid chains, return the original with a warning
+    if not valid_chains:
+        logger.warning(f"Person {person_id}: Could not find any valid chains even with relaxed constraints")
+        return person_trips, {'persons_failed': 1, 'trips_shifted': 0, 'total_time_shifts': 0}
 
-    # Apply the modified departure times to the dataframe
-    for trip_idx, new_time in modified_depart_times.items():
-        try:
-            # Find the position in the reordered dataframe
-            pos = np.where(fixed_idx_mapping == trip_idx)[0][0]
-            # Update the dataframe
-            person_trips.iloc[pos, person_trips.columns.get_loc('depart')] = new_time
+    # Find the longest chain with the lowest weight
+    valid_chains.sort(key=lambda x: (-len(x[0]), x[1]))
+    best_path, best_weight = valid_chains[0]
 
-        except IndexError:
-            logger.warning(f"Could not update departure time for trip {trip_idx} - not found in mapping")
+    # If the best path doesn't include all trips
+    if len(best_path) < n_trips:
+        logger.warning(f"Person {person_id}: Best path only includes {len(best_path)}/{n_trips} trips")
 
-    # Return reordered trips
-    # Calculate statistics
-    trips_shifted = len(modified_depart_times)
-    total_hours_shifted = 0
+        # Get the trips in the path
+        fixed_trips = person_trips.loc[best_path].copy()
 
-    if trips_shifted > 0:
-        # Calculate total shift and average
-        for trip_idx, new_time in modified_depart_times.items():
-            old_time = depart_times[trip_idx]  # Get the original time from the depart_times array
-            total_hours_shifted += abs(new_time - old_time)
+        # Reinsert remaining trips with best effort
+        remaining_trips = person_trips.loc[~person_trips.index.isin(best_path)]
 
-        # Determine status
-        status = "fixed_with_shifts"
+        for idx, trip in remaining_trips.iterrows():
+            fixed_trips = reinsert_trip_with_home_constraint(fixed_trips, trip, home_locations)
+
+        # Calculate statistics
+        trips_shifted = 0
+        total_time_shifts = 0
+
+        # Calculate how many trips were shifted and by how much
+        for idx in fixed_trips.index:
+            if idx in original_departures:  # Check if this index exists in original data
+                orig_time = original_departures[idx]
+                new_time = fixed_trips.loc[idx, 'depart']
+
+                if orig_time != new_time:
+                    trips_shifted += 1
+                    total_time_shifts += abs(new_time - orig_time)
+
+        return fixed_trips, {
+            'persons_fixed': 1,
+            'trips_shifted': trips_shifted,
+            'total_time_shifts': total_time_shifts,
+            'fixed_trip_count': len(best_path)
+        }
     else:
-        # If we didn't need to shift any trips but still fixed the sequence
-        status = "fixed_without_shifts"
+        # Full fix - all trips included
+        fixed_trips = person_trips.loc[best_path].copy()
 
-    # Create stats dictionary
-    stats = {
-        "status": status,
-        "trips_shifted": trips_shifted,
-        "hours_shifted": total_hours_shifted,
-        "avg_hours_shifted": total_hours_shifted / trips_shifted if trips_shifted > 0 else 0
-    }
+        # Update departure times to ensure temporal consistency
+        for i in range(1, len(best_path)):
+            prev_idx = best_path[i - 1]
+            curr_idx = best_path[i]
 
-    # Return reordered trips and statistics
-    return person_trips.iloc[fixed_idx_mapping].reset_index(drop=True), stats
+            # Get trips
+            prev_trip = fixed_trips.loc[prev_idx]
+            curr_trip = fixed_trips.loc[curr_idx]
+
+            # Calculate minimum required departure time
+            min_depart = prev_trip['depart'] + prev_trip['TOTAL_TIME_MINS'] / 60.0
+
+            # Shift current trip if needed
+            if curr_trip['depart'] < min_depart:
+                fixed_trips.at[curr_idx, 'depart'] = min_depart
+
+        # Calculate statistics
+        trips_shifted = 0
+        total_time_shifts = 0
+
+        # Calculate how many trips were shifted and by how much
+        for idx in fixed_trips.index:
+            if idx in original_departures:  # Check if this index exists in original data
+                orig_time = original_departures[idx]
+                new_time = fixed_trips.loc[idx, 'depart']
+
+                if orig_time != new_time:
+                    trips_shifted += 1
+                    total_time_shifts += abs(new_time - orig_time)
+
+        return fixed_trips, {
+            'persons_fixed': 1,
+            'trips_shifted': trips_shifted,
+            'total_time_shifts': total_time_shifts,
+            'fixed_trip_count': len(best_path)
+        }
 
 
-def _fix_trips_chunk(trips_chunk):
-    """Fix trip sequences for a chunk of people efficiently"""
-    # First, detect inconsistencies for all persons at once (vectorized)
-    topo_mask = ((trips_chunk["destination"].shift() == trips_chunk["origin"]) |
-                 (trips_chunk["person_id"].shift() != trips_chunk["person_id"]))
-    trips_chunk["is_bad"] = ~topo_mask
+def reinsert_trip_with_home_constraint(fixed_trips, trip, home_locations):
+    """
+    Attempt to reinsert a trip into an already fixed sequence
+    considering home constraints
 
-    # Find which persons have inconsistencies
-    persons_with_bad_trips = identify_persons_with_problems(trips_chunk)
-    logger.info(f"Found {len(persons_with_bad_trips)} persons with inconsistent trips")
+    Parameters
+    ----------
+    fixed_trips : pd.DataFrame
+        DataFrame of already-fixed trips
+    trip : Series
+        The trip to reinsert
+    home_locations : list
+        List of locations considered as home
 
-    if len(persons_with_bad_trips) == 0:
-        return trips_chunk  # No inconsistencies to fix
+    Returns
+    -------
+    pd.DataFrame
+        Updated fixed trips with the reinserted trip
+    """
+    # If empty, just return the trip as a single-row DataFrame
+    if len(fixed_trips) == 0:
+        return pd.DataFrame([trip])
 
-    # Process only those persons who have inconsistencies
-    all_fixed_trips = []
-    unchanged_mask = ~trips_chunk["person_id"].isin(persons_with_bad_trips)
+    # Check if this is a home trip and we should prioritize placing it at the end
+    is_home_trip = trip['purpose'] == 'home'
 
-    # Add all persons with no issues directly
-    if unchanged_mask.any():
-        all_fixed_trips.append(trips_chunk[unchanged_mask])
+    if is_home_trip and fixed_trips.iloc[-1]['purpose'] != 'home':
+        # This is a home trip and the current sequence doesn't end with home
+        # Add it to the end
+        result = pd.concat([fixed_trips, pd.DataFrame([trip])]).reset_index(drop=True)
+        return result
 
-    # Process each person with inconsistencies
-    for person_id in persons_with_bad_trips:
-        person_trips = trips_chunk[trips_chunk["person_id"] == person_id].copy()
+    # Try to find the best position based on location matching
+    best_pos = None
+    best_score = float('inf')
 
-        # Use numpy arrays for faster processing
-        trip_indices = np.array(person_trips.index)
-        origins = np.array(person_trips["origin"])
-        destinations = np.array(person_trips["destination"])
-        depart_times = np.array(person_trips["depart"])
+    for i in range(len(fixed_trips) + 1):
+        # Calculate score for inserting at position i
+        score = 0
 
-        # Create a fast lookup dictionary for each time period
-        time_to_trips = {}
-        for i, time in enumerate(depart_times):
-            if time not in time_to_trips:
-                time_to_trips[time] = []
-            time_to_trips[time].append(i)
+        # Check connection with previous trip (if not at the beginning)
+        if i > 0:
+            prev_trip = fixed_trips.iloc[i - 1]
+            if prev_trip['destination'] != trip['origin']:
+                score += 10000  # Major penalty for breaking the chain
 
-        # Fix the sequence using the efficient approach
-        fixed_person_trips = _fix_sequence_fast(
-            person_trips,
-            trip_indices,
-            origins,
-            destinations,
-            depart_times,
-            time_to_trips
-        )
-        all_fixed_trips.append(fixed_person_trips)
+            # Add penalty for time inconsistency
+            prev_end_time = prev_trip['depart'] + prev_trip['TOTAL_TIME_MINS'] / 60.0
+            if trip['depart'] < prev_end_time:
+                score += 5000 + (prev_end_time - trip['depart']) * 1000
 
-    return pd.concat(all_fixed_trips) if all_fixed_trips else trips_chunk
+        # Check connection with next trip (if not at the end)
+        if i < len(fixed_trips):
+            next_trip = fixed_trips.iloc[i]
+            if trip['destination'] != next_trip['origin']:
+                score += 10000  # Major penalty for breaking the chain
+
+            # Add penalty for time inconsistency
+            trip_end_time = trip['depart'] + trip['TOTAL_TIME_MINS'] / 60.0
+            if next_trip['depart'] < trip_end_time:
+                score += 5000 + (trip_end_time - next_trip['depart']) * 1000
+
+        # Special scoring for maintaining home trip at the end
+        if i == len(fixed_trips) and fixed_trips.iloc[-1]['purpose'] == 'home':
+            score += 8000  # Penalty for displacing a home trip from the end
+
+        # Special handling for home trips - prefer at the end
+        if is_home_trip and i < len(fixed_trips):
+            score += 500  # Small penalty for placing home trips before the end
+
+        # Update best position if this is better
+        if score < best_score:
+            best_score = score
+            best_pos = i
+
+    # Insert at the best position (or at the end if no good position found)
+    if best_pos is None:
+        best_pos = len(fixed_trips)
+
+    result = pd.concat([
+        fixed_trips.iloc[:best_pos],
+        pd.DataFrame([trip]),
+        fixed_trips.iloc[best_pos:]
+    ]).reset_index(drop=True)
+
+    return result
+
 
 
 def _process_trip_chunk(trips, constants, skims, model_settings, state, trace_label):
@@ -964,27 +988,6 @@ def _annotate_trips(trips, tours):
     trips['departure_time'] = np.float32(0.0)
 
 
-def _fix_trip_sequence(df):
-    bad_indices = np.nonzero(df.is_bad.values)[0]
-    if len(bad_indices) == 0:
-        return df
-
-    first_bad_index = bad_indices[0]
-    dest_last_good = df.loc[df.index[first_bad_index - 1], "destination"]
-    # TODO: allow a window around time period if you don't succeed at first
-    time_period = df.loc[df.index[first_bad_index], "depart"]
-
-    mask = ((df["depart"] == time_period) &
-            (df["origin"] == dest_last_good) &
-            (np.arange(len(df)) > first_bad_index))
-
-    try:
-        potential_indices = np.argwhere(mask.values)[0]
-        trip_index_to_move = np.random.choice(potential_indices)
-        return _reorder_trips(df, first_bad_index, trip_index_to_move)
-    except IndexError:
-        return _shuffle_trips(df, time_period)
-
 
 def _reorder_trips(df, first_bad_index, trip_index_to_move):
     df2 = df.copy()
@@ -1018,32 +1021,12 @@ def _sort_and_fix_sequences(trips, state):
 
     trips["original_order"] = np.arange(len(trips))
 
-    # Calculate initial inconsistencies with vectorized operations
-    topo_sort_mask = ((trips["destination"].shift() == trips["origin"]) |
-                      (trips["person_id"].shift() != trips["person_id"]))
-    trips.loc[:, "is_bad"] = ~topo_sort_mask
-    bad_activities = ((trips["activity_code"].shift() == trips["activity_code"]) &
-                      (trips["person_id"].shift() == trips["person_id"]) &
-                      (trips["activity_code"] > 0))
-    initial_bad_count = trips["is_bad"].sum()
-
-    if initial_bad_count == 0:
-        logger.info("No inconsistent trips found - sequence already valid")
-        trips.reset_index(inplace=True, drop=True)
-        return trips
-
-    logger.info(f"Pre-sorting left {initial_bad_count} inconsistent trips to fix")
-
-    # Track statistics
-    persons_total = 0
-    persons_fixed_without_shifts = 0
-    persons_fixed_with_shifts = 0
-    total_trips_shifted = 0
-    total_hours_shifted = 0
-
     # Find which persons have inconsistencies
-    persons_with_bad_trips = identify_persons_with_problems(trips)
+    persons_with_bad_trips, bad_trips = identify_persons_with_problems(trips)
     logger.info(f"Found {len(persons_with_bad_trips)} persons with inconsistent trips")
+    trips['is_bad'] = bad_trips
+
+    initial_bad_count = bad_trips.sum()
 
     # Process only those persons who have inconsistencies
     all_fixed_trips = []
@@ -1053,75 +1036,50 @@ def _sort_and_fix_sequences(trips, state):
     if unchanged_mask.any():
         all_fixed_trips.append(trips[unchanged_mask])
 
+    stats = {
+        'persons_total': len(persons_with_bad_trips),
+        'persons_fixed': 0,
+        'persons_partial': 0,
+        'persons_failed': 0,
+        'trips_shifted': 0,
+        'total_time_shifts': 0,
+        'fixed_trip_count': 0
+    }
+
     # Process each person with inconsistencies
     for person_id in persons_with_bad_trips:
-        persons_total += 1
         person_trips = trips[trips["person_id"] == person_id].copy()
 
-        # Use numpy arrays for faster processing
-        trip_indices = np.array(person_trips.index)
-        origins = np.array(person_trips["origin"])
-        destinations = np.array(person_trips["destination"])
-        depart_times = np.array(person_trips["depart"])
-        tour_starts = np.array(person_trips["tour_start"])
-        tour_ends = np.array(person_trips["tour_end"])
-        activity_codes = np.array(person_trips["activity_code"])
+        fixed_trips, person_stats = fix_person_sequence_with_graph(person_trips)
 
-        # Create a fast lookup dictionary for each time period
-        time_to_trips = {}
-        for i, time in enumerate(depart_times):
-            if time not in time_to_trips:
-                time_to_trips[time] = []
-            time_to_trips[time].append(i)
+        # Update statistics
+        for key, value in person_stats.items():
+            if key in stats:
+                stats[key] += value
 
-        # Fix the sequence using the efficient approach
-        fixed_person_trips, stats = _fix_sequence_fast(
-            person_trips,
-            trip_indices,
-            origins,
-            destinations,
-            depart_times,
-            time_to_trips,
-            tour_starts,
-            tour_ends,
-            activity_codes
-        )
-        # Update our statistics
-        if stats["status"] == "fixed_without_shifts":
-            persons_fixed_without_shifts += 1
-        elif stats["status"] == "fixed_with_shifts":
-            persons_fixed_with_shifts += 1
-            total_trips_shifted += stats["trips_shifted"]
-            total_hours_shifted += stats["hours_shifted"]
-        all_fixed_trips.append(fixed_person_trips)
+        all_fixed_trips.append(fixed_trips)
 
     # Combine results
     result = pd.concat(all_fixed_trips) if all_fixed_trips else trips
 
-    # Final validation
-    topo_sort_mask = ((result["destination"].shift() == result["origin"]) |
-                      (result["person_id"].shift() != result["person_id"]))
-    result["is_bad"] = ~topo_sort_mask
-    final_bad_count = result["is_bad"].sum()
+    # Final validation and cleanup
+    final_problem_persons, final_is_bad = identify_persons_with_problems(result)
+    final_bad_count = final_is_bad.sum()
 
-    # Report results
+    # Calculate improvement
     fixed_count = initial_bad_count - final_bad_count
-    logger.info(
-        f"Fixed {fixed_count} of {initial_bad_count} inconsistent trips ({fixed_count / initial_bad_count:.1%})")
-    logger.info(f"Persons processed: {persons_total}")
-    logger.info(
-        f"  - Fixed without shifting times: {persons_fixed_without_shifts} ({persons_fixed_without_shifts / persons_total:.1%})")
-    logger.info(
-        f"  - Fixed by shifting times: {persons_fixed_with_shifts} ({persons_fixed_with_shifts / persons_total:.1%})")
+    fix_percent = fixed_count / initial_bad_count * 100 if initial_bad_count > 0 else 100
 
-    if persons_fixed_with_shifts > 0:
-        avg_trips_shifted = total_trips_shifted / persons_fixed_with_shifts
-        avg_hours_shifted = total_hours_shifted / total_trips_shifted if total_trips_shifted > 0 else 0
-        logger.info(f"  - Average trips shifted per person: {avg_trips_shifted:.2f}")
-        logger.info(f"  - Average hours shifted per trip: {avg_hours_shifted:.2f}")
+    logger.info(f"Fixed {fixed_count} of {initial_bad_count} inconsistencies ({fix_percent:.1f}%)")
+    logger.info(f"Persons with remaining problems: {len(final_problem_persons)}")
 
-    if final_bad_count > 0:
-        logger.warning(f"Unable to fix {final_bad_count} inconsistent trips")
+    # Detailed statistics
+    if stats['persons_total'] > 0:
+        logger.info(f"Fully fixed persons: {stats['persons_fixed']} "
+                    f"({stats['persons_fixed'] / stats['persons_total'] * 100:.1f}%)")
+        logger.info(f"Trips shifted: {stats['trips_shifted']}")
+        if stats['trips_shifted'] > 0:
+            logger.info(f"Average shift amount: {stats['total_time_shifts'] / stats['trips_shifted']:.2f} hours")
 
     # Cleanup and return
     if "is_bad" in result.columns:
