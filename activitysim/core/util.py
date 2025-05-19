@@ -223,7 +223,7 @@ def other_than(groups, bools):
     counts = groups[bools].value_counts()
     merge_col = groups.to_frame(name="right")
     pipeline = tz.compose(
-        tz.curry(lambda s: s.fillna(value=False).infer_objects(copy=False)),
+        tz.curry(lambda s: s.fillna(value=False).infer_objects()),
         itemgetter("left"),
         tz.curry(
             pd.DataFrame.merge,
