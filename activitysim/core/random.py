@@ -380,6 +380,7 @@ class Random(object):
         self.step_name = None
         self.step_seed = None
         self.base_seed = 0
+        self.sample_households_seed = 0
         self.global_rng = np.random.RandomState()
 
     def get_channel_for_df(self, df):
@@ -507,7 +508,7 @@ class Random(object):
                 "drop_channel called with unknown channel '%s'" % (channel_name,)
             )
 
-    def set_base_seed(self, seed=None):
+    def set_base_seed(self, seed=None, households_sample_seed=None):
         """
         Like seed for numpy.random.RandomState, but generalized for use with all random streams.
 
@@ -520,11 +521,15 @@ class Random(object):
         set_base_seed(None) will set the base seed to a random and unpredictable integer and so
         provides "fully pseudo random" non-repeatable streams with different results every time
 
+        set_base_seed(household_sample_seed=1) will set a repeatable seed for sampling
+        households but a random seed for all other tasks
+
         Must be called before first step (before any channels are added or rands are consumed)
 
         Parameters
         ----------
         seed : int or None
+        households_sample_seed: int or None
         """
 
         if self.step_name is not None or self.channels:
@@ -534,10 +539,14 @@ class Random(object):
 
         if seed is None:
             self.base_seed = np.random.RandomState().randint(_MAX_SEED, dtype=np.uint32)
-            logger.debug("Set random seed randomly to %s" % self.base_seed)
+            logger.info("Set random seed randomly to %s" % self.base_seed)
         else:
-            logger.debug("Set random seed base to %s" % seed)
+            logger.info("Set random seed base to %s" % seed)
             self.base_seed = seed
+
+        if households_sample_seed is not None:
+            logger.info("Set random seed sample households to %s" % households_sample_seed)
+            self.sample_households_seed = households_sample_seed
 
     def get_global_rng(self):
         """
@@ -567,8 +576,10 @@ class Random(object):
 
         exists to allow sampling of input tables consistent no matter what step they are called in
         """
-
-        seed = [self.base_seed, hash32(one_off_step_name)]
+        if one_off_step_name == "sample_households":
+            seed = [self.sample_households_seed]
+        else:
+            seed = [self.base_seed, hash32(one_off_step_name)]
         return np.random.RandomState(seed)
 
     def random_for_df(self, df, n=1):

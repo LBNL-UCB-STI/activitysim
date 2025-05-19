@@ -687,6 +687,9 @@ class Settings(PydanticBase, extra="allow", validate_assignment=True):
     rng_base_seed: Union[int, None] = 0
     """Base seed for pseudo-random number generator."""
 
+    sample_households_seed: Union[int, None] = 0
+    """Seed for pseudo-random number generator to be used when sampling the population."""
+
     duplicate_step_execution: Literal["error", "allow"] = "error"
     """
     How activitysim should handle attempts to re-run a step with the same name.

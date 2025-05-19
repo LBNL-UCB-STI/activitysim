@@ -177,7 +177,7 @@ class State:
         self.tracing.initialize()
         self._context["_salient_tables"] = {}
 
-    def _initialize_prng(self, base_seed=None):
+    def _initialize_prng(self, base_seed=None, household_sample_seed=None):
         from activitysim.core.random import Random
 
         self._context["prng"] = Random()
@@ -188,7 +188,14 @@ class State:
                 base_seed = 0
             else:
                 base_seed = self.settings.rng_base_seed
-        self._context["prng"].set_base_seed(base_seed)
+        if household_sample_seed is None:
+            try:
+                self.settings
+            except StateAccessError:
+                household_sample_seed = None
+            else:
+                household_sample_seed = self.settings.sample_households_seed
+        self._context["prng"].set_base_seed(seed=base_seed, households_sample_seed=household_sample_seed)
 
     def import_extensions(self, ext: str | Iterable[str] = None, append=True) -> None:
         """
