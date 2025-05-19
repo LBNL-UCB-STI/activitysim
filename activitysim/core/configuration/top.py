@@ -440,6 +440,14 @@ class Settings(PydanticBase, extra="allow", validate_assignment=True):
     single-checkpoint pipeline file, and deleting any subprocess pipelines.
     """
 
+    delete_pipeline_files_during_cleanup: bool = True
+    """
+    Default behavior is to leave checkpoint files during cleanup.
+
+    Override to false if you want the final consolidated pipeline files but 
+    also want to be able to restart in the middle of a run
+    """
+
     cleanup_trace_files_on_resume: bool = False
     """Clean all trace files when restarting a model from a checkpoint."""
 

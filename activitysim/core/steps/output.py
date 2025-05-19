@@ -172,9 +172,12 @@ def write_data_dictionary(state: workflow.State) -> None:
                 # no change to table in this checkpoint
                 if row.get(table_name, None) != checkpoint_name:
                     continue
-
-                # get the checkpointed version of the table
-                df = state.checkpoint.load_dataframe(table_name, checkpoint_name)
+                try:
+                    # get the checkpointed version of the table
+                    df = state.checkpoint.load_dataframe(table_name, checkpoint_name)
+                except RuntimeError as run_err:
+                    logger.warning(f"Skipping table {table_name} due to loading error {run_err.args[0]}")
+                    continue
 
                 if df.index.name and df.index.name not in df.columns:
                     df = df.reset_index()

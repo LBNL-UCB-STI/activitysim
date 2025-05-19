@@ -1079,7 +1079,7 @@ class Checkpoints(StateAccessor):
                 else:
                     logger.info(f"table {table_name!r}: ok")
 
-    def cleanup(self):
+    def cleanup(self, delete=True):
         """
         Remove intermediate checkpoints from pipeline.
 
@@ -1168,16 +1168,22 @@ class Checkpoints(StateAccessor):
                 ),
             )
 
-        logger.debug(f"deleting all pipeline files except {final_pipeline_file_path}")
-        self._obj.tracing.delete_output_files("h5", ignore=[final_pipeline_file_path])
-
         # delete all ParquetStore except final
         pqps = list(
             self._obj.filesystem.get_output_dir().glob(f"**/*{ParquetStore.extension}")
         )
-        for pqp in pqps:
-            if pqp.name != final_pipeline_file_path.name:
-                ParquetStore(pqp).wipe()
+
+        if delete:
+            logger.info(f"deleting all pipeline files except {final_pipeline_file_path}")
+            self._obj.tracing.delete_output_files("h5", ignore=[final_pipeline_file_path])
+
+
+            for pqp in pqps:
+                if pqp.name != final_pipeline_file_path.name:
+                    ParquetStore(pqp).wipe()
+        else:
+            logger.info(f"Created final pipeline files at {final_pipeline_file_path} but also"
+                        f" keeping intermediate ones, including {pqps[:5]}")
 
     def load_dataframe(self, table_name, checkpoint_name=None):
         """

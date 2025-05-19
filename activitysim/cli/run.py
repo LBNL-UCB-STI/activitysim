@@ -369,6 +369,7 @@ def run(args):
                     logger.info(f"NUMPY {cfg_key} {info_key}: {info[info_key]}")
 
     t0 = tracing.print_elapsed_time()
+    delete_pipeline_files_during_cleanup = state.settings.delete_pipeline_files_during_cleanup
 
     try:
         if state.settings.multiprocess:
@@ -388,7 +389,7 @@ def run(args):
             mp_tasks.run_multiprocess(state, injectables)
 
             if state.settings.cleanup_pipeline_after_run:
-                state.checkpoint.cleanup()
+                state.checkpoint.cleanup(delete = delete_pipeline_files_during_cleanup)
 
         else:
             logger.info("run single process simulation")
