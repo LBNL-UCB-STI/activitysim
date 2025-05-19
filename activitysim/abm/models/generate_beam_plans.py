@@ -1061,6 +1061,7 @@ def _sort_and_fix_sequences(trips, state):
 
     # Combine results
     result = pd.concat(all_fixed_trips) if all_fixed_trips else trips
+    result['activity_code'] = result['activity_code'].astype(np.int8)
 
     # Final validation and cleanup
     final_problem_persons, final_is_bad = identify_persons_with_problems(result)
