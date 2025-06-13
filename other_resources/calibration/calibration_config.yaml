@@ -41,6 +41,6 @@ sample_size_schedule:
   20 : 10000
 main_settings_file: /Users/zaneedell/git/activitysim-configs-sfbay/configs_extended/settings.yaml
 output_file: activitysim/examples/prototype_mtc/output/summarize/trips_by_mode_and_distance_bin.csv
-calibration_data_file: data/trip_counts_by_mode_and_distance_per_capita.csv
+calibration_data_file: trip_counts_by_mode_and_distance_per_capita.csv
 output_dir: /Users/zaneedell/git/activitysim-configs-sfbay/output
 configs_dir: /Users/zaneedell/git/activitysim-configs-sfbay/configs_extended

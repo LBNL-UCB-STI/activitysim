@@ -1,0 +1,5063 @@
+tunable_coefficients:
+  tour_mode_choice_coeffs_v3.csv:
+    coef_ivt_eatout_escort_othdiscr_othmaint_shopping_social:
+      initial_value: -0.0175
+      bounds:
+      - -0.002
+      - -0.05
+    coef_ivt_school_univ:
+      initial_value: -0.0224
+      bounds:
+      - -0.002
+      - -0.05
+    coef_ivt_work:
+      initial_value: -0.0134
+      bounds:
+      - -0.002
+      - -0.05
+    coef_ivt_atwork:
+      initial_value: -0.0188
+      bounds:
+      - -0.002
+      - -0.05
+#    coef_topology_walk_multiplier_eatout_escort_othdiscr_othmaint_school_shopping_social_univ_work:
+#      initial_value: 15.0
+#      bounds:
+#      - 10.0
+#      - 17.0
+#    coef_topology_walk_multiplier_atwork:
+#      initial_value: 7.5
+#      bounds:
+#      - 2.0
+#      - 9.0
+#    coef_topology_bike_multiplier_eatout_escort_othdiscr_othmaint_school_shopping_social_univ_work:
+#      initial_value: 20.0
+#      bounds:
+#      - 15.0
+#      - 22.0
+#    coef_topology_bike_multiplier_atwork:
+#      initial_value: 10.0
+#      bounds:
+#      - 5.0
+#      - 12.0
+#    coef_topology_trn_multiplier_eatout_escort_othdiscr_othmaint_school_shopping_social_univ_work:
+#      initial_value: 2.2
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    coef_topology_trn_multiplier_atwork:
+#      initial_value: 2.0
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    coef_age1619_da_multiplier_eatout_escort_othdiscr_othmaint_shopping_social_work:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_age1619_da_multiplier_school_univ:
+#      initial_value: -1.3813
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    coef_age1619_da_multiplier_atwork:
+#      initial_value: 0.0032336
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_age010_trn_multiplier_eatout_escort_othdiscr_othmaint_shopping_social_work:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_age010_trn_multiplier_school_univ:
+#      initial_value: -1.5548
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    coef_age010_trn_multiplier_atwork:
+#      initial_value: 0.000722
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_age16p_sr_multiplier_eatout_escort_othdiscr_othmaint_shopping_social:
+#      initial_value: -1.366
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    coef_age16p_sr_multiplier_school_univ_work_atwork:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_hhsize1_sr_multiplier_eatout_escort_othdiscr_othmaint_school_shopping_social_univ_atwork:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_hhsize1_sr_multiplier_work:
+#      initial_value: -18.05191231
+#      bounds:
+#      - -23.0
+#      - -16.0
+#    coef_hhsize2_sr_multiplier_eatout_escort_othdiscr_othmaint_shopping_social_work_atwork:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_hhsize2_sr_multiplier_school_univ:
+#      initial_value: -0.6359
+#      bounds:
+#      - -5.0
+#      - 2.0
+    walk_ASC_no_auto_eatout:
+      initial_value: -1.491941333
+      bounds:
+      - -6.0
+      - 1.0
+    walk_ASC_no_auto_escort:
+      initial_value: 19.834108352661133
+      bounds:
+      - 14.0
+      - 21.0
+    walk_ASC_no_auto_othdiscr:
+      initial_value: -13.27774715
+      bounds:
+      - -18.0
+      - -11.0
+    walk_ASC_no_auto_othmaint:
+      initial_value: -13.99618816
+      bounds:
+      - -18.0
+      - -11.0
+    walk_ASC_no_auto_school:
+      initial_value: 31.570049285888672
+      bounds:
+      - 26.0
+      - 33.0
+    walk_ASC_no_auto_shopping:
+      initial_value: 15.489421844482422
+      bounds:
+      - 10.0
+      - 17.0
+    walk_ASC_no_auto_social:
+      initial_value: -7.029916763
+      bounds:
+      - -12.0
+      - -5.0
+    walk_ASC_no_auto_univ:
+      initial_value: -5.209798813
+      bounds:
+      - -10.0
+      - -3.0
+    walk_ASC_no_auto_work:
+      initial_value: -12.79683781
+      bounds:
+      - -17.0
+      - -10.0
+    walk_ASC_no_auto_atwork:
+      initial_value: 6.669213
+      bounds:
+      - 1.0
+      - 8.0
+    walk_ASC_auto_deficient_eatout:
+      initial_value: 8.714327812194824
+      bounds:
+      - 3.0
+      - 10.0
+    walk_ASC_auto_deficient_escort:
+      initial_value: 8.400849342346191
+      bounds:
+      - 3.0
+      - 10.0
+    walk_ASC_auto_deficient_othdiscr:
+      initial_value: -17.23918724
+      bounds:
+      - -22.0
+      - -15.0
+    walk_ASC_auto_deficient_othmaint:
+      initial_value: -9.614654541
+      bounds:
+      - -14.0
+      - -7.0
+    walk_ASC_auto_deficient_school:
+      initial_value: -0.259806991
+      bounds:
+      - -5.0
+      - 2.0
+    walk_ASC_auto_deficient_shopping:
+      initial_value: 6.494946002960205
+      bounds:
+      - 1.0
+      - 8.0
+    walk_ASC_auto_deficient_social:
+      initial_value: -5.184986591
+      bounds:
+      - -10.0
+      - -3.0
+    walk_ASC_auto_deficient_univ:
+      initial_value: -15.38105583
+      bounds:
+      - -20.0
+      - -13.0
+    walk_ASC_auto_deficient_work:
+      initial_value: -1.923326612
+      bounds:
+      - -6.0
+      - 1.0
+    walk_ASC_auto_deficient_atwork:
+      initial_value: 0.92546093
+      bounds:
+      - -5.0
+      - 2.0
+    walk_ASC_auto_sufficient_eatout:
+      initial_value: 2.0336148738861084
+      bounds:
+      - -3.0
+      - 4.0
+    walk_ASC_auto_sufficient_escort:
+      initial_value: -3.476354837
+      bounds:
+      - -8.0
+      - -1.0
+    walk_ASC_auto_sufficient_othdiscr:
+      initial_value: 0.8849702477455139
+      bounds:
+      - -5.0
+      - 2.0
+    walk_ASC_auto_sufficient_othmaint:
+      initial_value: 0.5769327878952026
+      bounds:
+      - -5.0
+      - 2.0
+    walk_ASC_auto_sufficient_school:
+      initial_value: 1.6634445190429688
+      bounds:
+      - -4.0
+      - 3.0
+    walk_ASC_auto_sufficient_shopping:
+      initial_value: -7.765168667
+      bounds:
+      - -12.0
+      - -5.0
+    walk_ASC_auto_sufficient_social:
+      initial_value: 5.422262668609619
+      bounds:
+      - 0.0
+      - 7.0
+    walk_ASC_auto_sufficient_univ:
+      initial_value: 4.097455024719238
+      bounds:
+      - -1.0
+      - 6.0
+    walk_ASC_auto_sufficient_work:
+      initial_value: 4.044371128082275
+      bounds:
+      - -1.0
+      - 6.0
+    walk_ASC_auto_sufficient_atwork:
+      initial_value: 0.677216
+      bounds:
+      - -5.0
+      - 2.0
+#    bike_ASC_no_auto_eatout:
+#      initial_value: -12.28494263
+#      bounds:
+#      - -17.0
+#      - -10.0
+#    bike_ASC_no_auto_escort:
+#      initial_value: -3.361364841
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    bike_ASC_no_auto_othdiscr:
+#      initial_value: -16.78245544
+#      bounds:
+#      - -21.0
+#      - -14.0
+#    bike_ASC_no_auto_othmaint:
+#      initial_value: -1.589131713
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    bike_ASC_no_auto_school:
+#      initial_value: -5.875105858
+#      bounds:
+#      - -10.0
+#      - -3.0
+#    bike_ASC_no_auto_shopping:
+#      initial_value: -13.22585297
+#      bounds:
+#      - -18.0
+#      - -11.0
+#    bike_ASC_no_auto_social:
+#      initial_value: -16.08203125
+#      bounds:
+#      - -21.0
+#      - -14.0
+#    bike_ASC_no_auto_univ:
+#      initial_value: -7.033092976
+#      bounds:
+#      - -12.0
+#      - -5.0
+#    bike_ASC_no_auto_work:
+#      initial_value: 6.617354393005371
+#      bounds:
+#      - 1.0
+#      - 8.0
+#    bike_ASC_no_auto_atwork:
+#      initial_value: -0.90725845
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    bike_ASC_auto_deficient_eatout:
+#      initial_value: -16.28821182
+#      bounds:
+#      - -21.0
+#      - -14.0
+#    bike_ASC_auto_deficient_escort:
+#      initial_value: 5.705061912536621
+#      bounds:
+#      - 0.0
+#      - 7.0
+#    bike_ASC_auto_deficient_othdiscr:
+#      initial_value: -7.888943672
+#      bounds:
+#      - -12.0
+#      - -5.0
+#    bike_ASC_auto_deficient_othmaint:
+#      initial_value: -10.64657402
+#      bounds:
+#      - -15.0
+#      - -8.0
+#    bike_ASC_auto_deficient_school:
+#      initial_value: -16.60024834
+#      bounds:
+#      - -21.0
+#      - -14.0
+#    bike_ASC_auto_deficient_shopping:
+#      initial_value: -15.87673759
+#      bounds:
+#      - -20.0
+#      - -13.0
+#    bike_ASC_auto_deficient_social:
+#      initial_value: -12.80515003
+#      bounds:
+#      - -17.0
+#      - -10.0
+#    bike_ASC_auto_deficient_univ:
+#      initial_value: -16.15953827
+#      bounds:
+#      - -21.0
+#      - -14.0
+#    bike_ASC_auto_deficient_work:
+#      initial_value: 14.211175918579102
+#      bounds:
+#      - 9.0
+#      - 16.0
+#    bike_ASC_auto_deficient_atwork:
+#      initial_value: -0.8074083
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    bike_ASC_auto_sufficient_eatout:
+#      initial_value: -12.23059082
+#      bounds:
+#      - -17.0
+#      - -10.0
+#    bike_ASC_auto_sufficient_escort:
+#      initial_value: -25.28166771
+#      bounds:
+#      - -30.0
+#      - -23.0
+#    bike_ASC_auto_sufficient_othdiscr:
+#      initial_value: -1.88364625
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    bike_ASC_auto_sufficient_othmaint:
+#      initial_value: -3.48109889
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    bike_ASC_auto_sufficient_school:
+#      initial_value: -12.35639954
+#      bounds:
+#      - -17.0
+#      - -10.0
+#    bike_ASC_auto_sufficient_shopping:
+#      initial_value: -13.06637764
+#      bounds:
+#      - -18.0
+#      - -11.0
+#    bike_ASC_auto_sufficient_social:
+#      initial_value: -10.50222778
+#      bounds:
+#      - -15.0
+#      - -8.0
+#    bike_ASC_auto_sufficient_univ:
+#      initial_value: 2.2384018898010254
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    bike_ASC_auto_sufficient_work:
+#      initial_value: -23.278162
+#      bounds:
+#      - -28.0
+#      - -21.0
+#    bike_ASC_auto_sufficient_atwork:
+#      initial_value: 15.72017
+#      bounds:
+#      - 10.0
+#      - 17.0
+    sr2_ASC_no_auto_all:
+      initial_value: 0.0
+      bounds:
+      - -5.0
+      - 2.0
+    sr2_ASC_auto_deficient_eatout:
+      initial_value: -4.811264992
+      bounds:
+      - -9.0
+      - -2.0
+    sr2_ASC_auto_deficient_escort:
+      initial_value: 0.0
+      bounds:
+      - -5.0
+      - 2.0
+    sr2_ASC_auto_deficient_othdiscr:
+      initial_value: 0.29651057720184326
+      bounds:
+      - -5.0
+      - 2.0
+    sr2_ASC_auto_deficient_othmaint:
+      initial_value: 12.412137985229492
+      bounds:
+      - 7.0
+      - 14.0
+    sr2_ASC_auto_deficient_school:
+      initial_value: -8.372909546
+      bounds:
+      - -13.0
+      - -6.0
+    sr2_ASC_auto_deficient_shopping:
+      initial_value: -3.731852055
+      bounds:
+      - -8.0
+      - -1.0
+    sr2_ASC_auto_deficient_social:
+      initial_value: 25.446170806884766
+      bounds:
+      - 20.0
+      - 27.0
+    sr2_ASC_auto_deficient_univ:
+      initial_value: -13.92011547
+      bounds:
+      - -18.0
+      - -11.0
+    sr2_ASC_auto_deficient_work:
+      initial_value: 13.575478553771973
+      bounds:
+      - 8.0
+      - 15.0
+    sr2_ASC_auto_deficient_atwork:
+      initial_value: -2.1102421
+      bounds:
+      - -7.0
+      - 0.0
+    sr2_ASC_auto_sufficient_eatout:
+      initial_value: 0.9112170338630676
+      bounds:
+      - -5.0
+      - 2.0
+    sr2_ASC_auto_sufficient_escort:
+      initial_value: 0.0
+      bounds:
+      - -5.0
+      - 2.0
+    sr2_ASC_auto_sufficient_othdiscr:
+      initial_value: 1.9953718185424805
+      bounds:
+      - -4.0
+      - 3.0
+    sr2_ASC_auto_sufficient_othmaint:
+      initial_value: 0.41315752267837524
+      bounds:
+      - -5.0
+      - 2.0
+    sr2_ASC_auto_sufficient_school:
+      initial_value: 1.4424705505371094
+      bounds:
+      - -4.0
+      - 3.0
+    sr2_ASC_auto_sufficient_shopping:
+      initial_value: 0.5306513905525208
+      bounds:
+      - -5.0
+      - 2.0
+    sr2_ASC_auto_sufficient_social:
+      initial_value: 0.9403549432754517
+      bounds:
+      - -5.0
+      - 2.0
+    sr2_ASC_auto_sufficient_univ:
+      initial_value: 0.25325921177864075
+      bounds:
+      - -5.0
+      - 2.0
+    sr2_ASC_auto_sufficient_work:
+      initial_value: -5.458568573
+      bounds:
+      - -10.0
+      - -3.0
+    sr2_ASC_auto_sufficient_atwork:
+      initial_value: -1.4450618
+      bounds:
+      - -6.0
+      - 1.0
+    sr3p_ASC_no_auto_eatout:
+      initial_value: 22.812694549560547
+      bounds:
+      - 17.0
+      - 24.0
+    sr3p_ASC_no_auto_escort:
+      initial_value: -7.421368599
+      bounds:
+      - -12.0
+      - -5.0
+    sr3p_ASC_no_auto_othdiscr:
+      initial_value: 28.894943237304688
+      bounds:
+      - 23.0
+      - 30.0
+    sr3p_ASC_no_auto_othmaint:
+      initial_value: 1.0649608373641968
+      bounds:
+      - -4.0
+      - 3.0
+    sr3p_ASC_no_auto_school:
+      initial_value: -13.94913483
+      bounds:
+      - -18.0
+      - -11.0
+    sr3p_ASC_no_auto_shopping:
+      initial_value: 4.336791038513184
+      bounds:
+      - -1.0
+      - 6.0
+    sr3p_ASC_no_auto_social:
+      initial_value: 18.65226936340332
+      bounds:
+      - 13.0
+      - 20.0
+    sr3p_ASC_no_auto_univ:
+      initial_value: -11.41973877
+      bounds:
+      - -16.0
+      - -9.0
+    sr3p_ASC_no_auto_work:
+      initial_value: -18.43250656
+      bounds:
+      - -23.0
+      - -16.0
+    sr3p_ASC_no_auto_atwork:
+      initial_value: 0.5826626
+      bounds:
+      - -5.0
+      - 2.0
+    sr3p_ASC_auto_deficient_eatout:
+      initial_value: -9.155963898
+      bounds:
+      - -14.0
+      - -7.0
+    sr3p_ASC_auto_deficient_escort:
+      initial_value: 2.151855469
+      bounds:
+      - -3.0
+      - 4.0
+    sr3p_ASC_auto_deficient_othdiscr:
+      initial_value: 34.59121322631836
+      bounds:
+      - 29.0
+      - 36.0
+    sr3p_ASC_auto_deficient_othmaint:
+      initial_value: -12.70749569
+      bounds:
+      - -17.0
+      - -10.0
+    sr3p_ASC_auto_deficient_school:
+      initial_value: -5.616947651
+      bounds:
+      - -10.0
+      - -3.0
+    sr3p_ASC_auto_deficient_shopping:
+      initial_value: -5.249391556
+      bounds:
+      - -10.0
+      - -3.0
+    sr3p_ASC_auto_deficient_social:
+      initial_value: -4.664608955
+      bounds:
+      - -9.0
+      - -2.0
+    sr3p_ASC_auto_deficient_univ:
+      initial_value: -13.93438721
+      bounds:
+      - -18.0
+      - -11.0
+    sr3p_ASC_auto_deficient_work:
+      initial_value: 9.213142395019531
+      bounds:
+      - 4.0
+      - 11.0
+    sr3p_ASC_auto_deficient_atwork:
+      initial_value: -2.514658
+      bounds:
+      - -7.0
+      - 0.0
+    sr3p_ASC_auto_sufficient_eatout:
+      initial_value: 0.5884100198745728
+      bounds:
+      - -5.0
+      - 2.0
+    sr3p_ASC_auto_sufficient_escort:
+      initial_value: -0.467015147
+      bounds:
+      - -5.0
+      - 2.0
+    sr3p_ASC_auto_sufficient_othdiscr:
+      initial_value: -12.46940613
+      bounds:
+      - -17.0
+      - -10.0
+    sr3p_ASC_auto_sufficient_othmaint:
+      initial_value: -0.136629149
+      bounds:
+      - -5.0
+      - 2.0
+    sr3p_ASC_auto_sufficient_school:
+      initial_value: 1.8787201642990112
+      bounds:
+      - -4.0
+      - 3.0
+    sr3p_ASC_auto_sufficient_shopping:
+      initial_value: 0.22305332124233246
+      bounds:
+      - -5.0
+      - 2.0
+    sr3p_ASC_auto_sufficient_social:
+      initial_value: 0.7751163840293884
+      bounds:
+      - -5.0
+      - 2.0
+    sr3p_ASC_auto_sufficient_univ:
+      initial_value: 0.25643718242645264
+      bounds:
+      - -5.0
+      - 2.0
+    sr3p_ASC_auto_sufficient_work:
+      initial_value: -3.314520597
+      bounds:
+      - -8.0
+      - -1.0
+    sr3p_ASC_auto_sufficient_atwork:
+      initial_value: -1.652174
+      bounds:
+      - -6.0
+      - 1.0
+    walk_transit_ASC_no_auto_eatout:
+      initial_value: -18.05977249
+      bounds:
+      - -23.0
+      - -16.0
+    walk_transit_ASC_no_auto_escort:
+      initial_value: -2.911773205
+      bounds:
+      - -7.0
+      - 0.0
+    walk_transit_ASC_no_auto_othdiscr:
+      initial_value: -21.38959694
+      bounds:
+      - -26.0
+      - -19.0
+    walk_transit_ASC_no_auto_othmaint:
+      initial_value: 6.362695217132568
+      bounds:
+      - 1.0
+      - 8.0
+    walk_transit_ASC_no_auto_school:
+      initial_value: -2.142196178
+      bounds:
+      - -7.0
+      - 0.0
+    walk_transit_ASC_no_auto_shopping:
+      initial_value: -7.829512119
+      bounds:
+      - -12.0
+      - -5.0
+    walk_transit_ASC_no_auto_social:
+      initial_value: -17.54115105
+      bounds:
+      - -22.0
+      - -15.0
+    walk_transit_ASC_no_auto_univ:
+      initial_value: 21.484037399291992
+      bounds:
+      - 16.0
+      - 23.0
+    walk_transit_ASC_no_auto_work:
+      initial_value: 29.476585388183594
+      bounds:
+      - 24.0
+      - 31.0
+    walk_transit_ASC_no_auto_atwork:
+      initial_value: 2.7041876
+      bounds:
+      - -3.0
+      - 4.0
+    walk_transit_ASC_auto_deficient_eatout:
+      initial_value: -13.24145222
+      bounds:
+      - -18.0
+      - -11.0
+    walk_transit_ASC_auto_deficient_escort:
+      initial_value: -18.75063705
+      bounds:
+      - -23.0
+      - -16.0
+    walk_transit_ASC_auto_deficient_othdiscr:
+      initial_value: -14.83991432
+      bounds:
+      - -19.0
+      - -12.0
+    walk_transit_ASC_auto_deficient_othmaint:
+      initial_value: -17.41578484
+      bounds:
+      - -22.0
+      - -15.0
+    walk_transit_ASC_auto_deficient_school:
+      initial_value: 11.031272888183594
+      bounds:
+      - 6.0
+      - 13.0
+    walk_transit_ASC_auto_deficient_shopping:
+      initial_value: -9.214422226
+      bounds:
+      - -14.0
+      - -7.0
+    walk_transit_ASC_auto_deficient_social:
+      initial_value: -9.04811573
+      bounds:
+      - -14.0
+      - -7.0
+    walk_transit_ASC_auto_deficient_univ:
+      initial_value: -1.85873878
+      bounds:
+      - -6.0
+      - 1.0
+    walk_transit_ASC_auto_deficient_work:
+      initial_value: -6.372811317
+      bounds:
+      - -11.0
+      - -4.0
+    walk_transit_ASC_auto_deficient_atwork:
+      initial_value: -2.9988291
+      bounds:
+      - -7.0
+      - 0.0
+    walk_transit_ASC_auto_sufficient_eatout:
+      initial_value: -24.2243309
+      bounds:
+      - -29.0
+      - -22.0
+    walk_transit_ASC_auto_sufficient_escort:
+      initial_value: -6.950210571
+      bounds:
+      - -11.0
+      - -4.0
+    walk_transit_ASC_auto_sufficient_othdiscr:
+      initial_value: -2.794331551
+      bounds:
+      - -7.0
+      - 0.0
+    walk_transit_ASC_auto_sufficient_othmaint:
+      initial_value: -5.489648342
+      bounds:
+      - -10.0
+      - -3.0
+    walk_transit_ASC_auto_sufficient_school:
+      initial_value: -6.162548065
+      bounds:
+      - -11.0
+      - -4.0
+    walk_transit_ASC_auto_sufficient_shopping:
+      initial_value: -4.817057133
+      bounds:
+      - -9.0
+      - -2.0
+    walk_transit_ASC_auto_sufficient_social:
+      initial_value: 2.6792826652526855
+      bounds:
+      - -3.0
+      - 4.0
+    walk_transit_ASC_auto_sufficient_univ:
+      initial_value: 0.5944441556930542
+      bounds:
+      - -5.0
+      - 2.0
+    walk_transit_ASC_auto_sufficient_work:
+      initial_value: -5.272944927
+      bounds:
+      - -10.0
+      - -3.0
+    walk_transit_ASC_auto_sufficient_atwork:
+      initial_value: -3.401027
+      bounds:
+      - -8.0
+      - -1.0
+    drive_transit_ASC_no_auto_all:
+      initial_value: 0.0
+      bounds:
+      - -5.0
+      - 2.0
+    drive_transit_ASC_auto_deficient_eatout:
+      initial_value: -15.81105709
+      bounds:
+      - -20.0
+      - -13.0
+    drive_transit_ASC_auto_deficient_escort:
+      initial_value: -15.76831818
+      bounds:
+      - -20.0
+      - -13.0
+    drive_transit_ASC_auto_deficient_othdiscr:
+      initial_value: -11.18155384
+      bounds:
+      - -16.0
+      - -9.0
+    drive_transit_ASC_auto_deficient_othmaint:
+      initial_value: -12.85981846
+      bounds:
+      - -17.0
+      - -10.0
+    drive_transit_ASC_auto_deficient_school:
+      initial_value: -18.86919594
+      bounds:
+      - -23.0
+      - -16.0
+    drive_transit_ASC_auto_deficient_shopping:
+      initial_value: -11.26554871
+      bounds:
+      - -16.0
+      - -9.0
+    drive_transit_ASC_auto_deficient_social:
+      initial_value: -9.961061478
+      bounds:
+      - -14.0
+      - -7.0
+    drive_transit_ASC_auto_deficient_univ:
+      initial_value: -26.73368263
+      bounds:
+      - -31.0
+      - -24.0
+    drive_transit_ASC_auto_deficient_work:
+      initial_value: 9.354217529296875
+      bounds:
+      - 4.0
+      - 11.0
+    drive_transit_ASC_auto_deficient_atwork:
+      initial_value: -998.8196
+      bounds:
+      - -1003.0
+      - -996.0
+    drive_transit_ASC_auto_sufficient_eatout:
+      initial_value: -10.91447544
+      bounds:
+      - -15.0
+      - -8.0
+    drive_transit_ASC_auto_sufficient_escort:
+      initial_value: -26.07130623
+      bounds:
+      - -31.0
+      - -24.0
+    drive_transit_ASC_auto_sufficient_othdiscr:
+      initial_value: -5.231681824
+      bounds:
+      - -10.0
+      - -3.0
+    drive_transit_ASC_auto_sufficient_othmaint:
+      initial_value: -11.67416954
+      bounds:
+      - -16.0
+      - -9.0
+    drive_transit_ASC_auto_sufficient_school:
+      initial_value: -22.75538826
+      bounds:
+      - -27.0
+      - -20.0
+    drive_transit_ASC_auto_sufficient_shopping:
+      initial_value: -10.62800884
+      bounds:
+      - -15.0
+      - -8.0
+    drive_transit_ASC_auto_sufficient_social:
+      initial_value: -2.139929771
+      bounds:
+      - -7.0
+      - 0.0
+    drive_transit_ASC_auto_sufficient_univ:
+      initial_value: 2.4619836807250977
+      bounds:
+      - -3.0
+      - 4.0
+    drive_transit_ASC_auto_sufficient_work:
+      initial_value: -14.83181763
+      bounds:
+      - -19.0
+      - -12.0
+    drive_transit_ASC_auto_sufficient_atwork:
+      initial_value: -999.21466
+      bounds:
+      - -1004.0
+      - -997.0
+#    taxi_ASC_no_auto_eatout_othdiscr_social:
+#      initial_value: 0.9923
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    taxi_ASC_no_auto_escort_othmaint_shopping:
+#      initial_value: 1.8939
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    taxi_ASC_no_auto_school_univ:
+#      initial_value: -7.0
+#      bounds:
+#      - -12.0
+#      - -5.0
+#    taxi_ASC_no_auto_work:
+#      initial_value: -4.357495308
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    taxi_ASC_no_auto_atwork:
+#      initial_value: 4.1021
+#      bounds:
+#      - -1.0
+#      - 6.0
+#    taxi_ASC_auto_deficient_eatout_othdiscr_social:
+#      initial_value: -3.1317
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    taxi_ASC_auto_deficient_escort_othmaint_shopping:
+#      initial_value: 0.1766
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    taxi_ASC_auto_deficient_school:
+#      initial_value: -14.23951912
+#      bounds:
+#      - -19.0
+#      - -12.0
+#    taxi_ASC_auto_deficient_univ:
+#      initial_value: 13.745699882507324
+#      bounds:
+#      - 8.0
+#      - 15.0
+#    taxi_ASC_auto_deficient_work:
+#      initial_value: 4.998227119445801
+#      bounds:
+#      - -1.0
+#      - 6.0
+#    taxi_ASC_auto_deficient_atwork:
+#      initial_value: -4.4046
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    taxi_ASC_auto_sufficient_eatout_othdiscr_social:
+#      initial_value: -3.0374
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    taxi_ASC_auto_sufficient_escort_othmaint_shopping:
+#      initial_value: -1.8055
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    taxi_ASC_auto_sufficient_school:
+#      initial_value: -15.02412987
+#      bounds:
+#      - -20.0
+#      - -13.0
+#    taxi_ASC_auto_sufficient_univ:
+#      initial_value: -0.597069204
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    taxi_ASC_auto_sufficient_work:
+#      initial_value: -6.530412674
+#      bounds:
+#      - -11.0
+#      - -4.0
+#    taxi_ASC_auto_sufficient_atwork:
+#      initial_value: -2.8804
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    tnc_single_ASC_no_auto_eatout_othdiscr_social:
+#      initial_value: 1.6852
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    tnc_single_ASC_no_auto_escort_othmaint_shopping:
+#      initial_value: 1.8605
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    tnc_single_ASC_no_auto_school:
+#      initial_value: -21.63360786
+#      bounds:
+#      - -26.0
+#      - -19.0
+#    tnc_single_ASC_no_auto_univ:
+#      initial_value: -6.070859909
+#      bounds:
+#      - -11.0
+#      - -4.0
+#    tnc_single_ASC_no_auto_work:
+#      initial_value: -3.592834711
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    tnc_single_ASC_no_auto_atwork:
+#      initial_value: 4.4982
+#      bounds:
+#      - -1.0
+#      - 6.0
+#    tnc_single_ASC_auto_deficient_eatout_othdiscr_social:
+#      initial_value: -2.9623
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    tnc_single_ASC_auto_deficient_escort_othmaint_shopping:
+#      initial_value: 0.6748
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    tnc_single_ASC_auto_deficient_school:
+#      initial_value: -14.15055752
+#      bounds:
+#      - -19.0
+#      - -12.0
+#    tnc_single_ASC_auto_deficient_univ:
+#      initial_value: -9.706098557
+#      bounds:
+#      - -14.0
+#      - -7.0
+#    tnc_single_ASC_auto_deficient_work:
+#      initial_value: -4.815392017
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    tnc_single_ASC_auto_deficient_atwork:
+#      initial_value: -3.7626
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    tnc_single_ASC_auto_sufficient_eatout_othdiscr_social:
+#      initial_value: -2.3239
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    tnc_single_ASC_auto_sufficient_escort_othmaint_shopping:
+#      initial_value: -1.45
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    tnc_single_ASC_auto_sufficient_school:
+#      initial_value: -15.43281078
+#      bounds:
+#      - -20.0
+#      - -13.0
+#    tnc_single_ASC_auto_sufficient_univ:
+#      initial_value: 3.083223581314087
+#      bounds:
+#      - -2.0
+#      - 5.0
+#    tnc_single_ASC_auto_sufficient_work:
+#      initial_value: -3.436670065
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    tnc_single_ASC_auto_sufficient_atwork:
+#      initial_value: -2.7988
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    tnc_shared_ASC_no_auto_eatout_othdiscr_social:
+#      initial_value: 0.6464
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    tnc_shared_ASC_no_auto_escort_othmaint_shopping:
+#      initial_value: 0.9361
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    tnc_shared_ASC_no_auto_school:
+#      initial_value: -19.83625603
+#      bounds:
+#      - -24.0
+#      - -17.0
+#    tnc_shared_ASC_no_auto_univ:
+#      initial_value: -8.29254818
+#      bounds:
+#      - -13.0
+#      - -6.0
+#    tnc_shared_ASC_no_auto_work:
+#      initial_value: -5.911614418
+#      bounds:
+#      - -10.0
+#      - -3.0
+#    tnc_shared_ASC_no_auto_atwork:
+#      initial_value: 3.3672
+#      bounds:
+#      - -2.0
+#      - 5.0
+#    tnc_shared_ASC_auto_deficient_eatout_othdiscr_social:
+#      initial_value: -4.3576
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    tnc_shared_ASC_auto_deficient_escort_othmaint_shopping:
+#      initial_value: -0.3863
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    tnc_shared_ASC_auto_deficient_school:
+#      initial_value: -16.5498085
+#      bounds:
+#      - -21.0
+#      - -14.0
+#    tnc_shared_ASC_auto_deficient_univ:
+#      initial_value: -10.97316647
+#      bounds:
+#      - -15.0
+#      - -8.0
+#    tnc_shared_ASC_auto_deficient_work:
+#      initial_value: -13.4830122
+#      bounds:
+#      - -18.0
+#      - -11.0
+#    tnc_shared_ASC_auto_deficient_atwork:
+#      initial_value: -4.5089
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    tnc_shared_ASC_auto_sufficient_eatout_othdiscr_social:
+#      initial_value: -3.6638
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    tnc_shared_ASC_auto_sufficient_escort_othmaint_shopping:
+#      initial_value: -2.4365
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    tnc_shared_ASC_auto_sufficient_school:
+#      initial_value: -17.75792313
+#      bounds:
+#      - -22.0
+#      - -15.0
+#    tnc_shared_ASC_auto_sufficient_univ:
+#      initial_value: 2.5381147861480713
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    tnc_shared_ASC_auto_sufficient_work:
+#      initial_value: -4.646265984
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    tnc_shared_ASC_auto_sufficient_atwork:
+#      initial_value: -3.5397
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    joint_walk_ASC_no_auto_all:
+#      initial_value: -0.21274701
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    joint_walk_ASC_auto_deficient_all:
+#      initial_value: -1.9607706
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    joint_walk_ASC_auto_sufficient_all:
+#      initial_value: -3.2352157
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    joint_bike_ASC_no_auto_all:
+#      initial_value: -2.8671598
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    joint_bike_ASC_auto_deficient_all:
+#      initial_value: -6.076415
+#      bounds:
+#      - -11.0
+#      - -4.0
+#    joint_bike_ASC_auto_sufficient_all:
+#      initial_value: -6.3760657
+#      bounds:
+#      - -11.0
+#      - -4.0
+#    joint_sr2_ASC_no_auto_all:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    joint_sr2_ASC_auto_deficient_all:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    joint_sr2_ASC_auto_sufficient_all:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    joint_sr3p_ASC_no_auto_all:
+#      initial_value: 0.5630671
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    joint_sr3p_ASC_auto_deficient_all:
+#      initial_value: -1.8841692
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    joint_sr3p_ASC_auto_sufficient_all:
+#      initial_value: -2.234826
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    joint_walk_transit_ASC_no_auto_all:
+#      initial_value: 0.62292415
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    joint_walk_transit_ASC_auto_deficient_all:
+#      initial_value: -5.1634483
+#      bounds:
+#      - -10.0
+#      - -3.0
+#    joint_walk_transit_ASC_auto_sufficient_all:
+#      initial_value: -18.264534
+#      bounds:
+#      - -23.0
+#      - -16.0
+#    joint_drive_transit_ASC_no_auto_all:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    joint_drive_transit_ASC_auto_deficient_all:
+#      initial_value: -5.9632215
+#      bounds:
+#      - -10.0
+#      - -3.0
+#    joint_drive_transit_ASC_auto_sufficient_all:
+#      initial_value: -8.045285
+#      bounds:
+#      - -13.0
+#      - -6.0
+#    joint_taxi_ASC_no_auto_all:
+#      initial_value: -4.5792
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    joint_taxi_ASC_auto_deficient_all:
+#      initial_value: -9.8157
+#      bounds:
+#      - -14.0
+#      - -7.0
+#    joint_taxi_ASC_auto_sufficient_all:
+#      initial_value: -11.7099
+#      bounds:
+#      - -16.0
+#      - -9.0
+#    joint_tnc_single_ASC_no_auto_all:
+#      initial_value: -4.4917
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    joint_tnc_single_ASC_auto_deficient_all:
+#      initial_value: -9.8961
+#      bounds:
+#      - -14.0
+#      - -7.0
+#    joint_tnc_single_ASC_auto_sufficient_all:
+#      initial_value: -14.0159
+#      bounds:
+#      - -19.0
+#      - -12.0
+#    joint_tnc_shared_ASC_no_auto_all:
+#      initial_value: -4.3002
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    joint_tnc_shared_ASC_auto_deficient_all:
+#      initial_value: -11.1572
+#      bounds:
+#      - -16.0
+#      - -9.0
+#    joint_tnc_shared_ASC_auto_sufficient_all:
+#      initial_value: -13.205
+#      bounds:
+#      - -18.0
+#      - -11.0
+#    local_bus_ASC_eatout_escort_othdiscr_othmaint_shopping_social_atwork:
+#      initial_value: -0.090703264
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    local_bus_ASC_school_univ:
+#      initial_value: -0.06508621
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    local_bus_ASC_work:
+#      initial_value: 5.163858890533447
+#      bounds:
+#      - 0.0
+#      - 7.0
+#    walk_light_rail_ASC_eatout_escort_othdiscr_othmaint_shopping_social_atwork:
+#      initial_value: 0.76895475
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    walk_light_rail_ASC_school_univ:
+#      initial_value: 1.6814003
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    walk_light_rail_ASC_work:
+#      initial_value: 0.019281595945358276
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    drive_light_rail_ASC_eatout_escort_othdiscr_othmaint_shopping_social_atwork:
+#      initial_value: 0.76895475
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    drive_light_rail_ASC_school_univ:
+#      initial_value: 1.6814003
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    drive_light_rail_ASC_work:
+#      initial_value: -9.718412399
+#      bounds:
+#      - -14.0
+#      - -7.0
+#    walk_ferry_ASC_eatout_escort_othdiscr_othmaint_shopping_social_atwork:
+#      initial_value: 0.9401238
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    walk_ferry_ASC_school_univ:
+#      initial_value: 2.0202317
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    walk_ferry_ASC_work:
+#      initial_value: -5.845720768
+#      bounds:
+#      - -10.0
+#      - -3.0
+#    drive_ferry_ASC_eatout_escort_othdiscr_othmaint_shopping_social_atwork:
+#      initial_value: 0.9401238
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    drive_ferry_ASC_school_univ:
+#      initial_value: 2.0202317
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    drive_ferry_ASC_work:
+#      initial_value: 34.29555892944336
+#      bounds:
+#      - 29.0
+#      - 36.0
+#    express_bus_ASC_eatout_escort_othdiscr_othmaint_shopping_social_atwork:
+#      initial_value: 0.9692316
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    express_bus_ASC_school_univ:
+#      initial_value: 0.32496938
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    express_bus_ASC_work:
+#      initial_value: -14.39562893
+#      bounds:
+#      - -19.0
+#      - -12.0
+#    heavy_rail_ASC_eatout_escort_othdiscr_othmaint_shopping_social_atwork:
+#      initial_value: 0.7706121
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    heavy_rail_ASC_school_univ:
+#      initial_value: 0.96200377
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    heavy_rail_ASC_work:
+#      initial_value: -11.78487587
+#      bounds:
+#      - -16.0
+#      - -9.0
+#    commuter_rail_ASC_eatout_escort_othdiscr_othmaint_shopping_social_atwork:
+#      initial_value: 0.7270185
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    commuter_rail_ASC_school_univ:
+#      initial_value: 1.0336206
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    commuter_rail_ASC_work:
+#      initial_value: -32.59711456
+#      bounds:
+#      - -37.0
+#      - -30.0
+#    walk_transit_CBD_ASC_eatout_escort_othdiscr_othmaint_shopping_social:
+#      initial_value: 0.525
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    walk_transit_CBD_ASC_school_univ:
+#      initial_value: 0.672
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    walk_transit_CBD_ASC_work:
+#      initial_value: -1.80767417
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    walk_transit_CBD_ASC_atwork:
+#      initial_value: 0.564
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    drive_transit_CBD_ASC_eatout_escort_othdiscr_othmaint_shopping_social:
+#      initial_value: 0.525
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    drive_transit_CBD_ASC_school_univ:
+#      initial_value: 0.672
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    drive_transit_CBD_ASC_work:
+#      initial_value: -33.8510704
+#      bounds:
+#      - -38.0
+#      - -31.0
+#    drive_transit_CBD_ASC_atwork:
+#      initial_value: 0.564
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_topology_walk_multiplier_univ:
+#      initial_value: 15.0
+#      bounds:
+#      - 10.0
+#      - 17.0
+#    coef_topology_bike_multiplier_univ:
+#      initial_value: 20.0
+#      bounds:
+#      - 15.0
+#      - 22.0
+#    coef_topology_trn_multiplier_univ:
+#      initial_value: 2.200000047683716
+#      bounds:
+#      - -3.0
+#      - 4.0
+    coef_age1619_da_multiplier_univ:
+      initial_value: -0.401116699
+      bounds:
+      - -5.0
+      - 2.0
+    coef_age010_trn_multiplier_univ:
+      initial_value: -1.554800034
+      bounds:
+      - -6.0
+      - 1.0
+    coef_hhsize2_sr_multiplier_univ:
+      initial_value: -4.810313702
+      bounds:
+      - -9.0
+      - -2.0
+#    taxi_ASC_no_auto_univ:
+#      initial_value: -7.806330681
+#      bounds:
+#      - -12.0
+#      - -5.0
+#    joint_walk_ASC_no_auto_univ:
+#      initial_value: -0.212747008
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    joint_walk_ASC_auto_deficient_univ:
+#      initial_value: -1.960770607
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    joint_walk_ASC_auto_sufficient_univ:
+#      initial_value: -3.235215664
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    joint_bike_ASC_no_auto_univ:
+#      initial_value: -2.867159843
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    joint_bike_ASC_auto_deficient_univ:
+#      initial_value: -6.076415062
+#      bounds:
+#      - -11.0
+#      - -4.0
+#    joint_bike_ASC_auto_sufficient_univ:
+#      initial_value: -6.376065731
+#      bounds:
+#      - -11.0
+#      - -4.0
+#    joint_sr3p_ASC_no_auto_univ:
+#      initial_value: 0.5630670785903931
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    joint_sr3p_ASC_auto_deficient_univ:
+#      initial_value: -1.884169221
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    joint_sr3p_ASC_auto_sufficient_univ:
+#      initial_value: -2.234826088
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    joint_walk_transit_ASC_no_auto_univ:
+#      initial_value: 0.6229241490364075
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    joint_walk_transit_ASC_auto_deficient_univ:
+#      initial_value: -5.163448334
+#      bounds:
+#      - -10.0
+#      - -3.0
+#    joint_walk_transit_ASC_auto_sufficient_univ:
+#      initial_value: -18.264534
+#      bounds:
+#      - -23.0
+#      - -16.0
+#    joint_drive_transit_ASC_auto_deficient_univ:
+#      initial_value: -5.96322155
+#      bounds:
+#      - -10.0
+#      - -3.0
+#    joint_drive_transit_ASC_auto_sufficient_univ:
+#      initial_value: -8.045285225
+#      bounds:
+#      - -13.0
+#      - -6.0
+#    joint_taxi_ASC_no_auto_univ:
+#      initial_value: -4.579199791
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    joint_taxi_ASC_auto_deficient_univ:
+#      initial_value: -9.815699577
+#      bounds:
+#      - -14.0
+#      - -7.0
+#    joint_taxi_ASC_auto_sufficient_univ:
+#      initial_value: -11.7098999
+#      bounds:
+#      - -16.0
+#      - -9.0
+#    joint_tnc_single_ASC_no_auto_univ:
+#      initial_value: -4.491700172
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    joint_tnc_single_ASC_auto_deficient_univ:
+#      initial_value: -9.896100044
+#      bounds:
+#      - -14.0
+#      - -7.0
+#    joint_tnc_single_ASC_auto_sufficient_univ:
+#      initial_value: -14.01589966
+#      bounds:
+#      - -19.0
+#      - -12.0
+#    joint_tnc_shared_ASC_no_auto_univ:
+#      initial_value: -4.300199986
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    joint_tnc_shared_ASC_auto_deficient_univ:
+#      initial_value: -11.15719986
+#      bounds:
+#      - -16.0
+#      - -9.0
+#    joint_tnc_shared_ASC_auto_sufficient_univ:
+#      initial_value: -13.20499992
+#      bounds:
+#      - -18.0
+#      - -11.0
+#    local_bus_ASC_univ:
+#      initial_value: 2.4925947189331055
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    walk_light_rail_ASC_univ:
+#      initial_value: 1.6870479583740234
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    drive_light_rail_ASC_univ:
+#      initial_value: 3.3075032234191895
+#      bounds:
+#      - -2.0
+#      - 5.0
+#    walk_ferry_ASC_univ:
+#      initial_value: -10.52428341
+#      bounds:
+#      - -15.0
+#      - -8.0
+#    drive_ferry_ASC_univ:
+#      initial_value: 25.705476760864258
+#      bounds:
+#      - 20.0
+#      - 27.0
+#    express_bus_ASC_univ:
+#      initial_value: 16.808095932006836
+#      bounds:
+#      - 11.0
+#      - 18.0
+#    heavy_rail_ASC_univ:
+#      initial_value: 16.390430450439453
+#      bounds:
+#      - 11.0
+#      - 18.0
+#    commuter_rail_ASC_univ:
+#      initial_value: 1.4276279211044312
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    walk_transit_CBD_ASC_univ:
+#      initial_value: -12.58957863
+#      bounds:
+#      - -17.0
+#      - -10.0
+#    drive_transit_CBD_ASC_univ:
+#      initial_value: -4.664581776
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    coef_topology_walk_multiplier_work:
+#      initial_value: 15.0
+#      bounds:
+#      - 10.0
+#      - 17.0
+#    coef_topology_bike_multiplier_work:
+#      initial_value: 20.0
+#      bounds:
+#      - 15.0
+#      - 22.0
+#    coef_topology_trn_multiplier_work:
+#      initial_value: 2.200000047683716
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    joint_walk_ASC_no_auto_work:
+#      initial_value: -0.212747008
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    joint_walk_ASC_auto_deficient_work:
+#      initial_value: -1.960770607
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    joint_walk_ASC_auto_sufficient_work:
+#      initial_value: -3.235215664
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    joint_bike_ASC_no_auto_work:
+#      initial_value: -2.867159843
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    joint_bike_ASC_auto_deficient_work:
+#      initial_value: -6.076415062
+#      bounds:
+#      - -11.0
+#      - -4.0
+#    joint_bike_ASC_auto_sufficient_work:
+#      initial_value: -6.376065731
+#      bounds:
+#      - -11.0
+#      - -4.0
+#    joint_sr3p_ASC_no_auto_work:
+#      initial_value: 0.5630670785903931
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    joint_sr3p_ASC_auto_deficient_work:
+#      initial_value: -1.884169221
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    joint_sr3p_ASC_auto_sufficient_work:
+#      initial_value: -2.234826088
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    joint_walk_transit_ASC_no_auto_work:
+#      initial_value: 0.6229241490364075
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    joint_walk_transit_ASC_auto_deficient_work:
+#      initial_value: -5.163448334
+#      bounds:
+#      - -10.0
+#      - -3.0
+#    joint_walk_transit_ASC_auto_sufficient_work:
+#      initial_value: -18.264534
+#      bounds:
+#      - -23.0
+#      - -16.0
+#    joint_drive_transit_ASC_auto_deficient_work:
+#      initial_value: -5.96322155
+#      bounds:
+#      - -10.0
+#      - -3.0
+#    joint_drive_transit_ASC_auto_sufficient_work:
+#      initial_value: -8.045285225
+#      bounds:
+#      - -13.0
+#      - -6.0
+#    joint_taxi_ASC_no_auto_work:
+#      initial_value: -4.579199791
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    joint_taxi_ASC_auto_deficient_work:
+#      initial_value: -9.815699577
+#      bounds:
+#      - -14.0
+#      - -7.0
+#    joint_taxi_ASC_auto_sufficient_work:
+#      initial_value: -11.7098999
+#      bounds:
+#      - -16.0
+#      - -9.0
+#    joint_tnc_single_ASC_no_auto_work:
+#      initial_value: -4.491700172
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    joint_tnc_single_ASC_auto_deficient_work:
+#      initial_value: -9.896100044
+#      bounds:
+#      - -14.0
+#      - -7.0
+#    joint_tnc_single_ASC_auto_sufficient_work:
+#      initial_value: -14.01589966
+#      bounds:
+#      - -19.0
+#      - -12.0
+#    joint_tnc_shared_ASC_no_auto_work:
+#      initial_value: -4.300199986
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    joint_tnc_shared_ASC_auto_deficient_work:
+#      initial_value: -11.15719986
+#      bounds:
+#      - -16.0
+#      - -9.0
+#    joint_tnc_shared_ASC_auto_sufficient_work:
+#      initial_value: -13.20499992
+#      bounds:
+#      - -18.0
+#      - -11.0
+#    coef_topology_walk_multiplier_school:
+#      initial_value: 15.0
+#      bounds:
+#      - 10.0
+#      - 17.0
+#    coef_topology_bike_multiplier_school:
+#      initial_value: 20.0
+#      bounds:
+#      - 15.0
+#      - 22.0
+#    coef_topology_trn_multiplier_school:
+#      initial_value: 2.200000047683716
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    coef_age1619_da_multiplier_school:
+#      initial_value: -8.380271912
+#      bounds:
+#      - -13.0
+#      - -6.0
+#    coef_age010_trn_multiplier_school:
+#      initial_value: -1.21376729
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    coef_hhsize2_sr_multiplier_school:
+#      initial_value: -9.539117813
+#      bounds:
+#      - -14.0
+#      - -7.0
+#    taxi_ASC_no_auto_school:
+#      initial_value: -20.69768333
+#      bounds:
+#      - -25.0
+#      - -18.0
+#    joint_walk_ASC_no_auto_school:
+#      initial_value: -0.212747008
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    joint_walk_ASC_auto_deficient_school:
+#      initial_value: -1.960770607
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    joint_walk_ASC_auto_sufficient_school:
+#      initial_value: -3.235215664
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    joint_bike_ASC_no_auto_school:
+#      initial_value: -2.867159843
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    joint_bike_ASC_auto_deficient_school:
+#      initial_value: -6.076415062
+#      bounds:
+#      - -11.0
+#      - -4.0
+#    joint_bike_ASC_auto_sufficient_school:
+#      initial_value: -6.376065731
+#      bounds:
+#      - -11.0
+#      - -4.0
+#    joint_sr3p_ASC_no_auto_school:
+#      initial_value: 0.5630670785903931
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    joint_sr3p_ASC_auto_deficient_school:
+#      initial_value: -1.884169221
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    joint_sr3p_ASC_auto_sufficient_school:
+#      initial_value: -2.234826088
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    joint_walk_transit_ASC_no_auto_school:
+#      initial_value: 0.6229241490364075
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    joint_walk_transit_ASC_auto_deficient_school:
+#      initial_value: -5.163448334
+#      bounds:
+#      - -10.0
+#      - -3.0
+#    joint_walk_transit_ASC_auto_sufficient_school:
+#      initial_value: -18.264534
+#      bounds:
+#      - -23.0
+#      - -16.0
+#    joint_drive_transit_ASC_auto_deficient_school:
+#      initial_value: -5.96322155
+#      bounds:
+#      - -10.0
+#      - -3.0
+#    joint_drive_transit_ASC_auto_sufficient_school:
+#      initial_value: -8.045285225
+#      bounds:
+#      - -13.0
+#      - -6.0
+#    joint_taxi_ASC_no_auto_school:
+#      initial_value: -4.579199791
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    joint_taxi_ASC_auto_deficient_school:
+#      initial_value: -9.815699577
+#      bounds:
+#      - -14.0
+#      - -7.0
+#    joint_taxi_ASC_auto_sufficient_school:
+#      initial_value: -11.7098999
+#      bounds:
+#      - -16.0
+#      - -9.0
+#    joint_tnc_single_ASC_no_auto_school:
+#      initial_value: -4.491700172
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    joint_tnc_single_ASC_auto_deficient_school:
+#      initial_value: -9.896100044
+#      bounds:
+#      - -14.0
+#      - -7.0
+#    joint_tnc_single_ASC_auto_sufficient_school:
+#      initial_value: -14.01589966
+#      bounds:
+#      - -19.0
+#      - -12.0
+#    joint_tnc_shared_ASC_no_auto_school:
+#      initial_value: -4.300199986
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    joint_tnc_shared_ASC_auto_deficient_school:
+#      initial_value: -11.15719986
+#      bounds:
+#      - -16.0
+#      - -9.0
+#    joint_tnc_shared_ASC_auto_sufficient_school:
+#      initial_value: -13.20499992
+#      bounds:
+#      - -18.0
+#      - -11.0
+#    local_bus_ASC_school:
+#      initial_value: 11.59439468383789
+#      bounds:
+#      - 6.0
+#      - 13.0
+#    walk_light_rail_ASC_school:
+#      initial_value: -25.31733894
+#      bounds:
+#      - -30.0
+#      - -23.0
+#    drive_light_rail_ASC_school:
+#      initial_value: -3.568199635
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    walk_ferry_ASC_school:
+#      initial_value: -6.790782452
+#      bounds:
+#      - -11.0
+#      - -4.0
+#    drive_ferry_ASC_school:
+#      initial_value: -3.840853691
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    express_bus_ASC_school:
+#      initial_value: -18.88273239
+#      bounds:
+#      - -23.0
+#      - -16.0
+#    heavy_rail_ASC_school:
+#      initial_value: -19.13663483
+#      bounds:
+#      - -24.0
+#      - -17.0
+#    commuter_rail_ASC_school:
+#      initial_value: -25.26385117
+#      bounds:
+#      - -30.0
+#      - -23.0
+#    walk_transit_CBD_ASC_school:
+#      initial_value: -9.2158041
+#      bounds:
+#      - -14.0
+#      - -7.0
+#    drive_transit_CBD_ASC_school:
+#      initial_value: -9.383680344
+#      bounds:
+#      - -14.0
+#      - -7.0
+#    coef_topology_walk_multiplier_othdiscr:
+#      initial_value: 15.0
+#      bounds:
+#      - 10.0
+#      - 17.0
+#    coef_topology_bike_multiplier_othdiscr:
+#      initial_value: 20.0
+#      bounds:
+#      - 15.0
+#      - 22.0
+#    coef_topology_trn_multiplier_othdiscr:
+#      initial_value: 2.200000047683716
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    coef_age16p_sr_multiplier_othdiscr:
+#      initial_value: -3.275640249
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    taxi_ASC_no_auto_othdiscr:
+#      initial_value: -11.68499184
+#      bounds:
+#      - -16.0
+#      - -9.0
+#    taxi_ASC_auto_deficient_othdiscr:
+#      initial_value: -13.84942913
+#      bounds:
+#      - -18.0
+#      - -11.0
+#    taxi_ASC_auto_sufficient_othdiscr:
+#      initial_value: -2.235582113
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    tnc_single_ASC_no_auto_othdiscr:
+#      initial_value: -11.89528847
+#      bounds:
+#      - -16.0
+#      - -9.0
+#    tnc_single_ASC_auto_deficient_othdiscr:
+#      initial_value: -13.27637959
+#      bounds:
+#      - -18.0
+#      - -11.0
+#    tnc_single_ASC_auto_sufficient_othdiscr:
+#      initial_value: -1.382754803
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    tnc_shared_ASC_no_auto_othdiscr:
+#      initial_value: -12.39168835
+#      bounds:
+#      - -17.0
+#      - -10.0
+#    tnc_shared_ASC_auto_deficient_othdiscr:
+#      initial_value: -11.07069588
+#      bounds:
+#      - -16.0
+#      - -9.0
+#    tnc_shared_ASC_auto_sufficient_othdiscr:
+#      initial_value: -2.627673388
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    joint_walk_ASC_no_auto_othdiscr:
+#      initial_value: -11.70575714
+#      bounds:
+#      - -16.0
+#      - -9.0
+#    joint_walk_ASC_auto_deficient_othdiscr:
+#      initial_value: -19.79304123
+#      bounds:
+#      - -24.0
+#      - -17.0
+#    joint_walk_ASC_auto_sufficient_othdiscr:
+#      initial_value: -33.78726196
+#      bounds:
+#      - -38.0
+#      - -31.0
+#    joint_bike_ASC_no_auto_othdiscr:
+#      initial_value: -13.40789318
+#      bounds:
+#      - -18.0
+#      - -11.0
+#    joint_bike_ASC_auto_deficient_othdiscr:
+#      initial_value: -22.02599144
+#      bounds:
+#      - -27.0
+#      - -20.0
+#    joint_bike_ASC_auto_sufficient_othdiscr:
+#      initial_value: -24.28221321
+#      bounds:
+#      - -29.0
+#      - -22.0
+#    joint_sr3p_ASC_no_auto_othdiscr:
+#      initial_value: 24.132951736450195
+#      bounds:
+#      - 19.0
+#      - 26.0
+#    joint_sr3p_ASC_auto_deficient_othdiscr:
+#      initial_value: 17.916812896728516
+#      bounds:
+#      - 12.0
+#      - 19.0
+#    joint_sr3p_ASC_auto_sufficient_othdiscr:
+#      initial_value: 29.411815643310547
+#      bounds:
+#      - 24.0
+#      - 31.0
+#    joint_walk_transit_ASC_no_auto_othdiscr:
+#      initial_value: -14.35704136
+#      bounds:
+#      - -19.0
+#      - -12.0
+#    joint_walk_transit_ASC_auto_deficient_othdiscr:
+#      initial_value: -24.36103439
+#      bounds:
+#      - -29.0
+#      - -22.0
+#    joint_walk_transit_ASC_auto_sufficient_othdiscr:
+#      initial_value: -30.19796753
+#      bounds:
+#      - -35.0
+#      - -28.0
+#    joint_drive_transit_ASC_auto_deficient_othdiscr:
+#      initial_value: -23.24106598
+#      bounds:
+#      - -28.0
+#      - -21.0
+#    joint_drive_transit_ASC_auto_sufficient_othdiscr:
+#      initial_value: -37.17621613
+#      bounds:
+#      - -42.0
+#      - -35.0
+#    joint_taxi_ASC_no_auto_othdiscr:
+#      initial_value: -11.2577486
+#      bounds:
+#      - -16.0
+#      - -9.0
+#    joint_taxi_ASC_auto_deficient_othdiscr:
+#      initial_value: -18.19539261
+#      bounds:
+#      - -23.0
+#      - -16.0
+#    joint_taxi_ASC_auto_sufficient_othdiscr:
+#      initial_value: -27.68892097
+#      bounds:
+#      - -32.0
+#      - -25.0
+#    joint_tnc_single_ASC_no_auto_othdiscr:
+#      initial_value: -11.28031445
+#      bounds:
+#      - -16.0
+#      - -9.0
+#    joint_tnc_single_ASC_auto_deficient_othdiscr:
+#      initial_value: -18.38170815
+#      bounds:
+#      - -23.0
+#      - -16.0
+#    joint_tnc_single_ASC_auto_sufficient_othdiscr:
+#      initial_value: -26.93792725
+#      bounds:
+#      - -31.0
+#      - -24.0
+#    joint_tnc_shared_ASC_no_auto_othdiscr:
+#      initial_value: -9.982746124
+#      bounds:
+#      - -14.0
+#      - -7.0
+#    joint_tnc_shared_ASC_auto_deficient_othdiscr:
+#      initial_value: -18.49534416
+#      bounds:
+#      - -23.0
+#      - -16.0
+#    joint_tnc_shared_ASC_auto_sufficient_othdiscr:
+#      initial_value: -28.91906166
+#      bounds:
+#      - -33.0
+#      - -26.0
+#    local_bus_ASC_othdiscr:
+#      initial_value: 3.3481569290161133
+#      bounds:
+#      - -2.0
+#      - 5.0
+#    walk_light_rail_ASC_othdiscr:
+#      initial_value: 0.44430574774742126
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    drive_light_rail_ASC_othdiscr:
+#      initial_value: -5.924533844
+#      bounds:
+#      - -10.0
+#      - -3.0
+#    walk_ferry_ASC_othdiscr:
+#      initial_value: -14.27967453
+#      bounds:
+#      - -19.0
+#      - -12.0
+#    drive_ferry_ASC_othdiscr:
+#      initial_value: 23.35370635986328
+#      bounds:
+#      - 18.0
+#      - 25.0
+#    express_bus_ASC_othdiscr:
+#      initial_value: 2.0631940364837646
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    heavy_rail_ASC_othdiscr:
+#      initial_value: 1.9685605764389038
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    commuter_rail_ASC_othdiscr:
+#      initial_value: -2.570244074
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    walk_transit_CBD_ASC_othdiscr:
+#      initial_value: -0.455602974
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    drive_transit_CBD_ASC_othdiscr:
+#      initial_value: -28.11770821
+#      bounds:
+#      - -33.0
+#      - -26.0
+#    coef_topology_walk_multiplier_othmaint:
+#      initial_value: 15.0
+#      bounds:
+#      - 10.0
+#      - 17.0
+#    coef_topology_bike_multiplier_othmaint:
+#      initial_value: 20.0
+#      bounds:
+#      - 15.0
+#      - 22.0
+#    coef_topology_trn_multiplier_othmaint:
+#      initial_value: 2.200000047683716
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    coef_age16p_sr_multiplier_othmaint:
+#      initial_value: -1.417131424
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    taxi_ASC_no_auto_othmaint:
+#      initial_value: -14.25447369
+#      bounds:
+#      - -19.0
+#      - -12.0
+#    taxi_ASC_auto_deficient_othmaint:
+#      initial_value: -12.70750999
+#      bounds:
+#      - -17.0
+#      - -10.0
+#    taxi_ASC_auto_sufficient_othmaint:
+#      initial_value: -6.074826717
+#      bounds:
+#      - -11.0
+#      - -4.0
+#    tnc_single_ASC_no_auto_othmaint:
+#      initial_value: -5.400579453
+#      bounds:
+#      - -10.0
+#      - -3.0
+#    tnc_single_ASC_auto_deficient_othmaint:
+#      initial_value: -10.36143494
+#      bounds:
+#      - -15.0
+#      - -8.0
+#    tnc_single_ASC_auto_sufficient_othmaint:
+#      initial_value: -3.747652054
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    tnc_shared_ASC_no_auto_othmaint:
+#      initial_value: -7.20652914
+#      bounds:
+#      - -12.0
+#      - -5.0
+#    tnc_shared_ASC_auto_deficient_othmaint:
+#      initial_value: -15.14283276
+#      bounds:
+#      - -20.0
+#      - -13.0
+#    tnc_shared_ASC_auto_sufficient_othmaint:
+#      initial_value: -11.39566994
+#      bounds:
+#      - -16.0
+#      - -9.0
+#    joint_walk_ASC_no_auto_othmaint:
+#      initial_value: -3.203843832
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    joint_walk_ASC_auto_deficient_othmaint:
+#      initial_value: -14.07025433
+#      bounds:
+#      - -19.0
+#      - -12.0
+#    joint_walk_ASC_auto_sufficient_othmaint:
+#      initial_value: -25.66974449
+#      bounds:
+#      - -30.0
+#      - -23.0
+#    joint_bike_ASC_no_auto_othmaint:
+#      initial_value: -12.50366879
+#      bounds:
+#      - -17.0
+#      - -10.0
+#    joint_bike_ASC_auto_deficient_othmaint:
+#      initial_value: -8.663804054
+#      bounds:
+#      - -13.0
+#      - -6.0
+#    joint_bike_ASC_auto_sufficient_othmaint:
+#      initial_value: -30.58777046
+#      bounds:
+#      - -35.0
+#      - -28.0
+#    joint_sr3p_ASC_no_auto_othmaint:
+#      initial_value: 8.014094352722168
+#      bounds:
+#      - 3.0
+#      - 10.0
+#    joint_sr3p_ASC_auto_deficient_othmaint:
+#      initial_value: -16.58605957
+#      bounds:
+#      - -21.0
+#      - -14.0
+#    joint_sr3p_ASC_auto_sufficient_othmaint:
+#      initial_value: -9.453593254
+#      bounds:
+#      - -14.0
+#      - -7.0
+#    joint_walk_transit_ASC_no_auto_othmaint:
+#      initial_value: -15.29844284
+#      bounds:
+#      - -20.0
+#      - -13.0
+#    joint_walk_transit_ASC_auto_deficient_othmaint:
+#      initial_value: -25.26748276
+#      bounds:
+#      - -30.0
+#      - -23.0
+#    joint_walk_transit_ASC_auto_sufficient_othmaint:
+#      initial_value: -40.82497787
+#      bounds:
+#      - -45.0
+#      - -38.0
+#    joint_drive_transit_ASC_auto_deficient_othmaint:
+#      initial_value: -31.82618904
+#      bounds:
+#      - -36.0
+#      - -29.0
+#    joint_drive_transit_ASC_auto_sufficient_othmaint:
+#      initial_value: -32.98428345
+#      bounds:
+#      - -37.0
+#      - -30.0
+#    joint_taxi_ASC_no_auto_othmaint:
+#      initial_value: -14.0517807
+#      bounds:
+#      - -19.0
+#      - -12.0
+#    joint_taxi_ASC_auto_deficient_othmaint:
+#      initial_value: -23.98625755
+#      bounds:
+#      - -28.0
+#      - -21.0
+#    joint_taxi_ASC_auto_sufficient_othmaint:
+#      initial_value: -30.44431686
+#      bounds:
+#      - -35.0
+#      - -28.0
+#    joint_tnc_single_ASC_no_auto_othmaint:
+#      initial_value: -14.11349297
+#      bounds:
+#      - -19.0
+#      - -12.0
+#    joint_tnc_single_ASC_auto_deficient_othmaint:
+#      initial_value: -24.83108521
+#      bounds:
+#      - -29.0
+#      - -22.0
+#    joint_tnc_single_ASC_auto_sufficient_othmaint:
+#      initial_value: -36.03213501
+#      bounds:
+#      - -41.0
+#      - -34.0
+#    joint_tnc_shared_ASC_no_auto_othmaint:
+#      initial_value: -14.62110519
+#      bounds:
+#      - -19.0
+#      - -12.0
+#    joint_tnc_shared_ASC_auto_deficient_othmaint:
+#      initial_value: -25.39584732
+#      bounds:
+#      - -30.0
+#      - -23.0
+#    joint_tnc_shared_ASC_auto_sufficient_othmaint:
+#      initial_value: -16.58130074
+#      bounds:
+#      - -21.0
+#      - -14.0
+#    local_bus_ASC_othmaint:
+#      initial_value: 5.428188323974609
+#      bounds:
+#      - 0.0
+#      - 7.0
+#    walk_light_rail_ASC_othmaint:
+#      initial_value: -14.8452673
+#      bounds:
+#      - -19.0
+#      - -12.0
+#    drive_light_rail_ASC_othmaint:
+#      initial_value: 6.739549637
+#      bounds:
+#      - 1.0
+#      - 8.0
+#    walk_ferry_ASC_othmaint:
+#      initial_value: 9.865807533
+#      bounds:
+#      - 4.0
+#      - 11.0
+#    drive_ferry_ASC_othmaint:
+#      initial_value: 1.8265655040740967
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    express_bus_ASC_othmaint:
+#      initial_value: -6.943709373
+#      bounds:
+#      - -11.0
+#      - -4.0
+#    heavy_rail_ASC_othmaint:
+#      initial_value: -7.440342903
+#      bounds:
+#      - -12.0
+#      - -5.0
+#    commuter_rail_ASC_othmaint:
+#      initial_value: -11.17147827
+#      bounds:
+#      - -16.0
+#      - -9.0
+#    walk_transit_CBD_ASC_othmaint:
+#      initial_value: -16.67915535
+#      bounds:
+#      - -21.0
+#      - -14.0
+#    drive_transit_CBD_ASC_othmaint:
+#      initial_value: -22.54317284
+#      bounds:
+#      - -27.0
+#      - -20.0
+#    coef_topology_walk_multiplier_eatout:
+#      initial_value: 15.0
+#      bounds:
+#      - 10.0
+#      - 17.0
+#    coef_topology_bike_multiplier_eatout:
+#      initial_value: 20.0
+#      bounds:
+#      - 15.0
+#      - 22.0
+#    coef_topology_trn_multiplier_eatout:
+#      initial_value: 2.200000047683716
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    coef_age16p_sr_multiplier_eatout:
+#      initial_value: -1.612565756
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    taxi_ASC_no_auto_eatout:
+#      initial_value: -10.26440144
+#      bounds:
+#      - -15.0
+#      - -8.0
+#    taxi_ASC_auto_deficient_eatout:
+#      initial_value: -16.47214317
+#      bounds:
+#      - -21.0
+#      - -14.0
+#    taxi_ASC_auto_sufficient_eatout:
+#      initial_value: -4.937436104
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    tnc_single_ASC_no_auto_eatout:
+#      initial_value: -11.15295887
+#      bounds:
+#      - -16.0
+#      - -9.0
+#    tnc_single_ASC_auto_deficient_eatout:
+#      initial_value: -16.63131905
+#      bounds:
+#      - -21.0
+#      - -14.0
+#    tnc_single_ASC_auto_sufficient_eatout:
+#      initial_value: -3.737006426
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    tnc_shared_ASC_no_auto_eatout:
+#      initial_value: 1.735002875328064
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    tnc_shared_ASC_auto_deficient_eatout:
+#      initial_value: -18.85674667
+#      bounds:
+#      - -23.0
+#      - -16.0
+#    tnc_shared_ASC_auto_sufficient_eatout:
+#      initial_value: -9.785998344
+#      bounds:
+#      - -14.0
+#      - -7.0
+#    joint_walk_ASC_no_auto_eatout:
+#      initial_value: -0.212747008
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    joint_walk_ASC_auto_deficient_eatout:
+#      initial_value: -18.8295269
+#      bounds:
+#      - -23.0
+#      - -16.0
+#    joint_walk_ASC_auto_sufficient_eatout:
+#      initial_value: -15.86783886
+#      bounds:
+#      - -20.0
+#      - -13.0
+#    joint_bike_ASC_no_auto_eatout:
+#      initial_value: -2.867159843
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    joint_bike_ASC_auto_deficient_eatout:
+#      initial_value: -22.9289608
+#      bounds:
+#      - -27.0
+#      - -20.0
+#    joint_bike_ASC_auto_sufficient_eatout:
+#      initial_value: -26.21675491
+#      bounds:
+#      - -31.0
+#      - -24.0
+#    joint_sr3p_ASC_no_auto_eatout:
+#      initial_value: 0.5630670785903931
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    joint_sr3p_ASC_auto_deficient_eatout:
+#      initial_value: -8.030480385
+#      bounds:
+#      - -13.0
+#      - -6.0
+#    joint_sr3p_ASC_auto_sufficient_eatout:
+#      initial_value: -10.46732807
+#      bounds:
+#      - -15.0
+#      - -8.0
+#    joint_walk_transit_ASC_no_auto_eatout:
+#      initial_value: 0.6229241490364075
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    joint_walk_transit_ASC_auto_deficient_eatout:
+#      initial_value: -22.54865456
+#      bounds:
+#      - -27.0
+#      - -20.0
+#    joint_walk_transit_ASC_auto_sufficient_eatout:
+#      initial_value: -4.794247627
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    joint_drive_transit_ASC_auto_deficient_eatout:
+#      initial_value: -26.94527054
+#      bounds:
+#      - -31.0
+#      - -24.0
+#    joint_drive_transit_ASC_auto_sufficient_eatout:
+#      initial_value: -32.26463318
+#      bounds:
+#      - -37.0
+#      - -30.0
+#    joint_taxi_ASC_no_auto_eatout:
+#      initial_value: -4.579199791
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    joint_taxi_ASC_auto_deficient_eatout:
+#      initial_value: -25.7662468
+#      bounds:
+#      - -30.0
+#      - -23.0
+#    joint_taxi_ASC_auto_sufficient_eatout:
+#      initial_value: -29.34790421
+#      bounds:
+#      - -34.0
+#      - -27.0
+#    joint_tnc_single_ASC_no_auto_eatout:
+#      initial_value: -4.491700172
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    joint_tnc_single_ASC_auto_deficient_eatout:
+#      initial_value: -26.22332764
+#      bounds:
+#      - -31.0
+#      - -24.0
+#    joint_tnc_single_ASC_auto_sufficient_eatout:
+#      initial_value: -31.48026276
+#      bounds:
+#      - -36.0
+#      - -29.0
+#    joint_tnc_shared_ASC_no_auto_eatout:
+#      initial_value: -4.300199986
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    joint_tnc_shared_ASC_auto_deficient_eatout:
+#      initial_value: -27.22729683
+#      bounds:
+#      - -32.0
+#      - -25.0
+#    joint_tnc_shared_ASC_auto_sufficient_eatout:
+#      initial_value: -30.59043694
+#      bounds:
+#      - -35.0
+#      - -28.0
+#    local_bus_ASC_eatout:
+#      initial_value: 1.4371427297592163
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    walk_light_rail_ASC_eatout:
+#      initial_value: -13.4551878
+#      bounds:
+#      - -18.0
+#      - -11.0
+#    drive_light_rail_ASC_eatout:
+#      initial_value: 2.7999298572540283
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    walk_ferry_ASC_eatout:
+#      initial_value: 13.639387130737305
+#      bounds:
+#      - 8.0
+#      - 15.0
+#    drive_ferry_ASC_eatout:
+#      initial_value: -2.024640083
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    express_bus_ASC_eatout:
+#      initial_value: -7.083898067
+#      bounds:
+#      - -12.0
+#      - -5.0
+#    heavy_rail_ASC_eatout:
+#      initial_value: -7.452392578
+#      bounds:
+#      - -12.0
+#      - -5.0
+#    commuter_rail_ASC_eatout:
+#      initial_value: -15.11400795
+#      bounds:
+#      - -20.0
+#      - -13.0
+#    walk_transit_CBD_ASC_eatout:
+#      initial_value: -16.02424049
+#      bounds:
+#      - -21.0
+#      - -14.0
+#    drive_transit_CBD_ASC_eatout:
+#      initial_value: -41.68627548
+#      bounds:
+#      - -46.0
+#      - -39.0
+#    coef_topology_walk_multiplier_shopping:
+#      initial_value: 15.0
+#      bounds:
+#      - 10.0
+#      - 17.0
+#    coef_topology_bike_multiplier_shopping:
+#      initial_value: 20.0
+#      bounds:
+#      - 15.0
+#      - 22.0
+#    coef_topology_trn_multiplier_shopping:
+#      initial_value: 2.200000047683716
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    coef_age16p_sr_multiplier_shopping:
+#      initial_value: -1.373792291
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    taxi_ASC_no_auto_shopping:
+#      initial_value: -11.91117477
+#      bounds:
+#      - -16.0
+#      - -9.0
+#    taxi_ASC_auto_deficient_shopping:
+#      initial_value: -6.246436119
+#      bounds:
+#      - -11.0
+#      - -4.0
+#    taxi_ASC_auto_sufficient_shopping:
+#      initial_value: -5.198505878
+#      bounds:
+#      - -10.0
+#      - -3.0
+#    tnc_single_ASC_no_auto_shopping:
+#      initial_value: -13.79780769
+#      bounds:
+#      - -18.0
+#      - -11.0
+#    tnc_single_ASC_auto_deficient_shopping:
+#      initial_value: -7.971375942
+#      bounds:
+#      - -12.0
+#      - -5.0
+#    tnc_single_ASC_auto_sufficient_shopping:
+#      initial_value: -3.694974184
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    tnc_shared_ASC_no_auto_shopping:
+#      initial_value: -11.86123466
+#      bounds:
+#      - -16.0
+#      - -9.0
+#    tnc_shared_ASC_auto_deficient_shopping:
+#      initial_value: -4.33531332
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    tnc_shared_ASC_auto_sufficient_shopping:
+#      initial_value: -6.739276886
+#      bounds:
+#      - -11.0
+#      - -4.0
+#    joint_walk_ASC_no_auto_shopping:
+#      initial_value: -13.32077885
+#      bounds:
+#      - -18.0
+#      - -11.0
+#    joint_walk_ASC_auto_deficient_shopping:
+#      initial_value: -14.49570179
+#      bounds:
+#      - -19.0
+#      - -12.0
+#    joint_walk_ASC_auto_sufficient_shopping:
+#      initial_value: -27.95325279
+#      bounds:
+#      - -32.0
+#      - -25.0
+#    joint_bike_ASC_no_auto_shopping:
+#      initial_value: -13.99215317
+#      bounds:
+#      - -18.0
+#      - -11.0
+#    joint_bike_ASC_auto_deficient_shopping:
+#      initial_value: -24.34007072
+#      bounds:
+#      - -29.0
+#      - -22.0
+#    joint_bike_ASC_auto_sufficient_shopping:
+#      initial_value: -23.19728851
+#      bounds:
+#      - -28.0
+#      - -21.0
+#    joint_sr3p_ASC_no_auto_shopping:
+#      initial_value: 15.63991641998291
+#      bounds:
+#      - 10.0
+#      - 17.0
+#    joint_sr3p_ASC_auto_deficient_shopping:
+#      initial_value: -9.018095016
+#      bounds:
+#      - -14.0
+#      - -7.0
+#    joint_sr3p_ASC_auto_sufficient_shopping:
+#      initial_value: -11.60435581
+#      bounds:
+#      - -16.0
+#      - -9.0
+#    joint_walk_transit_ASC_no_auto_shopping:
+#      initial_value: -16.92294693
+#      bounds:
+#      - -21.0
+#      - -14.0
+#    joint_walk_transit_ASC_auto_deficient_shopping:
+#      initial_value: -26.21161652
+#      bounds:
+#      - -31.0
+#      - -24.0
+#    joint_walk_transit_ASC_auto_sufficient_shopping:
+#      initial_value: -40.38201523
+#      bounds:
+#      - -45.0
+#      - -38.0
+#    joint_drive_transit_ASC_auto_deficient_shopping:
+#      initial_value: -29.05369377
+#      bounds:
+#      - -34.0
+#      - -27.0
+#    joint_drive_transit_ASC_auto_sufficient_shopping:
+#      initial_value: -35.49607086
+#      bounds:
+#      - -40.0
+#      - -33.0
+#    joint_taxi_ASC_no_auto_shopping:
+#      initial_value: -11.66903114
+#      bounds:
+#      - -16.0
+#      - -9.0
+#    joint_taxi_ASC_auto_deficient_shopping:
+#      initial_value: -21.38535118
+#      bounds:
+#      - -26.0
+#      - -19.0
+#    joint_taxi_ASC_auto_sufficient_shopping:
+#      initial_value: -34.76529312
+#      bounds:
+#      - -39.0
+#      - -32.0
+#    joint_tnc_single_ASC_no_auto_shopping:
+#      initial_value: -12.57924557
+#      bounds:
+#      - -17.0
+#      - -10.0
+#    joint_tnc_single_ASC_auto_deficient_shopping:
+#      initial_value: -21.90576363
+#      bounds:
+#      - -26.0
+#      - -19.0
+#    joint_tnc_single_ASC_auto_sufficient_shopping:
+#      initial_value: -35.02374268
+#      bounds:
+#      - -40.0
+#      - -33.0
+#    joint_tnc_shared_ASC_no_auto_shopping:
+#      initial_value: -12.72581577
+#      bounds:
+#      - -17.0
+#      - -10.0
+#    joint_tnc_shared_ASC_auto_deficient_shopping:
+#      initial_value: -22.5600872
+#      bounds:
+#      - -27.0
+#      - -20.0
+#    joint_tnc_shared_ASC_auto_sufficient_shopping:
+#      initial_value: -35.90484238
+#      bounds:
+#      - -40.0
+#      - -33.0
+#    local_bus_ASC_shopping:
+#      initial_value: 3.2731921672821045
+#      bounds:
+#      - -2.0
+#      - 5.0
+#    walk_light_rail_ASC_shopping:
+#      initial_value: -5.319116116
+#      bounds:
+#      - -10.0
+#      - -3.0
+#    drive_light_rail_ASC_shopping:
+#      initial_value: 2.8315227031707764
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    walk_ferry_ASC_shopping:
+#      initial_value: -2.672516346
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    drive_ferry_ASC_shopping:
+#      initial_value: -7.876436234
+#      bounds:
+#      - -12.0
+#      - -5.0
+#    express_bus_ASC_shopping:
+#      initial_value: 2.514604091644287
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    heavy_rail_ASC_shopping:
+#      initial_value: 2.316234588623047
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    commuter_rail_ASC_shopping:
+#      initial_value: -7.115124702
+#      bounds:
+#      - -12.0
+#      - -5.0
+#    walk_transit_CBD_ASC_shopping:
+#      initial_value: -10.88077641
+#      bounds:
+#      - -15.0
+#      - -8.0
+#    drive_transit_CBD_ASC_shopping:
+#      initial_value: -11.63860321
+#      bounds:
+#      - -16.0
+#      - -9.0
+#    coef_topology_walk_multiplier_social:
+#      initial_value: 15.0
+#      bounds:
+#      - 10.0
+#      - 17.0
+#    coef_topology_bike_multiplier_social:
+#      initial_value: 20.0
+#      bounds:
+#      - 15.0
+#      - 22.0
+#    coef_topology_trn_multiplier_social:
+#      initial_value: 2.200000047683716
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    coef_age16p_sr_multiplier_social:
+#      initial_value: -2.33535552
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    taxi_ASC_no_auto_social:
+#      initial_value: -14.88383198
+#      bounds:
+#      - -19.0
+#      - -12.0
+#    taxi_ASC_auto_deficient_social:
+#      initial_value: -10.30880737
+#      bounds:
+#      - -15.0
+#      - -8.0
+#    taxi_ASC_auto_sufficient_social:
+#      initial_value: -3.878576279
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    tnc_single_ASC_no_auto_social:
+#      initial_value: -13.77124882
+#      bounds:
+#      - -18.0
+#      - -11.0
+#    tnc_single_ASC_auto_deficient_social:
+#      initial_value: -10.66236305
+#      bounds:
+#      - -15.0
+#      - -8.0
+#    tnc_single_ASC_auto_sufficient_social:
+#      initial_value: -5.120249271
+#      bounds:
+#      - -10.0
+#      - -3.0
+#    tnc_shared_ASC_no_auto_social:
+#      initial_value: -14.39151955
+#      bounds:
+#      - -19.0
+#      - -12.0
+#    tnc_shared_ASC_auto_deficient_social:
+#      initial_value: -10.98654461
+#      bounds:
+#      - -15.0
+#      - -8.0
+#    tnc_shared_ASC_auto_sufficient_social:
+#      initial_value: -8.206341743
+#      bounds:
+#      - -13.0
+#      - -6.0
+#    joint_walk_ASC_no_auto_social:
+#      initial_value: -0.212747008
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    joint_walk_ASC_auto_deficient_social:
+#      initial_value: -5.386101723
+#      bounds:
+#      - -10.0
+#      - -3.0
+#    joint_walk_ASC_auto_sufficient_social:
+#      initial_value: -25.07272339
+#      bounds:
+#      - -30.0
+#      - -23.0
+#    joint_bike_ASC_no_auto_social:
+#      initial_value: -2.867159843
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    joint_bike_ASC_auto_deficient_social:
+#      initial_value: 18.78554344177246
+#      bounds:
+#      - 13.0
+#      - 20.0
+#    joint_bike_ASC_auto_sufficient_social:
+#      initial_value: -4.435167789
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    joint_sr3p_ASC_no_auto_social:
+#      initial_value: 0.5630670785903931
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    joint_sr3p_ASC_auto_deficient_social:
+#      initial_value: -13.08823395
+#      bounds:
+#      - -18.0
+#      - -11.0
+#    joint_sr3p_ASC_auto_sufficient_social:
+#      initial_value: -18.38895035
+#      bounds:
+#      - -23.0
+#      - -16.0
+#    joint_walk_transit_ASC_no_auto_social:
+#      initial_value: 0.6229241490364075
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    joint_walk_transit_ASC_auto_deficient_social:
+#      initial_value: -20.4722805
+#      bounds:
+#      - -25.0
+#      - -18.0
+#    joint_walk_transit_ASC_auto_sufficient_social:
+#      initial_value: -21.94688225
+#      bounds:
+#      - -26.0
+#      - -19.0
+#    joint_drive_transit_ASC_auto_deficient_social:
+#      initial_value: -20.86586189
+#      bounds:
+#      - -25.0
+#      - -18.0
+#    joint_drive_transit_ASC_auto_sufficient_social:
+#      initial_value: -38.83311081
+#      bounds:
+#      - -43.0
+#      - -36.0
+#    joint_taxi_ASC_no_auto_social:
+#      initial_value: -4.579199791
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    joint_taxi_ASC_auto_deficient_social:
+#      initial_value: -23.86759758
+#      bounds:
+#      - -28.0
+#      - -21.0
+#    joint_taxi_ASC_auto_sufficient_social:
+#      initial_value: -33.66429138
+#      bounds:
+#      - -38.0
+#      - -31.0
+#    joint_tnc_single_ASC_no_auto_social:
+#      initial_value: -4.491700172
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    joint_tnc_single_ASC_auto_deficient_social:
+#      initial_value: -24.5310936
+#      bounds:
+#      - -29.0
+#      - -22.0
+#    joint_tnc_single_ASC_auto_sufficient_social:
+#      initial_value: -14.24835491
+#      bounds:
+#      - -19.0
+#      - -12.0
+#    joint_tnc_shared_ASC_no_auto_social:
+#      initial_value: -4.300199986
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    joint_tnc_shared_ASC_auto_deficient_social:
+#      initial_value: -24.93212891
+#      bounds:
+#      - -29.0
+#      - -22.0
+#    joint_tnc_shared_ASC_auto_sufficient_social:
+#      initial_value: -25.28395271
+#      bounds:
+#      - -30.0
+#      - -23.0
+#    local_bus_ASC_social:
+#      initial_value: -3.852099895
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    walk_light_rail_ASC_social:
+#      initial_value: -8.833940506
+#      bounds:
+#      - -13.0
+#      - -6.0
+#    drive_light_rail_ASC_social:
+#      initial_value: -1.572320461
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    walk_ferry_ASC_social:
+#      initial_value: 5.3723955154418945
+#      bounds:
+#      - 0.0
+#      - 7.0
+#    drive_ferry_ASC_social:
+#      initial_value: -9.411546707
+#      bounds:
+#      - -14.0
+#      - -7.0
+#    express_bus_ASC_social:
+#      initial_value: -10.48695087
+#      bounds:
+#      - -15.0
+#      - -8.0
+#    heavy_rail_ASC_social:
+#      initial_value: -10.25652599
+#      bounds:
+#      - -15.0
+#      - -8.0
+#    commuter_rail_ASC_social:
+#      initial_value: -9.744318008
+#      bounds:
+#      - -14.0
+#      - -7.0
+#    walk_transit_CBD_ASC_social:
+#      initial_value: -20.86664963
+#      bounds:
+#      - -25.0
+#      - -18.0
+#    drive_transit_CBD_ASC_social:
+#      initial_value: -18.45969772
+#      bounds:
+#      - -23.0
+#      - -16.0
+#    coef_topology_walk_multiplier_escort:
+#      initial_value: 15.0
+#      bounds:
+#      - 10.0
+#      - 17.0
+#    coef_topology_bike_multiplier_escort:
+#      initial_value: 20.0
+#      bounds:
+#      - 15.0
+#      - 22.0
+#    coef_topology_trn_multiplier_escort:
+#      initial_value: 2.200000047683716
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    coef_age16p_sr_multiplier_escort:
+#      initial_value: -0.193369851
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    taxi_ASC_no_auto_escort:
+#      initial_value: -2.107145548
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    taxi_ASC_auto_deficient_escort:
+#      initial_value: -4.916888714
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    taxi_ASC_auto_sufficient_escort:
+#      initial_value: -10.42352104
+#      bounds:
+#      - -15.0
+#      - -8.0
+#    tnc_single_ASC_no_auto_escort:
+#      initial_value: -3.376517057
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    tnc_single_ASC_auto_deficient_escort:
+#      initial_value: -5.406478882
+#      bounds:
+#      - -10.0
+#      - -3.0
+#    tnc_single_ASC_auto_sufficient_escort:
+#      initial_value: -4.155766487
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    tnc_shared_ASC_no_auto_escort:
+#      initial_value: -2.663203955
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    tnc_shared_ASC_auto_deficient_escort:
+#      initial_value: -8.985836983
+#      bounds:
+#      - -13.0
+#      - -6.0
+#    tnc_shared_ASC_auto_sufficient_escort:
+#      initial_value: -8.631490707
+#      bounds:
+#      - -13.0
+#      - -6.0
+#    joint_walk_ASC_no_auto_escort:
+#      initial_value: -0.212747008
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    joint_walk_ASC_auto_deficient_escort:
+#      initial_value: -1.960770607
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    joint_walk_ASC_auto_sufficient_escort:
+#      initial_value: -3.235215664
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    joint_bike_ASC_no_auto_escort:
+#      initial_value: -2.867159843
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    joint_bike_ASC_auto_deficient_escort:
+#      initial_value: -6.076415062
+#      bounds:
+#      - -11.0
+#      - -4.0
+#    joint_bike_ASC_auto_sufficient_escort:
+#      initial_value: -6.376065731
+#      bounds:
+#      - -11.0
+#      - -4.0
+#    joint_sr3p_ASC_no_auto_escort:
+#      initial_value: 0.5630670785903931
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    joint_sr3p_ASC_auto_deficient_escort:
+#      initial_value: -1.884169221
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    joint_sr3p_ASC_auto_sufficient_escort:
+#      initial_value: -2.234826088
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    joint_walk_transit_ASC_no_auto_escort:
+#      initial_value: 0.6229241490364075
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    joint_walk_transit_ASC_auto_deficient_escort:
+#      initial_value: -5.163448334
+#      bounds:
+#      - -10.0
+#      - -3.0
+#    joint_walk_transit_ASC_auto_sufficient_escort:
+#      initial_value: -18.264534
+#      bounds:
+#      - -23.0
+#      - -16.0
+#    joint_drive_transit_ASC_auto_deficient_escort:
+#      initial_value: -5.96322155
+#      bounds:
+#      - -10.0
+#      - -3.0
+#    joint_drive_transit_ASC_auto_sufficient_escort:
+#      initial_value: -8.045285225
+#      bounds:
+#      - -13.0
+#      - -6.0
+#    joint_taxi_ASC_no_auto_escort:
+#      initial_value: -4.579199791
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    joint_taxi_ASC_auto_deficient_escort:
+#      initial_value: -9.815699577
+#      bounds:
+#      - -14.0
+#      - -7.0
+#    joint_taxi_ASC_auto_sufficient_escort:
+#      initial_value: -11.7098999
+#      bounds:
+#      - -16.0
+#      - -9.0
+#    joint_tnc_single_ASC_no_auto_escort:
+#      initial_value: -4.491700172
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    joint_tnc_single_ASC_auto_deficient_escort:
+#      initial_value: -9.896100044
+#      bounds:
+#      - -14.0
+#      - -7.0
+#    joint_tnc_single_ASC_auto_sufficient_escort:
+#      initial_value: -14.01589966
+#      bounds:
+#      - -19.0
+#      - -12.0
+#    joint_tnc_shared_ASC_no_auto_escort:
+#      initial_value: -4.300199986
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    joint_tnc_shared_ASC_auto_deficient_escort:
+#      initial_value: -11.15719986
+#      bounds:
+#      - -16.0
+#      - -9.0
+#    joint_tnc_shared_ASC_auto_sufficient_escort:
+#      initial_value: -13.20499992
+#      bounds:
+#      - -18.0
+#      - -11.0
+#    local_bus_ASC_escort:
+#      initial_value: 1.5286870002746582
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    walk_light_rail_ASC_escort:
+#      initial_value: -23.30050087
+#      bounds:
+#      - -28.0
+#      - -21.0
+#    drive_light_rail_ASC_escort:
+#      initial_value: -8.930927277
+#      bounds:
+#      - -13.0
+#      - -6.0
+#    walk_ferry_ASC_escort:
+#      initial_value: -0.244931489
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    drive_ferry_ASC_escort:
+#      initial_value: 1.2924500703811646
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    express_bus_ASC_escort:
+#      initial_value: -10.35242081
+#      bounds:
+#      - -15.0
+#      - -8.0
+#    heavy_rail_ASC_escort:
+#      initial_value: -0.672458112
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    commuter_rail_ASC_escort:
+#      initial_value: -18.34836006
+#      bounds:
+#      - -23.0
+#      - -16.0
+#    walk_transit_CBD_ASC_escort:
+#      initial_value: 10.077451705932617
+#      bounds:
+#      - 5.0
+#      - 12.0
+#    drive_transit_CBD_ASC_escort:
+#      initial_value: -2.598358154
+#      bounds:
+#      - -7.0
+#      - 0.0
+  trip_mode_choice_coefficients.csv:
+    coef_ivt_othmaint_social:
+      initial_value: -0.0175
+      bounds:
+      - -0.002
+      - -0.05
+    coef_ivt_work:
+      initial_value: -0.022
+      bounds:
+      - -0.002
+      - -0.05
+    coef_ivt_univ_school:
+      initial_value: -0.0271
+      bounds:
+      - -0.002
+      - -0.05
+    coef_ivt_escort_shopping_eatout_othdiscr_atwork:
+      initial_value: -0.0279
+      bounds:
+      - -0.002
+      - -0.05
+#    coef_age1619_da:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_age010_trn:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_age16p_sr:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_hhsize1_sr:
+#      initial_value: -0.7346
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_hhsize2_sr:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_walktimeshort_atwork:
+#      initial_value: 1.34767
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    coef_walktimeshort_work_univ_school_escort_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: 2.0
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    coef_biketimeshort_atwork:
+#      initial_value: 2.69535
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    coef_biketimeshort_work_univ_school_escort_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: 4.0
+#      bounds:
+#      - -1.0
+#      - 6.0
+#    coef_dtim_atwork:
+#      initial_value: 1.34767
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    coef_dtim_work_univ_school_escort_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: 2.0
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    coef_ivt_ferry_atwork:
+#      initial_value: 0.539
+#      bounds:
+#      - -0.002
+#      - -0.05
+#    coef_ivt_ferry_work_univ_school_escort_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: 0.8
+#      bounds:
+#      - -0.002
+#      - -0.05
+#    coef_ivt_lrt_atwork:
+#      initial_value: 0.60645
+#      bounds:
+#      - -0.002
+#      - -0.05
+#    coef_ivt_lrt_work_univ_school_escort_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: 0.9
+#      bounds:
+#      - -0.002
+#      - -0.05
+#    coef_long_iwait_atwork:
+#      initial_value: 0.6738
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_long_iwait_work_univ_school_escort_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: 1.0
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    coef_short_iwait_atwork:
+#      initial_value: 1.34767
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    coef_short_iwait_work_univ_school_escort_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: 2.0
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    coef_wacc_atwork:
+#      initial_value: 1.34767
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    coef_wacc_work_univ_school_escort_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: 2.0
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    coef_waux_atwork:
+#      initial_value: 1.34767
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    coef_waux_work_univ_school_escort_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: 2.0
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    coef_wegr_atwork:
+#      initial_value: 1.34767
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    coef_wegr_work_univ_school_escort_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: 2.0
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    coef_xwait_atwork:
+#      initial_value: 1.34767
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    coef_xwait_work_univ_school_escort_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: 2.0
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    coef_bike_ASC_rh:
+#      initial_value: -7.0
+#      bounds:
+#      - -12.0
+#      - -5.0
+#    coef_bike_ASC_walk_univ:
+#      initial_value: -0.3399
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_bike_ASC_walk_othmaint:
+#      initial_value: -0.5706
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_bike_ASC_walk_shopping:
+#      initial_value: -1.0245
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    coef_bike_ASC_walk_othdiscr:
+#      initial_value: -1.3577
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    coef_bike_ASC_walk_work:
+#      initial_value: -1.8333
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    coef_bike_ASC_walk_social:
+#      initial_value: -13.2384
+#      bounds:
+#      - -18.0
+#      - -11.0
+#    coef_bike_ASC_walk_escort:
+#      initial_value: -13.5203
+#      bounds:
+#      - -18.0
+#      - -11.0
+#    coef_bike_ASC_walk_school:
+#      initial_value: -2.0332
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    coef_bike_ASC_walk_eatout:
+#      initial_value: -2.699
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    coef_bike_ASC_walk_atwork:
+#      initial_value: -5.0532
+#      bounds:
+#      - -10.0
+#      - -3.0
+#    coef_drive_transit_ASC_commuter_work:
+#      initial_value: 0.4012
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_drive_transit_ASC_commuter_shopping_eatout_othmaint_social_othdiscr_atwork:
+#      initial_value: 0.5129
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_drive_transit_ASC_commuter_escort:
+#      initial_value: 0.5442
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_drive_transit_ASC_commuter_univ_school:
+#      initial_value: 0.9082
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_drive_transit_ASC_ferry_work:
+#      initial_value: 0.5277
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_drive_transit_ASC_ferry_escort:
+#      initial_value: 0.6005
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_drive_transit_ASC_ferry_shopping_eatout_othmaint_social_othdiscr_atwork:
+#      initial_value: 0.6466
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_drive_transit_ASC_ferry_univ_school:
+#      initial_value: 1.7237
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    coef_drive_transit_ASC_heavyrail_work:
+#      initial_value: 0.3538
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_drive_transit_ASC_heavyrail_shopping_eatout_othmaint_social_othdiscr_atwork:
+#      initial_value: 0.5403
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_drive_transit_ASC_heavyrail_escort:
+#      initial_value: 0.5673
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_drive_transit_ASC_heavyrail_univ_school:
+#      initial_value: 0.849
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_drive_transit_ASC_lightrail_work:
+#      initial_value: 0.4621
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_drive_transit_ASC_lightrail_escort:
+#      initial_value: 0.5252
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_drive_transit_ASC_lightrail_shopping_eatout_othmaint_social_othdiscr_atwork:
+#      initial_value: 0.5392
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_drive_transit_ASC_lightrail_univ_school:
+#      initial_value: 1.4436
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    coef_drive_transit_ASC_rh:
+#      initial_value: -4.25
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    coef_joint_auto_ASC_rh_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: -7.0
+#      bounds:
+#      - -12.0
+#      - -5.0
+#    coef_joint_auto_ASC_rh_work_univ_school_escort_atwork:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_auto_ASC_sr2_eatout_othmaint_social_othdiscr:
+#      initial_value: -0.0634
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_auto_ASC_sr2_work_univ_school_escort_atwork:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_auto_ASC_sr2_shopping:
+#      initial_value: 0.5875
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_auto_ASC_sr3p_eatout_othmaint_social_othdiscr:
+#      initial_value: -0.1625
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_auto_ASC_sr3p_shopping:
+#      initial_value: -19.0454
+#      bounds:
+#      - -24.0
+#      - -17.0
+#    coef_joint_auto_ASC_sr3p_work_univ_school_escort_atwork:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_auto_ASC_walk_eatout_othmaint_social_othdiscr:
+#      initial_value: -0.7144
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_auto_ASC_walk_shopping:
+#      initial_value: -23.4688
+#      bounds:
+#      - -28.0
+#      - -21.0
+#    coef_joint_auto_ASC_walk_work_univ_school_escort_atwork:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_bike_ASC_rh_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: -12.3057
+#      bounds:
+#      - -17.0
+#      - -10.0
+#    coef_joint_bike_ASC_rh_work_univ_school_escort_atwork:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_bike_ASC_walk_othmaint:
+#      initial_value: -13.5192
+#      bounds:
+#      - -18.0
+#      - -11.0
+#    coef_joint_bike_ASC_walk_othdiscr:
+#      initial_value: -14.444
+#      bounds:
+#      - -19.0
+#      - -12.0
+#    coef_joint_bike_ASC_walk_eatout:
+#      initial_value: -15.5588
+#      bounds:
+#      - -20.0
+#      - -13.0
+#    coef_joint_bike_ASC_walk_social:
+#      initial_value: -26.1714
+#      bounds:
+#      - -31.0
+#      - -24.0
+#    coef_joint_bike_ASC_walk_shopping:
+#      initial_value: -7.0476
+#      bounds:
+#      - -12.0
+#      - -5.0
+#    coef_joint_bike_ASC_walk_work_univ_school_escort_atwork:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_drive_transit_ASC_commuter_work_univ_school_escort_atwork:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_drive_transit_ASC_commuter_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: 0.5129
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_drive_transit_ASC_ferry_work_univ_school_escort_atwork:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_drive_transit_ASC_ferry_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: 0.6466
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_drive_transit_ASC_heavyrail_work_univ_school_escort_atwork:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_drive_transit_ASC_heavyrail_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: 0.5403
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_drive_transit_ASC_lightrail_work_univ_school_escort_atwork:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_drive_transit_ASC_lightrail_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: 0.5392
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_drive_transit_ASC_rh_work_univ_school_escort_atwork:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_drive_transit_ASC_rh_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: 4.6138
+#      bounds:
+#      - -1.0
+#      - 6.0
+#    coef_joint_ride_hail_ASC_sr2_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: -7.0
+#      bounds:
+#      - -12.0
+#      - -5.0
+#    coef_joint_ride_hail_ASC_sr2_work_univ_school_escort_atwork:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_ride_hail_ASC_sr3p_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: -7.0
+#      bounds:
+#      - -12.0
+#      - -5.0
+#    coef_joint_ride_hail_ASC_sr3p_work_univ_school_escort_atwork:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_ride_hail_ASC_taxi_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: -7.0
+#      bounds:
+#      - -12.0
+#      - -5.0
+#    coef_joint_ride_hail_ASC_taxi_work_univ_school_escort_atwork:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_ride_hail_ASC_tnc_shared:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_ride_hail_ASC_tnc_single_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: -4.7339
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    coef_joint_ride_hail_ASC_tnc_single_work_univ_school_escort_atwork:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_ride_hail_ASC_walk_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: -7.0
+#      bounds:
+#      - -12.0
+#      - -5.0
+#    coef_joint_ride_hail_ASC_walk_work_univ_school_escort_atwork:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_ride_hail_ASC_walk_transit:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_walk_ASC_rh_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: -3.0362
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    coef_joint_walk_ASC_rh_work_univ_school_escort_atwork:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_walk_transit_ASC_commuter_work_univ_school_escort_atwork:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_walk_transit_ASC_commuter_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: 0.5129
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_walk_transit_ASC_ferry_work_univ_school_escort_atwork:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_walk_transit_ASC_ferry_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: 0.6466
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_walk_transit_ASC_heavyrail_work_univ_school_escort_atwork:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_walk_transit_ASC_heavyrail_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: 0.5403
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_walk_transit_ASC_lightrail_work_univ_school_escort_atwork:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_walk_transit_ASC_lightrail_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: 0.5392
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_walk_transit_ASC_rh_work_univ_school_escort_atwork:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_walk_transit_ASC_rh_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: 1.2266
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    coef_joint_walk_transit_ASC_sr2_eatout:
+#      initial_value: -14.9134
+#      bounds:
+#      - -19.0
+#      - -12.0
+#    coef_joint_walk_transit_ASC_sr2_othdiscr:
+#      initial_value: -14.9801
+#      bounds:
+#      - -19.0
+#      - -12.0
+#    coef_joint_walk_transit_ASC_sr2_social:
+#      initial_value: -20.5022
+#      bounds:
+#      - -25.0
+#      - -18.0
+#    coef_joint_walk_transit_ASC_sr2_shopping:
+#      initial_value: -21.5768
+#      bounds:
+#      - -26.0
+#      - -19.0
+#    coef_joint_walk_transit_ASC_sr2_othmaint:
+#      initial_value: -5.323
+#      bounds:
+#      - -10.0
+#      - -3.0
+#    coef_joint_walk_transit_ASC_sr2_work_univ_school_escort_atwork:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_walk_transit_ASC_sr3p_othdiscr:
+#      initial_value: -16.7354
+#      bounds:
+#      - -21.0
+#      - -14.0
+#    coef_joint_walk_transit_ASC_sr3p_eatout:
+#      initial_value: -16.7587
+#      bounds:
+#      - -21.0
+#      - -14.0
+#    coef_joint_walk_transit_ASC_sr3p_shopping:
+#      initial_value: -25.5953
+#      bounds:
+#      - -30.0
+#      - -23.0
+#    coef_joint_walk_transit_ASC_sr3p_othmaint:
+#      initial_value: -3.9563
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    coef_joint_walk_transit_ASC_sr3p_social:
+#      initial_value: -34.7378
+#      bounds:
+#      - -39.0
+#      - -32.0
+#    coef_joint_walk_transit_ASC_sr3p_work_univ_school_escort_atwork:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_walk_transit_ASC_walk_othdiscr:
+#      initial_value: -0.0024
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_walk_transit_ASC_walk_shopping:
+#      initial_value: -0.5472
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_walk_transit_ASC_walk_social:
+#      initial_value: -2.1301
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    coef_joint_walk_transit_ASC_walk_work_univ_school_escort_atwork:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_joint_walk_transit_ASC_walk_othmaint:
+#      initial_value: 1.1876
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    coef_joint_walk_transit_ASC_walk_eatout:
+#      initial_value: 2.3017
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    coef_ride_hail_ASC_sr2_school:
+#      initial_value: -1.5869
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    coef_ride_hail_ASC_sr2_univ:
+#      initial_value: -4.3372
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    coef_ride_hail_ASC_sr2_atwork:
+#      initial_value: -5.2763
+#      bounds:
+#      - -10.0
+#      - -3.0
+#    coef_ride_hail_ASC_sr2_escort_shopping_othmaint:
+#      initial_value: -5.6483
+#      bounds:
+#      - -10.0
+#      - -3.0
+#    coef_ride_hail_ASC_sr2_eatout_social_othdiscr:
+#      initial_value: -5.9692
+#      bounds:
+#      - -10.0
+#      - -3.0
+#    coef_ride_hail_ASC_sr2_work:
+#      initial_value: -6.108
+#      bounds:
+#      - -11.0
+#      - -4.0
+#    coef_ride_hail_ASC_sr3p_school:
+#      initial_value: -2.5362
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    coef_ride_hail_ASC_sr3p_univ:
+#      initial_value: -4.922
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    coef_ride_hail_ASC_sr3p_eatout_social_othdiscr:
+#      initial_value: -6.7199
+#      bounds:
+#      - -11.0
+#      - -4.0
+#    coef_ride_hail_ASC_sr3p_work_escort_shopping_othmaint_atwork:
+#      initial_value: -7.0
+#      bounds:
+#      - -12.0
+#      - -5.0
+#    coef_ride_hail_ASC_taxi_school:
+#      initial_value: -0.5869
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_ride_hail_ASC_taxi_univ:
+#      initial_value: -1.5994
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    coef_ride_hail_ASC_taxi_atwork:
+#      initial_value: -1.7764
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    coef_ride_hail_ASC_taxi_work:
+#      initial_value: -2.385
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    coef_ride_hail_ASC_taxi_eatout_social_othdiscr:
+#      initial_value: -2.5543
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    coef_ride_hail_ASC_taxi_escort_shopping_othmaint:
+#      initial_value: -3.6629
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    coef_ride_hail_ASC_tnc_shared:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_ride_hail_ASC_tnc_single_univ:
+#      initial_value: 0.1081
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_ride_hail_ASC_tnc_single_school:
+#      initial_value: 0.3201
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_ride_hail_ASC_tnc_single_work:
+#      initial_value: 0.735
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_ride_hail_ASC_tnc_single_escort_shopping_othmaint:
+#      initial_value: 0.7879
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_ride_hail_ASC_tnc_single_eatout_social_othdiscr:
+#      initial_value: 0.8274
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_ride_hail_ASC_tnc_single_atwork:
+#      initial_value: 1.2143
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    coef_ride_hail_ASC_walk_atwork:
+#      initial_value: -2.6103
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    coef_ride_hail_ASC_walk_eatout_social_othdiscr:
+#      initial_value: -3.3603
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    coef_ride_hail_ASC_walk_univ_escort_shopping_othmaint:
+#      initial_value: -7.0
+#      bounds:
+#      - -12.0
+#      - -5.0
+#    coef_ride_hail_ASC_walk_school:
+#      initial_value: 0.245
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_ride_hail_ASC_walk_work:
+#      initial_value: 0.2858
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_ride_hail_ASC_walk_transit:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sov_ASC_rh_school:
+#      initial_value: -5.6549
+#      bounds:
+#      - -10.0
+#      - -3.0
+#    coef_sov_ASC_rh_univ:
+#      initial_value: -6.649
+#      bounds:
+#      - -11.0
+#      - -4.0
+#    coef_sov_ASC_rh_work_atwork:
+#      initial_value: -7.0
+#      bounds:
+#      - -12.0
+#      - -5.0
+#    coef_sov_ASC_rh_escort_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sov_ASC_sr2_work_univ_school_shopping_eatout_othmaint_social_othdiscr_atwork:
+#      initial_value: -999.0
+#      bounds:
+#      - -1004.0
+#      - -997.0
+#    coef_sov_ASC_sr2_escort:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sov_ASC_sr3p_work_univ_school_shopping_eatout_othmaint_social_othdiscr_atwork:
+#      initial_value: -999.0
+#      bounds:
+#      - -1004.0
+#      - -997.0
+#    coef_sov_ASC_sr3p_escort:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sov_ASC_walk_work:
+#      initial_value: -0.8398
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sov_ASC_walk_univ:
+#      initial_value: -1.0579
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    coef_sov_ASC_walk_othmaint:
+#      initial_value: -1.2993
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    coef_sov_ASC_walk_eatout:
+#      initial_value: -1.3443
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    coef_sov_ASC_walk_shopping:
+#      initial_value: -1.4766
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    coef_sov_ASC_walk_othdiscr:
+#      initial_value: -1.5507
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    coef_sov_ASC_walk_atwork:
+#      initial_value: -1.7875
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    coef_sov_ASC_walk_social:
+#      initial_value: -1.8077
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    coef_sov_ASC_walk_school:
+#      initial_value: -71.8977
+#      bounds:
+#      - -76.0
+#      - -69.0
+#    coef_sov_ASC_walk_escort:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr2_ASC_rh_univ:
+#      initial_value: -6.6897
+#      bounds:
+#      - -11.0
+#      - -4.0
+#    coef_sr2_ASC_rh_work_school_escort_shopping_eatout_othmaint_social_othdiscr_atwork:
+#      initial_value: -7.0
+#      bounds:
+#      - -12.0
+#      - -5.0
+#    coef_sr2_ASC_sr2_school:
+#      initial_value: -1.9335
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    coef_sr2_ASC_sr2_work:
+#      initial_value: 0.0149
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr2_ASC_sr2_escort:
+#      initial_value: 0.3533
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr2_ASC_sr2_univ:
+#      initial_value: 0.4304
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr2_ASC_sr2_social:
+#      initial_value: 0.5663
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr2_ASC_sr2_othdiscr:
+#      initial_value: 0.7478
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr2_ASC_sr2_othmaint:
+#      initial_value: 0.8574
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr2_ASC_sr2_eatout:
+#      initial_value: 0.9971
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr2_ASC_sr2_shopping:
+#      initial_value: 1.3765
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    coef_sr2_ASC_sr2_atwork:
+#      initial_value: 2.2815
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    coef_sr2_ASC_sr3p:
+#      initial_value: -999.0
+#      bounds:
+#      - -1004.0
+#      - -997.0
+#    coef_sr2_ASC_walk_othdiscr:
+#      initial_value: -0.0268
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr2_ASC_walk_eatout:
+#      initial_value: -0.0729
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr2_ASC_walk_shopping:
+#      initial_value: -0.1117
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr2_ASC_walk_othmaint:
+#      initial_value: -0.5989
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr2_ASC_walk_social:
+#      initial_value: -0.7932
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr2_ASC_walk_school:
+#      initial_value: -1.0362
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    coef_sr2_ASC_walk_escort:
+#      initial_value: -2.0528
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    coef_sr2_ASC_walk_work:
+#      initial_value: 0.126
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr2_ASC_walk_atwork:
+#      initial_value: 1.1789
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    coef_sr2_ASC_walk_univ:
+#      initial_value: 1.3041
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    coef_sr3p_ASC_rh_atwork:
+#      initial_value: -6.026
+#      bounds:
+#      - -11.0
+#      - -4.0
+#    coef_sr3p_ASC_rh_school:
+#      initial_value: -6.6714
+#      bounds:
+#      - -11.0
+#      - -4.0
+#    coef_sr3p_ASC_rh_univ_escort_shopping_eatout_othmaint_social_othdiscr:
+#      initial_value: -7.0
+#      bounds:
+#      - -12.0
+#      - -5.0
+#    coef_sr3p_ASC_rh_work:
+#      initial_value: -71.9177
+#      bounds:
+#      - -76.0
+#      - -69.0
+#    coef_sr3p_ASC_sr2_shopping:
+#      initial_value: -0.0781
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr3p_ASC_sr2_social:
+#      initial_value: -0.1556
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr3p_ASC_sr2_escort:
+#      initial_value: -0.2682
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr3p_ASC_sr2_othmaint:
+#      initial_value: -0.2958
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr3p_ASC_sr2_univ:
+#      initial_value: -0.3117
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr3p_ASC_sr2_eatout:
+#      initial_value: -0.3178
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr3p_ASC_sr2_othdiscr:
+#      initial_value: -0.6142
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr3p_ASC_sr2_work:
+#      initial_value: -1.1956
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    coef_sr3p_ASC_sr2_school:
+#      initial_value: -2.7407
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    coef_sr3p_ASC_sr2_atwork:
+#      initial_value: 1.0387
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    coef_sr3p_ASC_sr3p_work:
+#      initial_value: -0.1836
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr3p_ASC_sr3p_school:
+#      initial_value: -1.7718
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    coef_sr3p_ASC_sr3p_univ:
+#      initial_value: 0.6293
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr3p_ASC_sr3p_escort:
+#      initial_value: 0.7358
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr3p_ASC_sr3p_othdiscr:
+#      initial_value: 0.7398
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr3p_ASC_sr3p_social:
+#      initial_value: 0.8331
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr3p_ASC_sr3p_othmaint:
+#      initial_value: 0.9527
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr3p_ASC_sr3p_eatout:
+#      initial_value: 1.3323
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    coef_sr3p_ASC_sr3p_shopping:
+#      initial_value: 1.3395
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    coef_sr3p_ASC_sr3p_atwork:
+#      initial_value: 2.4128
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    coef_sr3p_ASC_walk_eatout:
+#      initial_value: -0.0434
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr3p_ASC_walk_social:
+#      initial_value: -0.3134
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr3p_ASC_walk_shopping:
+#      initial_value: -0.5079
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr3p_ASC_walk_othdiscr:
+#      initial_value: -0.5272
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr3p_ASC_walk_escort:
+#      initial_value: -1.0075
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    coef_sr3p_ASC_walk_school:
+#      initial_value: -1.2127
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    coef_sr3p_ASC_walk_othmaint:
+#      initial_value: 0.0422
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr3p_ASC_walk_work:
+#      initial_value: 0.2171
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr3p_ASC_walk_atwork:
+#      initial_value: 0.8102
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_sr3p_ASC_walk_univ:
+#      initial_value: 1.6793
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    coef_walk_ASC_rh:
+#      initial_value: -7.0
+#      bounds:
+#      - -12.0
+#      - -5.0
+#    coef_walk_transit_ASC_commuter_work:
+#      initial_value: 0.4012
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_walk_transit_ASC_commuter_shopping_eatout_othmaint_social_othdiscr_atwork:
+#      initial_value: 0.5129
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_walk_transit_ASC_commuter_escort:
+#      initial_value: 0.5442
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_walk_transit_ASC_commuter_univ_school:
+#      initial_value: 0.9082
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_walk_transit_ASC_ferry_work:
+#      initial_value: 0.5277
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_walk_transit_ASC_ferry_escort:
+#      initial_value: 0.6005
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_walk_transit_ASC_ferry_shopping_eatout_othmaint_social_othdiscr_atwork:
+#      initial_value: 0.6466
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_walk_transit_ASC_ferry_univ_school:
+#      initial_value: 1.7237
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    coef_walk_transit_ASC_heavyrail_work:
+#      initial_value: 0.3538
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_walk_transit_ASC_heavyrail_shopping_eatout_othmaint_social_othdiscr_atwork:
+#      initial_value: 0.5403
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_walk_transit_ASC_heavyrail_escort:
+#      initial_value: 0.5673
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_walk_transit_ASC_heavyrail_univ_school:
+#      initial_value: 0.849
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_walk_transit_ASC_lightrail_work:
+#      initial_value: 0.4621
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_walk_transit_ASC_lightrail_escort:
+#      initial_value: 0.5252
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_walk_transit_ASC_lightrail_shopping_eatout_othmaint_social_othdiscr_atwork:
+#      initial_value: 0.5392
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_walk_transit_ASC_lightrail_univ_school:
+#      initial_value: 1.4436
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    coef_walk_transit_ASC_rh_escort_shopping_othmaint:
+#      initial_value: -3.1136
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    coef_walk_transit_ASC_rh_work:
+#      initial_value: -3.7408
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    coef_walk_transit_ASC_rh_atwork:
+#      initial_value: -3.8506
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    coef_walk_transit_ASC_rh_univ:
+#      initial_value: -4.2691
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    coef_walk_transit_ASC_rh_eatout_social_othdiscr:
+#      initial_value: -4.7508
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    coef_walk_transit_ASC_rh_school:
+#      initial_value: -7.0
+#      bounds:
+#      - -12.0
+#      - -5.0
+#    coef_walk_transit_ASC_sr2_escort:
+#      initial_value: -2.6284
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    coef_walk_transit_ASC_sr2_othdiscr:
+#      initial_value: -2.759
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    coef_walk_transit_ASC_sr2_atwork:
+#      initial_value: -22.6587
+#      bounds:
+#      - -27.0
+#      - -20.0
+#    coef_walk_transit_ASC_sr2_eatout:
+#      initial_value: -3.1434
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    coef_walk_transit_ASC_sr2_social:
+#      initial_value: -3.3663
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    coef_walk_transit_ASC_sr2_work:
+#      initial_value: -3.6631
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    coef_walk_transit_ASC_sr2_othmaint:
+#      initial_value: -34.6746
+#      bounds:
+#      - -39.0
+#      - -32.0
+#    coef_walk_transit_ASC_sr2_univ:
+#      initial_value: -4.005
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    coef_walk_transit_ASC_sr2_shopping:
+#      initial_value: -4.0115
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    coef_walk_transit_ASC_sr2_school:
+#      initial_value: -4.2961
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    coef_walk_transit_ASC_sr3p_othdiscr:
+#      initial_value: -2.5126
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    coef_walk_transit_ASC_sr3p_social:
+#      initial_value: -21.6309
+#      bounds:
+#      - -26.0
+#      - -19.0
+#    coef_walk_transit_ASC_sr3p_univ:
+#      initial_value: -28.6972
+#      bounds:
+#      - -33.0
+#      - -26.0
+#    coef_walk_transit_ASC_sr3p_othmaint:
+#      initial_value: -29.3858
+#      bounds:
+#      - -34.0
+#      - -27.0
+#    coef_walk_transit_ASC_sr3p_escort:
+#      initial_value: -3.2074
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    coef_walk_transit_ASC_sr3p_eatout:
+#      initial_value: -3.852
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    coef_walk_transit_ASC_sr3p_school:
+#      initial_value: -3.8665
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    coef_walk_transit_ASC_sr3p_atwork:
+#      initial_value: -35.958
+#      bounds:
+#      - -40.0
+#      - -33.0
+#    coef_walk_transit_ASC_sr3p_work:
+#      initial_value: -4.1314
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    coef_walk_transit_ASC_sr3p_shopping:
+#      initial_value: -4.3852
+#      bounds:
+#      - -9.0
+#      - -2.0
+#    coef_walk_transit_ASC_walk_shopping:
+#      initial_value: -0.1943
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_walk_transit_ASC_walk_othdiscr:
+#      initial_value: -0.4997
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_walk_transit_ASC_walk_social:
+#      initial_value: -0.7651
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_walk_transit_ASC_walk_escort:
+#      initial_value: -0.9974
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_walk_transit_ASC_walk_univ:
+#      initial_value: -1.0311
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    coef_walk_transit_ASC_walk_school:
+#      initial_value: -1.1828
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    coef_walk_transit_ASC_walk_work:
+#      initial_value: 0.4432
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_walk_transit_ASC_walk_atwork:
+#      initial_value: 0.5165
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_walk_transit_ASC_walk_othmaint:
+#      initial_value: 0.7248
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_walk_transit_ASC_walk_eatout:
+#      initial_value: 1.3504
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    adjust_tnc_shared:
+#      initial_value: 30.0
+#      bounds:
+#      - 25.0
+#      - 32.0
+#    coef_origin_density_applied_work_univ_school:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    coef_origin_density_applied_escort_shopping_eatout_othmaint_social_othdiscr_atwork:
+#      initial_value: 1.0
+#      bounds:
+#      - -4.0
+#      - 3.0
+  trip_destination_coefficients.csv:
+    coef_mode_choice_logsum:
+      initial_value: 1.821
+      bounds:
+      - 0.0
+      - 2.0
+    coef_distance_joint:
+      initial_value: -0.1238
+      bounds:
+      - -2.0
+      - -0.01
+    coef_util_distance_work_outbound:
+      initial_value: -0.04972591574229
+      bounds:
+      - -2.0
+      - -0.01
+    coef_util_distance_work_inbound:
+      initial_value: 0.147813278663948
+      bounds:
+      - -2.0
+      - -0.01
+    coef_util_distance_univ:
+      initial_value: -0.0613
+      bounds:
+      - -2.0
+      - -0.01
+    coef_util_distance_school:
+      initial_value: -0.1056
+      bounds:
+      - -2.0
+      - -0.01
+    coef_util_distance_escort:
+      initial_value: -0.1491
+      bounds:
+      - -2.0
+      - -0.01
+    coef_util_distance_shopping:
+      initial_value: -0.1192
+      bounds:
+      - -2.0
+      - -0.01
+    coef_util_distance_eatout:
+      initial_value: -0.1029
+      bounds:
+      - -2.0
+      - -0.01
+    coef_util_distance_othmaint:
+      initial_value: -0.0962
+      bounds:
+      - -2.0
+      - -0.01
+    coef_util_distance_social:
+      initial_value: -0.1329
+      bounds:
+      - -2.0
+      - -0.01
+    coef_util_distance_othdiscr:
+      initial_value: -0.126172224
+      bounds:
+      - -2.0
+      - -0.01
+    coef_util_distance_atwork:
+      initial_value: -0.122334597
+      bounds:
+      - -2.0
+      - -0.01
+    coef_prox_home_outbound_work:
+      initial_value: -0.38
+      bounds:
+      - -5.0
+      - 2.0
+    coef_prox_home_inbound_work:
+      initial_value: -0.15
+      bounds:
+      - -5.0
+      - 2.0
+    coef_prox_dest_outbound_work:
+      initial_value: -0.26
+      bounds:
+      - -5.0
+      - 2.0
+  non_mandatory_tour_destination_coefficients.csv:
+    coef_mode_logsum:
+      initial_value: 0.6755
+      bounds:
+      - 0.0
+      - 2.0
+    coef_escort_dist_0_2:
+      initial_value: -0.1499
+      bounds:
+      - -2.0
+      - -0.01
+    coef_eatout_dist_0_2:
+      initial_value: -0.5609
+      bounds:
+      - -2.0
+      - -0.01
+    coef_eatout_social_0_2:
+      initial_value: -0.5609
+      bounds:
+      - -5.0
+      - 2.0
+    coef_othdiscr_dist_0_2:
+      initial_value: -0.1677
+      bounds:
+      - -2.0
+      - -0.01
+    coef_escort_dist_2_5:
+      initial_value: -0.8671
+      bounds:
+      - -2.0
+      - -0.01
+    coef_shopping_dist_2_5:
+      initial_value: -0.5655
+      bounds:
+      - -2.0
+      - -0.01
+    coef_eatout_dist_2_5:
+      initial_value: -0.3192
+      bounds:
+      - -2.0
+      - -0.01
+    coef_othmaint_dist_2_5:
+      initial_value: -0.6055
+      bounds:
+      - -2.0
+      - -0.01
+    coef_social_dist_2_5:
+      initial_value: -0.3485
+      bounds:
+      - -2.0
+      - -0.01
+    coef_othdiscr_dist_2_5:
+      initial_value: -0.4955
+      bounds:
+      - -2.0
+      - -0.01
+    coef_escort_dist_5_plus:
+      initial_value: -0.2137
+      bounds:
+      - -2.0
+      - -0.01
+    coef_shopping_dist_5_plus:
+      initial_value: -0.1832
+      bounds:
+      - -2.0
+      - -0.01
+    coef_eatout_dist_5_plus:
+      initial_value: -0.1238
+      bounds:
+      - -2.0
+      - -0.01
+    coef_othmaint_dist_5_plus:
+      initial_value: -0.1093
+      bounds:
+      - -2.0
+      - -0.01
+    coef_social_dist_5_plus:
+      initial_value: -0.1306
+      bounds:
+      - -2.0
+      - -0.01
+    coef_othdiscr_dist_5_plus:
+      initial_value: -0.1193
+      bounds:
+      - -2.0
+      - -0.01
+  workplace_location_coefficients.csv:
+    coef_dist_0_1:
+      initial_value: -0.8428
+      bounds:
+      - -2.0
+      - -0.01
+    coef_dist_1_2:
+      initial_value: -0.3104
+      bounds:
+      - -2.0
+      - -0.01
+    coef_dist_2_5:
+      initial_value: -0.3783
+      bounds:
+      - -2.0
+      - -0.01
+    coef_dist_5_15:
+      initial_value: -0.1285
+      bounds:
+      - -2.0
+      - -0.01
+    coef_dist_15_up:
+      initial_value: -0.0917
+      bounds:
+      - -2.0
+      - -0.01
+    coef_dist_0_5_high:
+      initial_value: 0.15
+      bounds:
+      - -2.0
+      - -0.01
+    coef_dist_5_up_high:
+      initial_value: 0.02
+      bounds:
+      - -2.0
+      - -0.01
+    coef_mode_logsum:
+      initial_value: 0.3
+      bounds:
+      - 0.0
+      - 2.0
+
+
+sample_size_schedule:
+  1 : 5000
+  250 : 20000
+  1000 : 50000
+
+main_settings_file: settings.yaml
+#output_file: activitysim/examples/prototype_mtc/output/summarize/trips_by_mode_and_distance_bin.csv
+calibration_data_file: trip_counts_by_mode_and_distance_per_capita.csv
+#output_dir: /Users/zaneedell/git/activitysim-configs-sfbay/output
+#configs_dir: /Users/zaneedell/git/activitysim-configs-sfbay/configs_extended

@@ -27,7 +27,7 @@ RUN sed -i '/-e \.\./d' $ASIM_PATH/conda-environments/activitysim-dev.yml \
     && conda env create -p $FULL_CONDA_PATH --file $ASIM_PATH/conda-environments/activitysim-dev.yml --solver=libmamba \
     && $FULL_CONDA_PATH/bin/pip install --only-binary pandas "pandas>=1.4.0,<2"
 
-RUN conda install -c conda-forge dfo-ls --solver=libmamba
+RUN $FULL_CONDA_PATH/bin/pip install DFO-LS
 ENV EXAMPLE prototype_mtc_clean
 
 COPY activitysim/abm $ASIM_PATH/activitysim/abm

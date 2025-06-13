@@ -106,6 +106,10 @@ def add_run_args(parser, multiprocess=True):
         "generally secure.",
     )
 
+    parser.add_argument(
+        "-cc", "--calibration_config", help="Calibration configuration file"
+    )
+
     if multiprocess:
         parser.add_argument(
             "-m",
@@ -273,7 +277,7 @@ def run(args):
         # register abm steps and other abm-specific injectables
         from activitysim import abm  # noqa: F401
 
-    state.logging.config_logger(basic=True)
+    # state.logging.config_logger(basic=True)
     state = handle_standard_args(state, args)  # possibly update injectables
 
     if state.settings.rotate_logs:
