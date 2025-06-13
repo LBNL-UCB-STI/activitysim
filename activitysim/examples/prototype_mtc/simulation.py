@@ -16,13 +16,28 @@ import os
 from activitysim import abm  # register injectables
 from activitysim.cli.run import add_run_args, run
 
+import logging
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+# calibration_logger = None
+
+def setup_logger(name, log_file, level=logging.INFO):
+    """To setup as many loggers as you want"""
+
+    handler = logging.FileHandler(log_file)
+    handler.setFormatter(formatter)
+
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+    logger.addHandler(handler)
+
+    return logger
+
 counter = 0
-calibration_progress_log_file = None # Initialize log file handle
-# config = None # Global variable to hold the calibration config for access in objective # REMOVE global config
 _inferred_num_errors = 0 # Global to store inferred errors for log header/fallback
 
 
 def calibrate(config_file, args):
+    global calibration_logger
     print("Running calibration!!!")
     # global config # Declare intent to use the global config variable
     global _inferred_num_errors # Declare intent to use the global error count
@@ -76,8 +91,7 @@ def calibrate(config_file, args):
         """
 
         global counter
-        global calibration_progress_log_file
-        # global config # REMOVE access to global config
+        global calibration_logger
 
         counter += 1 # Increment counter at the start of each iteration
 
@@ -108,14 +122,11 @@ def calibrate(config_file, args):
 
         print(f"Calculated errors: {errors}")
 
-        # --- Log progress ---
-        if calibration_progress_log_file:
-            # Log format: Iteration, Coef1 Value, ..., Error1, Error2, ...
-            log_data = [counter] + list(x) + list(errors)
-            # Ensure all elements are strings before joining
-            calibration_progress_log_file.write(",".join(map(str, log_data)) + "\n")
-            calibration_progress_log_file.flush() # Ensure data is written immediately
-            # print(f"Logged progress for iteration {counter}") # Optional: Add this line for more logging detail
+        log_data = [counter] + list(x) + list(errors)
+        # Ensure all elements are strings before joining
+        calibration_logger.info(",".join(map(str, log_data)) + "\n")
+        print(f" --> Logged calibration progress for iteration {counter}")
+        # print(f"Logged progress for iteration {counter}") # Optional: Add this line for more logging detail
 
         return errors # The optimizer expects the array of errors
 
@@ -213,7 +224,7 @@ def calibrate(config_file, args):
 
         print(f"Differences: {differences}")
 
-        return differences.values.flatten()
+        return differences.fillna(0.0).values.flatten()
 
 
     def update_sample_size(main_settings_file_path, new_sample_size):
@@ -294,8 +305,6 @@ def calibrate(config_file, args):
         # Create output directory if it doesn't exist
         os.makedirs(output_dir, exist_ok=True)
         # Open in write mode ('w') to create/overwrite the file each calibration run
-        calibration_progress_log_file = open(calibration_log_path, "w")
-
         # Write header to the log file
         header_parts = ["Iteration"]
         # Collect coefficient names for the header
@@ -322,12 +331,10 @@ def calibrate(config_file, args):
         if num_errors > 0: header_parts.extend([f"Error_{i+1}" for i in range(num_errors)])
         elif len(header_parts) > 1: header_parts.append("Errors...") # Placeholder
 
-        if header_parts: calibration_progress_log_file.write(",".join(header_parts) + "\n")
-        calibration_progress_log_file.flush()
+        if header_parts: calibration_logger.info(",".join(header_parts) + "\n")
         _inferred_num_errors = num_errors # Store inferred num_errors globally for calculate_errors fallback
     except Exception as e:
         print(f"Error setting up calibration log file {calibration_log_path}: {e}. Proceeding without logging calibration progress.", file=sys.stderr)
-        calibration_progress_log_file = None # Proceed without logging
 
     # --- Prepare optimization ---
     x0_list = []
@@ -347,8 +354,6 @@ def calibrate(config_file, args):
 
     if len(x0) == 0:
          print("Error: No valid tunable coefficients found in the calibration config. Exiting.", file=sys.stderr)
-         if calibration_progress_log_file: calibration_progress_log_file.close()
-         calibration_progress_log_file = None
          sys.exit(1)
 
     print(f"Calibration progress will be logged to: {calibration_log_path}")
@@ -367,10 +372,7 @@ def calibrate(config_file, args):
     except Exception as e:
         print(f"An error occurred during optimization: {e}", file=sys.stderr)
     finally:
-        if calibration_progress_log_file:
-            calibration_progress_log_file.close()
-            calibration_progress_log_file = None
-            print(f"Calibration progress log file closed: {calibration_log_path}")
+        calibration_logger.info(f"Calibration progress log file closed: {calibration_log_path}")
 
 
 if __name__ == "__main__":
@@ -380,7 +382,11 @@ if __name__ == "__main__":
         "-cc", "--calibration_config", help="Calibration configuration file"
     )
     args = parser.parse_args()
-
+    global calibration_logger
+    calibration_logger = setup_logger('calibration_logger', os.path.join(args.output, "calibration_progress.log"))
+    calibration_logger.info("Calibration progress will also be logged to: {0}".format(os.path.join(args.output, "calibration_progress.csv")))
+    print("Calibration progress will also be logged to: {0}".format(
+        os.path.join(args.output, "calibration_progress.csv")))
     if args.calibration_config:
         # calibration_config is the path from the command line
         # args contains all standard run arguments including -c, -d, -o
