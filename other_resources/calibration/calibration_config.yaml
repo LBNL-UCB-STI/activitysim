@@ -1,0 +1,46 @@
+tunable_coefficients:
+  tour_mode_choice_coefficients.csv:
+    coef_ivt_eatout_escort_othdiscr_othmaint_shopping_social:
+      initial_value: -0.0175
+      bounds:
+      - -2.0
+      - 0.0
+    coef_ivt_school_univ:
+      initial_value: -0.0224
+      bounds:
+      - -2.0
+      - 0.0
+    coef_ivt_work:
+      initial_value: -0.0134
+      bounds:
+      - -2.0
+      - 0.0
+    coef_ivt_atwork:
+      initial_value: -0.0188
+      bounds:
+      - -2.0
+      - 0.0
+    walk_ASC_no_auto_eatout:
+      initial_value: 5.1251173
+      bounds:
+      - -2.0
+      - 8.0
+    walk_ASC_no_auto_escort:
+      initial_value: 2.8012068
+      bounds:
+      - -2.0
+      - 5.0
+    walk_ASC_no_auto_othdiscr:
+      initial_value: 3.2665946
+      bounds:
+      - -2.0
+      - 5.0
+sample_size_schedule:
+  0 : 1000
+  10 : 5000
+  20 : 10000
+main_settings_file: /Users/zaneedell/git/activitysim-configs-sfbay/configs_extended/settings.yaml
+output_file: activitysim/examples/prototype_mtc/output/summarize/trips_by_mode_and_distance_bin.csv
+calibration_data_file: data/trip_counts_by_mode_and_distance_per_capita.csv
+output_dir: /Users/zaneedell/git/activitysim-configs-sfbay/output
+configs_dir: /Users/zaneedell/git/activitysim-configs-sfbay/configs_extended
