@@ -110,7 +110,7 @@ def get_tour_satisfaction(candidates, participate):
             x.composition == "mixed"
         ) & (x.adults > 0) & (x.participants > x.adults)
 
-        satisfaction = satisfaction.reindex(tour_ids).fillna(False).astype(bool)
+        satisfaction = satisfaction.reindex(tour_ids, fill_value=False).fillna(False).astype(bool)
 
     else:
         satisfaction = pd.Series(dtype=bool)

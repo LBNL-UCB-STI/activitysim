@@ -912,6 +912,7 @@ def _process_trip_chunk(trips, constants, skims, model_settings, state, trace_la
         # Process this chunk
         chunk = trips.iloc[start_idx:end_idx].copy()
         processed_chunk = _process_single_chunk(chunk, constants, skims, model_settings, state, trace_label)
+        processed_chunk['activity_code'] = processed_chunk['activity_code'].astype(np.int8)
         result_chunks.append(processed_chunk)
 
         # Clean up memory

@@ -547,6 +547,9 @@ class Random(object):
         if households_sample_seed is not None:
             logger.info("Set random seed sample households to %s" % households_sample_seed)
             self.sample_households_seed = households_sample_seed
+        else:
+            logger.info("Setting household ransom sample seed to 0 by default")
+            self.sample_households_seed = 0
 
     def get_global_rng(self):
         """

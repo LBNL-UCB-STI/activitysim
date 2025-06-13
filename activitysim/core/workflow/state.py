@@ -185,9 +185,11 @@ class State:
             try:
                 self.settings
             except StateAccessError:
+                logger.info(f"Falling back to default base seed of 0 for model {self.current_model_name}")
                 base_seed = 0
             else:
                 base_seed = self.settings.rng_base_seed
+                logger.info(f"Using seed {base_seed} for model {self.current_model_name}")
         if household_sample_seed is None:
             try:
                 self.settings
