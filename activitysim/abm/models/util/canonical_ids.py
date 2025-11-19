@@ -390,7 +390,7 @@ def set_tour_index(
         # (e.g. eat1_1 is eat subtour for parent work tour 1 and eat1_2 is for work tour 2)
 
         parent_tour_num = tours[parent_tour_num_col]
-        if parent_tour_num.dtype != "int64":
+        if not pd.api.types.is_integer_dtype(parent_tour_num):
             # might get converted to float if non-subtours rows are None (but we try to avoid this)
             logger.error("parent_tour_num.dtype: %s" % parent_tour_num.dtype)
             parent_tour_num = parent_tour_num.astype(np.int64)
@@ -406,7 +406,7 @@ def set_tour_index(
     # map recognized strings to ints
     tours.tour_id = tours.tour_id.replace(
         to_replace=possible_tours, value=list(range(possible_tours_count))
-    )
+    ).infer_objects(copy=False)
 
     # convert to numeric - shouldn't be any NaNs - this will raise error if there are
     tours.tour_id = pd.to_numeric(tours.tour_id, errors="raise").astype(np.int64)

@@ -223,7 +223,7 @@ def other_than(groups, bools):
     counts = groups[bools].value_counts()
     merge_col = groups.to_frame(name="right")
     pipeline = tz.compose(
-        tz.curry(lambda s: s.fillna(value=False).infer_objects()),
+        tz.curry(lambda s: s.fillna(value=False).infer_objects(copy=False)),
         itemgetter("left"),
         tz.curry(
             pd.DataFrame.merge,
@@ -339,39 +339,20 @@ def assign_in_place(df, df2, downcast_int=False, downcast_float=False):
     # update common columns in place
     common_columns = df2.columns.intersection(df.columns)
     if len(common_columns) > 0:
-        old_dtypes = [df[c].dtype for c in common_columns]
+        for c in common_columns:
+            # Check if df column is integer and df2 column is also integer but potentially larger
+            if pd.api.types.is_integer_dtype(df[c].dtype) and \
+               pd.api.types.is_integer_dtype(df2[c].dtype):
+                # If df2 has values that won't fit in df's current integer dtype, upcast df's column
+                if df2[c].max() > np.iinfo(df[c].dtype).max or \
+                   df2[c].min() < np.iinfo(df[c].dtype).min:
+                    df[c] = df[c].astype(df2[c].dtype)
+            # If df column is integer and df2 column is float, upcast df's column to float
+            elif pd.api.types.is_integer_dtype(df[c].dtype) and \
+                 pd.api.types.is_float_dtype(df2[c].dtype):
+                df[c] = df[c].astype(df2[c].dtype)
+
         df.update(df2)
-
-        # avoid needlessly changing int columns to float
-        # this is a hack fix for a bug in pandas.update
-        # github.com/pydata/pandas/issues/4094
-        for c, old_dtype in zip(common_columns, old_dtypes):
-            # if both df and df2 column were same type, but result is not
-            if (old_dtype == df2[c].dtype) and (df[c].dtype != old_dtype):
-                try:
-                    df[c] = df[c].astype(old_dtype)
-                except ValueError:
-                    logger.warning(
-                        "assign_in_place changed dtype %s of column %s to %s"
-                        % (old_dtype, c, df[c].dtype)
-                    )
-
-            if isinstance(old_dtype, pd.api.types.CategoricalDtype):
-                continue
-
-            # if both df and df2 column were ints, but result is not
-            if (
-                np.issubdtype(old_dtype, np.integer)
-                and np.issubdtype(df2[c].dtype, np.integer)
-                and not np.issubdtype(df[c].dtype, np.integer)
-            ):
-                try:
-                    df[c] = df[c].astype(old_dtype)
-                except ValueError:
-                    logger.warning(
-                        "assign_in_place changed dtype %s of column %s to %s"
-                        % (old_dtype, c, df[c].dtype)
-                    )
 
     # add new columns (in order they appear in df2)
     new_columns = [c for c in df2.columns if c not in df.columns]

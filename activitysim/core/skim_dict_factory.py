@@ -239,6 +239,7 @@ class AbstractSkimFactory(ABC):
 
     def __init__(self, network_los):
         self.network_los = network_los
+        self._loaded_skims = {}
 
     @property
     def supports_shared_data_for_multiprocessing(self):
@@ -486,6 +487,10 @@ class NumpyArraySkimFactory(AbstractSkimFactory):
         )
 
     def get_skim_data(self, skim_tag, skim_info):
+        if skim_tag in self._loaded_skims:
+            logger.debug(f"Returning cached skim {skim_tag}")
+            return self._loaded_skims[skim_tag]
+
         """
         Read skim data from backing store and return it as a 3D ndarray quack-alike SkimData object
 

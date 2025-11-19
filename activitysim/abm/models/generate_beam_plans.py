@@ -448,18 +448,30 @@ def generate_beam_plans(
 
     constants = config.get_model_constants(model_settings)
 
+    original_trips_dtypes = trips[trips.columns].dtypes
+
     for ii in range(nChunks):
         logger.info("Starting on {0} of {1} chunks".format(ii, nChunks))
         splitPerson = trips['person_id'].values[inner_chunk_size * (ii + 1)]
         splitInd = np.argmax(trips['person_id'].values == splitPerson)
-        trips_sub = trips.iloc[lastInd:(splitInd - 1)].copy()
-        trips_sub = _process_trip_chunk(trips_sub, constants, skims, model_settings, state, trace_label)
-        trips.iloc[lastInd:(splitInd - 1)] = trips_sub[trips.columns].values
+        target_slice = trips.iloc[lastInd:(splitInd - 1)]
+        trips_sub = _process_trip_chunk(target_slice.copy(), constants, skims, model_settings, state, trace_label)
+
+        # align index and dtypes for safe assignment
+        trips_sub.index = target_slice.index
+        aligned_trips_sub = trips_sub[trips.columns].astype(trips.dtypes.to_dict())
+
+        trips.loc[target_slice.index] = aligned_trips_sub
         lastInd = splitInd
     if lastChunkSize > 0:
-        trips_sub = trips.iloc[lastInd:].copy()
-        trips_sub = _process_trip_chunk(trips_sub, constants, skims, model_settings, state, trace_label)
-        trips.iloc[lastInd:] = trips_sub[trips.columns].values
+        target_slice = trips.iloc[lastInd:]
+        trips_sub = _process_trip_chunk(target_slice.copy(), constants, skims, model_settings, state, trace_label)
+
+        # align index and dtypes for safe assignment
+        trips_sub.index = target_slice.index
+        aligned_trips_sub = trips_sub[trips.columns].astype(trips.dtypes.to_dict())
+
+        trips.loc[target_slice.index] = aligned_trips_sub
 
     trips.drop(columns=["outbound", "tour_num", "parent_tour_num", "tour_ordinal", "tour_start", "tour_end", "trip_num",
                         "inbound"], inplace=True)
@@ -501,13 +513,14 @@ def identify_persons_with_problems(trips, pre=True):
                            (trips["person_id"].shift() == trips["person_id"]) &
                            (trips["destination"].shift() == trips["destination"]) &
                            (trips["activity_code"] > 0))
+    bad_trips = topologically_bad | repeated_activities
+
+    if not bad_trips.any():
+        logger.info("No inconsistent trips found - sequence already valid")
+        return [], bad_trips
+
     topologically_bad_count = topologically_bad.sum()
     repeated_bad_count = repeated_activities.sum()
-
-    if topologically_bad_count + repeated_bad_count == 0:
-        logger.info("No inconsistent trips found - sequence already valid")
-        trips.reset_index(inplace=True, drop=True)
-        return trips
 
     if pre:
         logger.info(
@@ -519,15 +532,13 @@ def identify_persons_with_problems(trips, pre=True):
             f"and {repeated_bad_count} repeated destinations to fix")
 
     # 1. Get persons with topological inconsistencies (if is_bad already calculated)
-    problematic_persons_topo = trips.loc[topologically_bad]["person_id"].unique()
-    problematic_persons_repeat = trips.loc[repeated_activities]["person_id"].unique()
-    problematic_persons_total = set(problematic_persons_topo) | set(problematic_persons_repeat)
+    problematic_persons = trips.loc[bad_trips, "person_id"].unique()
 
     logger.info(
-        f"These are from {len(problematic_persons_topo)} and {len(problematic_persons_repeat)} persons, respectively,"
-        f"leaving {len(problematic_persons_total)} total people with plans to fix.")
+        f"These are from {len(problematic_persons)} persons, "
+        f"leaving {len(problematic_persons)} total people with plans to fix.")
 
-    return list(problematic_persons_total), topologically_bad | repeated_activities
+    return list(problematic_persons), bad_trips
 
 
 def build_trip_sequence_graph(person_trips):
@@ -1065,7 +1076,7 @@ def _sort_and_fix_sequences(trips, state):
     result['activity_code'] = result['activity_code'].astype(np.int8)
 
     # Final validation and cleanup
-    final_problem_persons, final_is_bad = identify_persons_with_problems(result)
+    final_problem_persons, final_is_bad = identify_persons_with_problems(result, pre=False)
     final_bad_count = final_is_bad.sum()
 
     # Calculate improvement

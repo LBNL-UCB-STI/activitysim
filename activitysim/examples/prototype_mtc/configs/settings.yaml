@@ -13,10 +13,6 @@
 # has a different id column name, you can rename it to the required index name with the rename_columns directive.
 # In the settings below, the 'TAZ' column in the imported table is renamed 'zone_id' in the rename_columns settings.
 #
-
-inherit_settings: True
-
-# input tables 
 input_table_list:
   #
   # households (table index 'household_id')
@@ -25,10 +21,10 @@ input_table_list:
     filename: households.csv
     index_col: household_id
     rename_columns:
-      household_id: household_id
-      persons: hhsize
+      HHID: household_id  # household_id is the required index column
+      PERSONS: hhsize
       workers: num_workers
-      cars: auto_ownership
+      VEHICL: auto_ownership
       TAZ: home_zone_id
     recode_columns:
       home_zone_id: land_use.zone_id
@@ -46,8 +42,7 @@ input_table_list:
     filename: persons.csv
     index_col: person_id
     rename_columns:
-      person_id: person_id
-      member_id: PNUM
+      PERID: person_id  # person_id is the required index column
     keep_columns:
       - household_id
       - age
@@ -56,8 +51,9 @@ input_table_list:
       - pemploy
       - pstudent
       - ptype
-      - home_x
-      - home_y
+  #
+  # land_use (table index 'zone_id')
+  #
   - tablename: land_use
     filename: land_use.csv
     index_col: zone_id
@@ -67,11 +63,14 @@ input_table_list:
     recode_columns:
       zone_id: zero-based
     keep_columns:
-      - geometry
+      - DISTRICT
+      - SD
       - county_id
       - TOTHH
       - TOTPOP
       - TOTACRE
+      - RESACRE
+      - CIACRE
       - TOTEMP
       - AGE0519
       - RETEMPN
@@ -93,24 +92,15 @@ input_table_list:
 # create_input_store: True
 recode_pipeline_columns: True
 
-# input skims
-skims_file: skims.omx
-
-# input valid geometries
-beam_geometries: clipped_tazs.csv
+#input_store: ../output/input_data.h5
 
 # number of households to simulate
-households_sample_size:  250000
-
-# raise error if any sub-process fails without waiting for others to complete
-fail_fast: True
+households_sample_size:  100000
+# simulate all households
+# households_sample_size: 0
 
 # set false to disable variability check in simple_simulate and interaction_simulate
 check_for_variability: False
-
-strict: False
-
-mem_tick: 0
 
 # - shadow pricing global switches
 
@@ -129,8 +119,6 @@ log_alt_losers: False
 # alternate dir to read/write cache (defaults to output_dir)
 # used for skim cache, tvpb, and chunk_log caches
 #cache_dir: data/cache
-
-omx_ignore_patterns: ['.*_TRIPS$','.*_FAILURES$']
 
 ##############
 #
@@ -167,11 +155,7 @@ keep_mem_logs: True
 
 ##############
 
-# multiprocessing controls
-multiprocess: True
-chunk_size: 200_000_000_000
-num_processes: 5
-stagger: 0
+# - tracing
 
 # trace household id; comment out or leave empty for no trace
 # households with all tour types
@@ -200,11 +184,9 @@ checkpoints: True
 
 
 models:
-  ### mp_initialize step
   - initialize_landuse
   - initialize_households
   - compute_accessibility
-  ### mp_households step
   - school_location
   - workplace_location
   - auto_ownership_simulate
@@ -231,21 +213,11 @@ models:
   - trip_purpose_and_destination
   - trip_scheduling
   - trip_mode_choice
-  - generate_beam_plans
-  ### mp_summarize step
+  - write_data_dictionary
+  - track_skim_usage
+  - write_trip_matrices
+  - write_tables
   - summarize
-
-multiprocess_steps:
-  - name: mp_initialize
-    begin: initialize_landuse
-  - name: mp_households
-    begin: school_location
-    slice:
-      tables:
-        - households
-        - persons
-  - name: mp_summarize
-    begin: summarize
 
 output_tables:
   h5_store: False
@@ -274,38 +246,13 @@ output_tables:
         origin: land_use.zone_id
         destination: land_use.zone_id
     - joint_tour_participants
-    - plans
-    - beam_plans
-#     - trip_mode_choice_raw
-#     - trip_mode_choice_utilities
-#     - trip_mode_choice_specs
-#     - trip_mode_choice_data_dict
 
 # area_types less than this are considered urban
 urban_threshold: 4
 cbd_threshold: 2
 rural_threshold: 6
 
-skim_time_periods:
-    period_minutes: 60
-    periods:
-        - 0
-        - 6
-        - 11
-        - 16
-        - 20
-        - 24
-    labels:
-        - EA
-        - AM
-        - MD
-        - PM
-        - EV
-
 # - value of time
-
-# value_of_time = lognormal(np.log(median_value_of_time * mu), sigma).clip(min_vot, max_vot)
-
 min_value_of_time: 1
 max_value_of_time: 50
 distributed_vot_mu: 0.684

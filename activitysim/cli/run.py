@@ -110,6 +110,10 @@ def add_run_args(parser, multiprocess=True):
         "-cc", "--calibration_config", help="Calibration configuration file"
     )
 
+    parser.add_argument(
+        "-reg", "--regularization", help="Calibration regularization coefficient"
+    )
+
     if multiprocess:
         parser.add_argument(
             "-m",

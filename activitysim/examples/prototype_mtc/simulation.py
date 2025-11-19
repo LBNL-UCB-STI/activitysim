@@ -39,7 +39,7 @@ counter = 0
 _inferred_num_errors = 0  # Global to store inferred errors for log header/fallback
 
 
-def calibrate(config_file, args):
+def calibrate(config_file, args, regularization=None):
     global calibration_logger
     print("Running calibration!!!")
     # global config # Declare intent to use the global config variable
@@ -94,7 +94,7 @@ def calibrate(config_file, args):
         )
         sys.exit(1)
 
-    def objective(x):
+    def objective(x, x0=None, scale=1.0):
         """
         Objective function for calibration.
         Runs the simulation with current coefficients and calculates errors.
@@ -148,8 +148,10 @@ def calibrate(config_file, args):
         calibration_logger.info(",".join(map(str, log_data)) + "\n")
         print(f" --> Logged calibration progress for iteration {counter}")
         # print(f"Logged progress for iteration {counter}") # Optional: Add this line for more logging detail
-
-        return errors  # The optimizer expects the array of errors
+        if x0 is None:
+            return errors  # The optimizer expects the array of errors
+        else:
+            return np.concatenate([errors, scale * (x - x0)])
 
     def calculate_errors(model_output_dir, calibration_data_file_path):
         """Calculates the differences between the simulation output and the calibration data."""
@@ -440,6 +442,8 @@ def calibrate(config_file, args):
     bounds_upper = []
     for coef_file, coef_details in tunable_coefficients_config.items():
         for coef_name, values in coef_details.items():
+            if isinstance(values, float):
+                print("This is a problem")
             if (
                 "initial_value" not in values
                 or "bounds" not in values
@@ -470,13 +474,6 @@ def calibrate(config_file, args):
     # Run the calibration using dfols
     print("Starting optimization with DFO-LS...")
     try:
-        # L1 regularizer: h(x) = lda*||x||_1 for some lda>0
-        lda = 1.0
-        h = lambda x: lda * np.linalg.norm(x - x0, 1)
-        Lh = lda * np.sqrt(len(x0))  # Lipschitz constant of h(x)
-        prox_uh = lambda x, u: np.sign(x - x0) * np.maximum(
-            np.abs(x - x0) - lda * u, 0.0
-        )
         result = dfols.solve(
             objective,
             x0,
@@ -484,10 +481,8 @@ def calibrate(config_file, args):
             scaling_within_bounds=True,
             objfun_has_noise=True,
             maxfun=5000,
-            h=h,
-            lh=Lh,
-            prox_uh=prox_uh,
             user_params={"restarts.use_restarts": False},
+            argsf=(x0, regularization)
         )
 
         print("\n--- Optimization Result ---")
@@ -519,13 +514,14 @@ if __name__ == "__main__":
                 os.path.join(args.output, "calibration_progress.csv")
             )
         )
+        reg = args.regularization
         print(
             "Calibration progress will also be logged to: {0}".format(
                 os.path.join(args.output, "calibration_progress.csv")
             )
         )
 
-        calibrate(args.calibration_config, args)
+        calibrate(args.calibration_config, args, reg)
     else:
         # This branch runs the standard simulation using the args provided
         run(args)

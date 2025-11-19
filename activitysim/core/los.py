@@ -224,9 +224,10 @@ class Network_LOS(object):
 
         if self.zone_system == THREE_ZONE:
             # load tap skim_info
-            self.skims_info["tap"] = self.skim_dict_factory.load_skim_info(
-                self.state, "tap"
-            )
+            if "tap" not in self.skims_info:
+                self.skims_info["tap"] = self.skim_dict_factory.load_skim_info(
+                    self.state, "tap"
+                )
 
         if self.zone_system == THREE_ZONE:
             # load this here rather than in load_data as it is required during multiprocessing to size TVPBCache
@@ -445,9 +446,10 @@ class Network_LOS(object):
                 _override_offset_int = 0
             else:
                 _override_offset_int = None
-            self.skim_dicts["taz"] = self.create_skim_dict(
-                "taz", _override_offset_int=_override_offset_int
-            )
+            if "taz" not in self.skim_dicts:
+                self.skim_dicts["taz"] = self.create_skim_dict(
+                    "taz", _override_offset_int=_override_offset_int
+                )
             # make sure skim has all taz_ids
             # FIXME - weird that there is no list of tazs?
         else:

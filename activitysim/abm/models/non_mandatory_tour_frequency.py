@@ -222,7 +222,7 @@ def non_mandatory_tour_frequency(
         )
     else:
         # tot_tours already exists, check if it is consistent with legacy behavior
-        if not (alternatives["tot_tours"] == alternatives.sum(axis=1)).all():
+        if not (alternatives["tot_tours"] == alternatives.drop(columns="tot_tours").sum(axis=1)).all():
             warnings.warn(
                 "The 'tot_tours' column in non_mandatory_tour_frequency_alternatives.csv "
                 "does not match the sum of the other columns.",

@@ -1,8 +1,8 @@
 # tour_mode_choice.yaml
 
 SPEC: tour_mode_choice.csv
-COEFFICIENTS: tour_mode_choice_coeffs_v3.csv
-COEFFICIENT_TEMPLATE: tour_mode_choice_coeffs_template_v4.csv
+COEFFICIENTS: tour_mode_choice_coefficients.csv
+COEFFICIENT_TEMPLATE: tour_mode_choice_coefficients_template.csv
 
 LOGIT_TYPE: NL
 
@@ -128,7 +128,6 @@ CONSTANTS:
       5: 0
     min_waitTime: 0
     max_waitTime: 50
-    TNC_missed_trip_penalty: 50
 
     ivt_cost_multiplier: 0.6
     ivt_lrt_multiplier: 0.9

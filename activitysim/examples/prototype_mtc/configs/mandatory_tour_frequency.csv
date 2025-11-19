@@ -1,7 +1,7 @@
 Label,Description,Expression,work1,work2,school1,school2,work_and_school
-util_ft_worker,Full-time worker alternative-specific constants,ptype == 1,0.0,coef_ft_worker_work2_asc,,,
-util_pt_worker,Part-time worker alternative-specific constants,ptype == 2,0.0,coef_pt_worker_work2_asc,,,
-util_univ,University student alternative-specific constants,ptype == 3,coef_univ_work1_asc,coef_univ_work2_asc,0.0,coef_univ_school2_asc,coef_univ_work_and_school_asc
+util_ft_worker,Full-time worker alternative-specific constants,ptype == 1,0,coef_ft_worker_work2_asc,,,
+util_pt_worker,Part-time worker alternative-specific constants,ptype == 2,0,coef_pt_worker_work2_asc,,,
+util_univ,University student alternative-specific constants,ptype == 3,coef_univ_work1_asc,coef_univ_work2_asc,0,coef_univ_school2_asc,coef_univ_work_and_school_asc
 util_non_working_adult,Non-working adult alternative-specific constants,ptype == 4,,,,,
 util_retired,Retired alternative-specific constants,ptype == 5,,,,,
 util_driving_age_child,Driving-age child alternative-specific constants,ptype == 6,,,0,coef_driving_age_child_school2_asc,coef_driving_age_child_work_and_school_asc

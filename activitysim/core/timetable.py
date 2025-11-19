@@ -248,7 +248,7 @@ def tour_map(persons, tours, tdd_alts, persons_id_col="person_id"):
     window_periods = np.asanyarray([list(r) for r in w_strings]).astype(int)
     window_periods_df = pd.DataFrame(data=window_periods, index=tdd_alts.index)
 
-    for keys, nth_tours in tours.groupby(["tour_type", "tour_type_num"], sort=True):
+    for keys, nth_tours in tours.groupby(["tour_type", "tour_type_num"], sort=True, observed=True):
         tour_type = keys[0]
         tour_sigil = sigil[tour_type]
 

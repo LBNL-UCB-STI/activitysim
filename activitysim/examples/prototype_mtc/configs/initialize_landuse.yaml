@@ -5,5 +5,3 @@ annotate_tables:
     annotate:
       SPEC: annotate_landuse
       DF: land_use
-
-beam_geometries_path: ""

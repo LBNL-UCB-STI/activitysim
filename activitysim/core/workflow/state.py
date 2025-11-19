@@ -185,11 +185,21 @@ class State:
             try:
                 self.settings
             except StateAccessError:
-                logger.info(f"Falling back to default base seed of 0 for model {self.current_model_name}")
-                base_seed = 0
+                logger.info(
+                    f"Falling back to random base seed for model {self.current_model_name}"
+                )
+                base_seed = None
             else:
-                base_seed = self.settings.rng_base_seed
-                logger.info(f"Using seed {base_seed} for model {self.current_model_name}")
+                if hasattr(self.settings, "rng_base_seed"):
+                    base_seed = self.settings.rng_base_seed
+                    logger.info(
+                        f"Using seed {base_seed} for model {self.current_model_name}"
+                    )
+                else:
+                    base_seed = None
+                    logger.info(
+                        f"Using random seed for model {self.current_model_name}"
+                    )
         if household_sample_seed is None:
             try:
                 self.settings
@@ -197,7 +207,9 @@ class State:
                 household_sample_seed = None
             else:
                 household_sample_seed = self.settings.sample_households_seed
-        self._context["prng"].set_base_seed(seed=base_seed, households_sample_seed=household_sample_seed)
+        self._context["prng"].set_base_seed(
+            seed=base_seed, households_sample_seed=household_sample_seed
+        )
 
     def import_extensions(self, ext: str | Iterable[str] = None, append=True) -> None:
         """
@@ -515,6 +527,7 @@ class State:
     _RUNNABLE_STEPS = {}
     _LOADABLE_TABLES = {}
     _LOADABLE_OBJECTS = {}
+    _loaded_datasets = {}
     _PREDICATES = {}
     _TEMP_NAMES = set()  # never checkpointed
 
@@ -557,6 +570,10 @@ class State:
             if swallow_errors:
                 return self.get_dataframe(table_name)
             raise ValueError(f"table {table_name} already loaded")
+
+        if table_name in self._loaded_datasets:
+            return self._loaded_datasets[table_name]
+
         if table_name not in self._LOADABLE_TABLES:
             if swallow_errors:
                 return
