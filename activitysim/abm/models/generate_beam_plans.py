@@ -59,19 +59,42 @@ def sample_geoseries(geoseries, size, overestimate=2):
         randomly-sample-from-geopandas-dataframe-in-python
     """
     polygon = geoseries.unary_union
+    if size <= 0 or polygon.is_empty:
+        return np.array([], dtype=object)
+
     min_x, min_y, max_x, max_y = polygon.bounds
-    ratio = polygon.area / polygon.envelope.area
-    overestimate = 2
-    # np.random.uniform can't specify dtype, so let's try a different method
-    # samples = np.random.uniform(
-    #     (min_x, min_y), (max_x, max_y), (int(size / ratio * overestimate), 2)
-    # )
-    samples = np.random.default_rng().random(size=(int(size / ratio * overestimate), 2), dtype=np.float32) * np.array(
-        [(max_x - min_x), (max_y - min_y)]) + np.array([min_x, min_y])
-    multipoint = MultiPoint(samples)
-    multipoint = multipoint.intersection(polygon)
-    samples = np.array(multipoint.geoms)
-    return samples[np.random.choice(len(samples), size)]
+    envelope_area = polygon.envelope.area
+    polygon_area = polygon.area
+    if envelope_area <= 0 or polygon_area <= 0:
+        return np.array([], dtype=object)
+
+    ratio = polygon_area / envelope_area
+    if not np.isfinite(ratio) or ratio <= 0:
+        return np.array([], dtype=object)
+
+    safe_overestimate = max(float(overestimate), 1.0)
+    candidate_count = max(int(np.ceil(size / min(ratio, 1.0) * safe_overestimate)), size)
+    rng = np.random.default_rng()
+    samples = rng.random(size=(candidate_count, 2), dtype=np.float32) * np.array(
+        [(max_x - min_x), (max_y - min_y)]
+    ) + np.array([min_x, min_y])
+
+    intersection = MultiPoint(samples).intersection(polygon)
+    if intersection.is_empty:
+        return np.array([], dtype=object)
+    if isinstance(intersection, Point):
+        inside_points = np.array([intersection], dtype=object)
+    elif hasattr(intersection, "geoms"):
+        inside_points = np.array([geom for geom in intersection.geoms if isinstance(geom, Point)], dtype=object)
+    else:
+        inside_points = np.array([], dtype=object)
+
+    if len(inside_points) == 0:
+        return inside_points
+
+    replace = len(inside_points) < size
+    selected_idx = rng.choice(len(inside_points), size=size, replace=replace)
+    return inside_points[selected_idx]
 
 
 def get_trip_coords(trips, zones, persons, state, max_points_per_zone=300):
@@ -386,7 +409,7 @@ def generate_beam_plans(
     tours["parent_tour_id"] = tours["parent_tour_id"].astype(pd.Int64Dtype())
     tours.index = tours.index.astype(pd.Int64Dtype())
     tours["parent_tour_num"] = 0
-    tours.tour_category.astype(tourPurposeCategory)
+    tours["tour_category"] = tours["tour_category"].astype(tourPurposeCategory)
     tours.sort_values(["person_id", "start", "tour_category"], inplace=True)
     tours["tour_ordinal"] = tours.groupby("person_id").cumcount()
     tours.loc[~tours.parent_tour_id.isna(), "parent_tour_num"] = tours.loc[
@@ -454,14 +477,15 @@ def generate_beam_plans(
         logger.info("Starting on {0} of {1} chunks".format(ii, nChunks))
         splitPerson = trips['person_id'].values[inner_chunk_size * (ii + 1)]
         splitInd = np.argmax(trips['person_id'].values == splitPerson)
-        target_slice = trips.iloc[lastInd:(splitInd - 1)]
-        trips_sub = _process_trip_chunk(target_slice.copy(), constants, skims, model_settings, state, trace_label)
+        if splitInd > lastInd:
+            target_slice = trips.iloc[lastInd:splitInd]
+            trips_sub = _process_trip_chunk(target_slice.copy(), constants, skims, model_settings, state, trace_label)
 
-        # align index and dtypes for safe assignment
-        trips_sub.index = target_slice.index
-        aligned_trips_sub = trips_sub[trips.columns].astype(trips.dtypes.to_dict())
+            # align index and dtypes for safe assignment
+            trips_sub.index = target_slice.index
+            aligned_trips_sub = trips_sub[trips.columns].astype(trips.dtypes.to_dict())
 
-        trips.loc[target_slice.index] = aligned_trips_sub
+            trips.loc[target_slice.index] = aligned_trips_sub
         lastInd = splitInd
     if lastChunkSize > 0:
         target_slice = trips.iloc[lastInd:]
@@ -908,6 +932,9 @@ def reinsert_trip_with_home_constraint(fixed_trips, trip, home_locations):
 def _process_trip_chunk(trips, constants, skims, model_settings, state, trace_label):
     # Determine chunk size based on available memory
     total_trips = len(trips)
+    if total_trips == 0:
+        logger.info("No trips to process; returning empty result")
+        return trips.copy()
     chunk_size = min(500000, total_trips)
     num_chunks = (total_trips + chunk_size - 1) // chunk_size
 
@@ -1139,7 +1166,10 @@ def _create_final_plans(trips):
     # Shift relevant columns
     shift_cols = ["trip_id", "trip_mode", "tour_id", "tour_mode", "trip_dur_min",
                   "trip_cost_dollars", "number_of_participants"]
-    final_plans[shift_cols] = final_plans[shift_cols].shift()
+    shifted = final_plans[shift_cols].shift()
+    person_break = final_plans["person_id"].ne(final_plans["person_id"].shift())
+    final_plans[shift_cols] = shifted
+    final_plans.loc[person_break, shift_cols] = np.nan
 
     # Select final columns in desired order
     final_plans = final_plans[[
