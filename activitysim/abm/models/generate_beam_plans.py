@@ -5,6 +5,7 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 import random
+import time
 from shapely import wkt
 from shapely.geometry import Point, MultiPoint
 import geopandas as gpd
@@ -384,6 +385,10 @@ class GenerateBeamPlansSettings(PydanticReadable):
     SAVE_TRIPS_TABLE: bool = False
     MATRICES: List[MatrixSettings] = []
     CONSTANTS: Dict[str, Any] = {}
+    MAX_SEQUENCE_SEARCH_SECONDS_PER_PERSON: float = 3.0
+    MAX_SEQUENCE_PATHS_PER_PERSON: int = 5000
+    MAX_SEQUENCE_ENUM_TRIPS: int = 14
+    MAX_SEQUENCE_FALLBACK_PAIR_EVALS: int = 500
 
 
 @workflow.step
@@ -652,7 +657,26 @@ def build_trip_sequence_graph(person_trips):
     return G, home_locations
 
 
-def fix_person_sequence_with_graph(person_trips):
+def _search_budget_exhausted(
+        search_started_at: float,
+        max_search_seconds: float,
+        num_paths_evaluated: int,
+        max_simple_paths: int,
+) -> bool:
+    if num_paths_evaluated >= max_simple_paths:
+        return True
+    if max_search_seconds > 0 and (time.perf_counter() - search_started_at) >= max_search_seconds:
+        return True
+    return False
+
+
+def fix_person_sequence_with_graph(
+        person_trips,
+        max_search_seconds=3.0,
+        max_simple_paths=5000,
+        max_enumeration_trips=14,
+        max_fallback_pairs=500,
+):
     """
     Fix a single person's trip sequence using a graph-based approach,
     enforcing home start/end constraints.
@@ -705,41 +729,85 @@ def fix_person_sequence_with_graph(person_trips):
     home_trip_indices = person_trips[person_trips['purpose'] == 'home'].index.tolist()
     potential_ends = home_trip_indices if home_trip_indices else [idx for idx in G.nodes() if idx in person_trips.index]
 
+    search_started_at = time.perf_counter()
+    num_paths_evaluated = 0
+    search_capped = n_trips > max_enumeration_trips
+
+    if search_capped:
+        logger.warning(
+            f"Person {person_id}: skipping exhaustive path enumeration for {n_trips} trips "
+            f"(MAX_SEQUENCE_ENUM_TRIPS={max_enumeration_trips})."
+        )
+
     # Try to find paths between all potential start/end pairs
-    for start_idx in potential_starts:
-        for end_idx in potential_ends:
-            if start_idx == end_idx:
-                continue
+    if not search_capped:
+        for start_idx in potential_starts:
+            if _search_budget_exhausted(
+                    search_started_at, max_search_seconds, num_paths_evaluated, max_simple_paths
+            ):
+                search_capped = True
+                break
 
-            try:
-                # Check if there's a path from start to end
-                paths = nx.all_simple_paths(G, start_idx, end_idx)
-                these_paths = []
+            for end_idx in potential_ends:
+                if start_idx == end_idx:
+                    continue
 
-                for path in paths:
-                    # Verify the first-last location constraint: first trip origin = last trip destination
-                    first_trip_origin = person_trips.loc[path[0], 'origin']
-                    last_trip_dest = person_trips.loc[path[-1], 'destination']
+                if _search_budget_exhausted(
+                        search_started_at, max_search_seconds, num_paths_evaluated, max_simple_paths
+                ):
+                    search_capped = True
+                    break
 
-                    if len(path) == n_trips:
-                        if first_trip_origin == last_trip_dest:
+                try:
+                    # Check if there's a path from start to end
+                    paths = nx.all_simple_paths(G, start_idx, end_idx)
+                    these_paths = []
+
+                    for path in paths:
+                        num_paths_evaluated += 1
+
+                        # Verify the first-last location constraint: first trip origin = last trip destination
+                        first_trip_origin = person_trips.loc[path[0], 'origin']
+                        last_trip_dest = person_trips.loc[path[-1], 'destination']
+
+                        if len(path) == n_trips and first_trip_origin == last_trip_dest:
                             # This path forms a closed loop - perfect!
                             path_weight = nx.path_weight(G, path, weight='weight')
                             these_paths.append((path, path_weight))
                             if len(these_paths) >= 10:  # Stop after finding 10 complete paths
                                 break
-                these_paths.sort(key=lambda x: (-len(x[0]), x[1]))
-                if these_paths:
-                    valid_chains.append(these_paths[0])
 
-            except nx.NetworkXNoPath:
-                continue
+                        if _search_budget_exhausted(
+                                search_started_at, max_search_seconds, num_paths_evaluated, max_simple_paths
+                        ):
+                            search_capped = True
+                            break
+
+                    these_paths.sort(key=lambda x: (-len(x[0]), x[1]))
+                    if these_paths:
+                        valid_chains.append(these_paths[0])
+
+                    if search_capped:
+                        break
+
+                except nx.NetworkXNoPath:
+                    continue
+
+    if search_capped and not valid_chains:
+        elapsed_seconds = time.perf_counter() - search_started_at
+        logger.warning(
+            f"Person {person_id}: path search capped after {num_paths_evaluated} paths in "
+            f"{elapsed_seconds:.2f}s; using shortest-path fallback."
+        )
 
     # If no valid chains were found, relax constraints and try again
     if not valid_chains:
         logger.warning(f"Person {person_id}: No valid chains with home constraints. Relaxing requirements.")
 
         # Try again without the home constraint
+        fallback_pairs_checked = 0
+        reached_fallback_pair_cap = False
+        fallback_pair_limit = max(int(max_fallback_pairs), 1)
         for start_idx in G.nodes():
             if start_idx not in person_trips.index:
                 continue
@@ -747,6 +815,10 @@ def fix_person_sequence_with_graph(person_trips):
             for end_idx in G.nodes():
                 if end_idx not in person_trips.index or start_idx == end_idx:
                     continue
+                fallback_pairs_checked += 1
+                if fallback_pairs_checked > fallback_pair_limit:
+                    reached_fallback_pair_cap = True
+                    break
 
                 try:
                     # Check if there's a path from start to end
@@ -755,6 +827,12 @@ def fix_person_sequence_with_graph(person_trips):
                                                               weight='weight') + 3000))  # Penalty for not meeting home requirements
                 except nx.NetworkXNoPath:
                     continue
+            if reached_fallback_pair_cap:
+                logger.warning(
+                    f"Person {person_id}: fallback shortest-path search hit pair cap "
+                    f"(MAX_SEQUENCE_FALLBACK_PAIR_EVALS={fallback_pair_limit})."
+                )
+                break
 
     # If still no valid chains, return the original with a warning
     if not valid_chains:
@@ -963,7 +1041,7 @@ def _process_trip_chunk(trips, constants, skims, model_settings, state, trace_la
 
 def _process_single_chunk(chunk, constants, skims, model_settings, state, trace_label):
     # Sort and fix sequences
-    chunk = _sort_and_fix_sequences(chunk, state)
+    chunk = _sort_and_fix_sequences(chunk, state, model_settings)
     logger.info("Done rearranging trips")
 
     chunk['origin'] = chunk['origin'].astype(int)
@@ -1050,7 +1128,7 @@ def _shuffle_trips(df, time_period):
     return df2 if df2["original_order"].is_unique else df
 
 
-def _sort_and_fix_sequences(trips, state):
+def _sort_and_fix_sequences(trips, state, model_settings):
     """Fix trip sequences with tour time window constraints"""
     # Initial sorting
     trips.sort_values(
@@ -1089,7 +1167,13 @@ def _sort_and_fix_sequences(trips, state):
     for person_id in persons_with_bad_trips:
         person_trips = trips[trips["person_id"] == person_id].copy()
 
-        fixed_trips, person_stats = fix_person_sequence_with_graph(person_trips)
+        fixed_trips, person_stats = fix_person_sequence_with_graph(
+            person_trips,
+            max_search_seconds=model_settings.MAX_SEQUENCE_SEARCH_SECONDS_PER_PERSON,
+            max_simple_paths=model_settings.MAX_SEQUENCE_PATHS_PER_PERSON,
+            max_enumeration_trips=model_settings.MAX_SEQUENCE_ENUM_TRIPS,
+            max_fallback_pairs=model_settings.MAX_SEQUENCE_FALLBACK_PAIR_EVALS,
+        )
 
         # Update statistics
         for key, value in person_stats.items():
