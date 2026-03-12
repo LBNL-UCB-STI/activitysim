@@ -39,12 +39,12 @@ def _regression_check(dataframe_regression, df, basename=None, rtol=None):
         rtol = 0.1
     dataframe_regression.check(
         df.select_dtypes("number")
-        .drop(columns=["holdfast"], errors="ignore")
+        .drop(columns=["holdfast", "minimum", "maximum"], errors="ignore")
         .clip(-9e9, 9e9),
         # pandas 1.3 handles int8 dtypes as actual numbers, so holdfast needs to be dropped manually
         # we're dropping it not adding to the regression check so older pandas will also work.
         basename=basename,
-        default_tolerance=dict(atol=1e-6, rtol=rtol)
+        default_tolerance=dict(atol=1e-6, rtol=rtol),
         # can set a little loose, as there is sometimes a little variance in these
         # results when switching backend implementations. We're checking all
         # the parameters and the log likelihood, so modest variance in individual
@@ -73,7 +73,7 @@ def test_simple_simulate(est_data, num_regression, dataframe_regression, name, m
     m.load_data()
     m.doctor(repair_ch_av="-")
     loglike_prior = m.loglike()
-    r = m.maximize_loglike(method=method, options={"maxiter": 1000})
+    r = m.maximize_loglike(method=method, options={"maxiter": 1000, "ftol": 1e-9})
     num_regression.check(
         {"loglike_prior": loglike_prior, "loglike_converge": r.loglike},
         basename=f"test_simple_simulate_{name}_{method}_loglike",
@@ -87,9 +87,11 @@ def test_simple_simulate(est_data, num_regression, dataframe_regression, name, m
     [
         ("workplace_location", "SLSQP", None),
         ("school_location", "SLSQP", None),
+        ("school_location", "BHHH", None),
         ("non_mandatory_tour_destination", "SLSQP", None),
         ("atwork_subtour_destination", "BHHH", None),
-        ("trip_destination", "SLSQP", 0.12),
+        ("trip_destination", "BHHH", None),
+        ("trip_destination", "SLSQP", None),
         # trip_destination model has unusual parameter variance on a couple
         # parameters when switching platforms, possibly related to default data
         # types and high standard errors.  Most parameters and the overall
@@ -103,12 +105,19 @@ def test_location_model(
     from activitysim.estimation.larch import component_model, update_size_spec
 
     m, data = component_model(name, return_data=True)
-    m.load_data()
+
+    if name == "trip_destination":
+        # this model is overspecified in the example, so we need to lock a
+        # parameter to make it identifiable.
+        m.lock_value("coef_prox_dest_outbound_work", 0.0)
+        m.set_cap(25.0)
+
+    m.doctor(repair_av_zq="-", repair_nan_utility=True)
     loglike_prior = m.loglike()
-    r = m.maximize_loglike(method=method, options={"maxiter": 1000})
+    r = m.maximize_loglike(method=method, options={"maxiter": 1000, "ftol": 1.0e-8})
     num_regression.check(
         {"loglike_prior": loglike_prior, "loglike_converge": r.loglike},
-        basename=f"test_loc_{name}_loglike",
+        basename=f"test_loc_{name}_{method}_loglike",
     )
     _regression_check(dataframe_regression, m.pf, rtol=rtol)
     size_spec = update_size_spec(
@@ -119,8 +128,8 @@ def test_location_model(
     )
     dataframe_regression.check(
         size_spec,
-        basename=f"test_loc_{name}_size_spec",
-        default_tolerance=dict(atol=1e-6, rtol=5e-2)
+        basename=f"test_loc_{name}_{method}_size_spec",
+        default_tolerance=dict(atol=1e-6, rtol=5e-2),
         # set a little loose, as there is sometimes a little variance in these
         # results when switching backend implementations.
     )
@@ -143,7 +152,7 @@ def test_scheduling_model(est_data, num_regression, dataframe_regression, name, 
     m.load_data()
     m.doctor(repair_ch_av="-")
     loglike_prior = m.loglike()
-    r = m.maximize_loglike(method=method)
+    r = m.maximize_loglike(method=method, options={"maxiter": 1000, "ftol": 1.0e-9})
     num_regression.check(
         {"loglike_prior": loglike_prior, "loglike_converge": r.loglike},
         basename=f"test_{name}_loglike",
@@ -158,7 +167,7 @@ def test_stop_freq_model(est_data, num_regression, dataframe_regression):
     m, data = component_model(name, return_data=True)
     m.load_data()
     loglike_prior = m.loglike()
-    r = m.maximize_loglike()
+    r = m.maximize_loglike(method="SLSQP", options={"maxiter": 1000, "ftol": 1.0e-9})
     num_regression.check(
         {"loglike_prior": loglike_prior, "loglike_converge": r.loglike},
         basename=f"test_{name}_loglike",
@@ -217,12 +226,28 @@ def test_school_location(est_data, num_regression, dataframe_regression):
 
 
 def test_cdap_model(est_data, num_regression, dataframe_regression):
+    from larch import P
+
     from activitysim.estimation.larch.cdap import cdap_model
 
     m = cdap_model()
+
+    assert len(m) == 5
+    assert len(m[0].utility_co) == 3
+    assert len(m[1].utility_co) == 9
+    assert len(m[2].utility_co) == 27
+    assert len(m[3].utility_co) == 81
+    assert len(m[4].utility_co) == 243
+
+    # check that interaction parameters are assigned correctly
+    assert P.coef_M_xxx in m[2].utility_co[1]
+    assert P.coef_M_xxxxx not in m[2].utility_co[1]
+    assert P.coef_M_xxx not in m[4].utility_co[1]
+    assert P.coef_M_xxxxx in m[4].utility_co[1]
+
     m.load_data()
     loglike_prior = m.loglike()
-    r = m.maximize_loglike(method="SLSQP", options={"maxiter": 1000})
+    r = m.maximize_loglike(method="SLSQP", options={"maxiter": 1000, "ftol": 1.0e-7})
     num_regression.check(
         {"loglike_prior": loglike_prior, "loglike_converge": r.loglike},
         basename="test_cdap_model_loglike",
@@ -260,7 +285,7 @@ def test_tour_and_subtour_mode_choice(est_data, num_regression, dataframe_regres
     m.load_data()
     m.doctor(repair_ch_av="-")
     loglike_prior = m.loglike()
-    r = m.maximize_loglike(method="SLSQP", options={"maxiter": 1000})
+    r = m.maximize_loglike(method="SLSQP", options={"maxiter": 1000, "ftol": 1.0e-9})
     num_regression.check(
         {"loglike_prior": loglike_prior, "loglike_converge": r.loglike},
         basename="test_tour_mode_choice_loglike",

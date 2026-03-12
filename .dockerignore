@@ -3,6 +3,7 @@
 */notebooks/*
 */cache/*
 .git
+.venv
 *.omx
 *.mmap
 *.log

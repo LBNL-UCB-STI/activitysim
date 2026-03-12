@@ -74,7 +74,9 @@ def delete_files(file_list, trace_label):
                 logger.debug(f"{trace_label} deleting {file_path}")
                 os.unlink(file_path)
         except Exception as e:
-            logger.warning(f"{trace_label} exception (e) trying to delete {file_path}")
+            logger.warning(
+                f"{trace_label} exception ({e}) trying to delete {file_path}"
+            )
 
 
 def df_size(df):
@@ -223,7 +225,7 @@ def other_than(groups, bools):
     counts = groups[bools].value_counts()
     merge_col = groups.to_frame(name="right")
     pipeline = tz.compose(
-        tz.curry(lambda s: s.fillna(value=False).infer_objects(copy=False)),
+        tz.curry(pd.Series.fillna, value=False),
         itemgetter("left"),
         tz.curry(
             pd.DataFrame.merge,
@@ -289,14 +291,14 @@ def quick_loc_series(loc_list, target_series):
 
     left_on = "left"
 
-    if isinstance(loc_list, pd.Int64Index):
+    if isinstance(loc_list, pd.Index):
         left_df = pd.DataFrame({left_on: loc_list.values})
     elif isinstance(loc_list, pd.Series):
         left_df = loc_list.to_frame(name=left_on)
     elif isinstance(loc_list, np.ndarray) or isinstance(loc_list, list):
         left_df = pd.DataFrame({left_on: loc_list})
     else:
-        raise RuntimeError(
+        raise TypeError(
             "quick_loc_series loc_list of unexpected type %s" % type(loc_list)
         )
 
@@ -339,18 +341,33 @@ def assign_in_place(df, df2, downcast_int=False, downcast_float=False):
     # update common columns in place
     common_columns = df2.columns.intersection(df.columns)
     if len(common_columns) > 0:
+        old_dtypes = [df[c].dtype for c in common_columns]
         for c in common_columns:
-            # Check if df column is integer and df2 column is also integer but potentially larger
-            if pd.api.types.is_integer_dtype(df[c].dtype) and \
-               pd.api.types.is_integer_dtype(df2[c].dtype):
-                # If df2 has values that won't fit in df's current integer dtype, upcast df's column
-                if df2[c].max() > np.iinfo(df[c].dtype).max or \
-                   df2[c].min() < np.iinfo(df[c].dtype).min:
+            # Preserve integer and float precision before update coerces the column.
+            if pd.api.types.is_integer_dtype(df[c].dtype) and pd.api.types.is_integer_dtype(
+                df2[c].dtype
+            ):
+                if (
+                    df2[c].max() > np.iinfo(df[c].dtype).max
+                    or df2[c].min() < np.iinfo(df[c].dtype).min
+                ):
                     df[c] = df[c].astype(df2[c].dtype)
-            # If df column is integer and df2 column is float, upcast df's column to float
-            elif pd.api.types.is_integer_dtype(df[c].dtype) and \
-                 pd.api.types.is_float_dtype(df2[c].dtype):
+            elif pd.api.types.is_integer_dtype(df[c].dtype) and pd.api.types.is_float_dtype(
+                df2[c].dtype
+            ):
                 df[c] = df[c].astype(df2[c].dtype)
+
+            # in pandas 2.x, update a categorical column with any new categories will cause
+            # TypeError, so we need to add the new categories first.
+            if isinstance(df[c].dtype, pd.CategoricalDtype):
+                if not isinstance(df2[c].dtype, pd.CategoricalDtype):
+                    df2[c] = df2[c].astype("category")
+
+                from pandas.api.types import union_categoricals
+
+                uc = union_categoricals([df[c], df2[c]], sort_categories=True)
+                df[c] = pd.Categorical(df[c], categories=uc.categories)
+                df2[c] = pd.Categorical(df2[c], categories=uc.categories)
 
         df.update(df2)
 
@@ -407,7 +424,7 @@ def auto_opt_pd_dtypes(
                 else:
                     df[col] = pd.to_numeric(df[col], downcast="float")
         # Skip if the column is already categorical
-        if pd.api.types.is_categorical_dtype(dtype):
+        if isinstance(dtype, pd.CategoricalDtype):
             continue
         # Handle integer types
         if pd.api.types.is_integer_dtype(dtype):
@@ -683,9 +700,9 @@ def drop_unused_columns(
         custom_chooser_lines = inspect.getsource(custom_chooser)
         unique_variables_in_spec.update(re.findall(pattern, custom_chooser_lines))
 
-    logger.info("Dropping unused variables in chooser table")
+    logger.debug("Dropping unused variables in chooser table")
 
-    logger.info(
+    logger.debug(
         "before dropping, the choosers table has {} columns: {}".format(
             len(choosers.columns), choosers.columns
         )
@@ -694,7 +711,7 @@ def drop_unused_columns(
     # keep only variables needed for spec
     choosers = choosers[[c for c in choosers.columns if c in unique_variables_in_spec]]
 
-    logger.info(
+    logger.debug(
         "after dropping, the choosers table has {} columns: {}".format(
             len(choosers.columns), choosers.columns
         )

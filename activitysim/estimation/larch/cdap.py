@@ -9,24 +9,23 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import xarray as xr
 import yaml
 
 from ...abm.models.util import cdap
 from .general import apply_coefficients, explicit_value_parameters
 
 try:
-    import larch
+    import larch as lx
 except ImportError:
-    larch = None
+    lx = None
     logger_name = "larch"
 else:
-    from larch import DataFrames, Model, P, X
-    from larch.log import logger_name
-    from larch.model.model_group import ModelGroup
+    from larch import P, X
     from larch.util import Dict
 
 
-_logger = logging.getLogger(logger_name)
+_logger = logging.getLogger("larch")
 
 MAX_HHSIZE = 5
 
@@ -112,11 +111,17 @@ def cdap_base_utility_by_person(
     if n_persons == 1:
         for i in spec.index:
             if not pd.isna(spec.loc[i, "M"]):
-                model.utility_co[1] += X(spec.Expression[i]) * P(spec.loc[i, "M"])
+                model.utility_co[1] += X(spec.Expression[i].lstrip("@")) * P(
+                    spec.loc[i, "M"]
+                )
             if not pd.isna(spec.loc[i, "N"]):
-                model.utility_co[2] += X(spec.Expression[i]) * P(spec.loc[i, "N"])
+                model.utility_co[2] += X(spec.Expression[i].lstrip("@")) * P(
+                    spec.loc[i, "N"]
+                )
             if not pd.isna(spec.loc[i, "H"]):
-                model.utility_co[3] += X(spec.Expression[i]) * P(spec.loc[i, "H"])
+                model.utility_co[3] += X(spec.Expression[i].lstrip("@")) * P(
+                    spec.loc[i, "H"]
+                )
     else:
         if alts is None:
             alts = generate_alternatives(n_persons, add_joint)
@@ -129,7 +134,9 @@ def cdap_base_utility_by_person(
                         x = apply_replacements(
                             spec.Expression[i], f"p{pnum}", value_tokens
                         )
-                        model.utility_co[anum] += X(x) * P(spec.loc[i, aname[z]])
+                        model.utility_co[anum] += X(x.lstrip("@")) * P(
+                            spec.loc[i, aname[z]]
+                        )
 
 
 def interact_pattern(n_persons, select_persons, tag):
@@ -157,7 +164,32 @@ def interact_pattern(n_persons, select_persons, tag):
     return re.compile(pattern)
 
 
-def cdap_interaction_utility(model, n_persons, alts, interaction_coef, coefficients):
+def cdap_interaction_utility(
+    model: lx.Model,
+    n_persons: int,
+    alts: dict,
+    interaction_coef: pd.DataFrame,
+    coefficients: pd.DataFrame,
+):
+    """
+    Build the interaction utility for each pattern.
+
+    Parameters
+    ----------
+    model : larch.Model
+    n_persons : int
+    alts : dict
+        The keys are the names of the patterns, and
+        the values are the alternative code numbers,
+        as created by `generate_alternatives`.
+    interaction_coef : pandas.DataFrame
+        The interaction coefficients provided by
+        the ActivitySim framework.  Should include columns
+        "cardinality", "activity", "interaction_ptypes", and "coefficient".
+    coefficients : pandas.DataFrame
+        The full set of coefficients provided by
+        the ActivitySim framework.
+    """
     person_numbers = list(range(1, n_persons + 1))
 
     matcher = re.compile("coef_[HMN]_.*")
@@ -167,8 +199,11 @@ def cdap_interaction_utility(model, n_persons, alts, interaction_coef, coefficie
             c_split = c.split("_")
             for j in c_split[2:]:
                 interact_coef_map[(c_split[1], j)] = c
-                if all((i == "x" for i in j)):  # wildcards also map to empty
-                    interact_coef_map[(c_split[1], "")] = c
+                # previously, wildcards also mapped empty here, but this caused a clash
+                # as all wildcards would map to the same coefficient name no matter the
+                # cardinality, so instead we only map the exact wildcard case, and later
+                # check that empty interaction_ptypes maps to the correct coefficient name
+                # based on cardinality.
 
     for (cardinality, activity), coefs in interaction_coef.groupby(
         ["cardinality", "activity"]
@@ -187,17 +222,21 @@ def cdap_interaction_utility(model, n_persons, alts, interaction_coef, coefficie
                     for (p, t) in zip(person_numbers, row.interaction_ptypes)
                     if t != "*"
                 )
+                row_interaction_ptypes = row.interaction_ptypes
+                if not row_interaction_ptypes:
+                    # empty interaction_ptypes means all wildcards, but it needs to be the correct length
+                    row_interaction_ptypes = "x" * n_persons
                 if expression:
-                    if (activity, row.interaction_ptypes) in interact_coef_map:
+                    if (activity, row_interaction_ptypes) in interact_coef_map:
                         linear_component = X(expression) * P(
-                            interact_coef_map[(activity, row.interaction_ptypes)]
+                            interact_coef_map[(activity, row_interaction_ptypes)]
                         )
                     else:
                         linear_component = X(expression) * P(row.coefficient)
                 else:
-                    if (activity, row.interaction_ptypes) in interact_coef_map:
+                    if (activity, row_interaction_ptypes) in interact_coef_map:
                         linear_component = P(
-                            interact_coef_map[(activity, row.interaction_ptypes)]
+                            interact_coef_map[(activity, row_interaction_ptypes)]
                         )
                     else:
                         linear_component = P(row.coefficient)
@@ -281,7 +320,7 @@ def cdap_joint_tour_utility(model, n_persons, alts, joint_coef, values):
 
                         expression_value = "&".join(expression_list)
                         # FIXME only apply to alternative if dependency satisfied
-                        bug
+                        raise NotImplementedError("bug")
                         model.utility_co[anum] += X(expression_value) * P(coefficient)
 
                 elif "_px" in expression:
@@ -289,7 +328,7 @@ def cdap_joint_tour_utility(model, n_persons, alts, joint_coef, values):
                         dependency_name = row.dependency.replace("x", str(pnum))
                         expression = row.Expression.replace("x", str(pnum))
                         # FIXME only apply to alternative if dependency satisfied
-                        bug
+                        raise NotImplementedError("bug")
                         model.utility_co[anum] += X(expression) * P(coefficient)
 
             else:
@@ -335,46 +374,23 @@ def cdap_split_data(households, values, add_joint):
     return cdap_data
 
 
-def cdap_dataframes(households, values, add_joint):
+def cdap_dataframes(households, values, add_joint) -> dict[int, lx.Dataset]:
     data = cdap_split_data(households, values, add_joint)
     dfs = {}
     for hhsize in data.keys():
         alts = generate_alternatives(hhsize, add_joint)
-        dfs[hhsize] = DataFrames(
-            co=data[hhsize],
-            alt_names=alts.keys(),
-            alt_codes=alts.values(),
-            av=1,
-            ch=data[hhsize].override_choice.map(alts),
+        dfs[hhsize] = lx.Dataset.construct.from_idco(
+            data[hhsize],
+            alts=dict(zip(alts.values(), alts.keys())),
+        )
+        # convert override_choice to alternative code from alternative name
+        dfs[hhsize]["override_choice"] = xr.DataArray(
+            np.vectorize(alts.get)(dfs[hhsize].override_choice.data),
+            coords=dfs[hhsize].override_choice.coords,
+            dims=dfs[hhsize].override_choice.dims,
+            name="override_choice",
         )
     return dfs
-
-
-# def _cdap_model(households, values, spec1, interaction_coef, coefficients):
-#     cdap_data = cdap_dataframes(households, values)
-#     m = {}
-#     _logger.info(f"building for model 1")
-#     m[1] = Model(dataservice=cdap_data[1])
-#     cdap_base_utility_by_person(m[1], n_persons=1, spec=spec1)
-#     m[1].choice_any = True
-#     m[1].availability_any = True
-#
-#     # Add cardinality into interaction_coef if not present
-#     if 'cardinality' not in interaction_coef:
-#         interaction_coef['cardinality'] = interaction_coef['interaction_ptypes'].str.len()
-#     for s in [2, 3, 4, 5]:
-#         _logger.info(f"building for model {s}")
-#         m[s] = Model(dataservice=cdap_data[s])
-#         alts = generate_alternatives(s)
-#         cdap_base_utility_by_person(m[s], s, spec1, alts, values.columns)
-#         cdap_interaction_utility(m[s], s, alts, interaction_coef, coefficients)
-#         m[s].choice_any = True
-#         m[s].availability_any = True
-#
-#     result = ModelGroup(m.values())
-#     explicit_value_parameters(result)
-#     apply_coefficients(coefficients, result)
-#     return result
 
 
 def cdap_data(
@@ -393,12 +409,23 @@ def cdap_data(
     if not os.path.exists(edb_directory):
         raise FileNotFoundError(edb_directory)
 
-    def read_csv(filename, **kwargs):
-        filename = filename.format(name=name)
-        return pd.read_csv(os.path.join(edb_directory, filename), **kwargs)
+    def read_csv(filename, **kwargs) -> pd.DataFrame:
+        filename = Path(edb_directory).joinpath(filename.format(name=name)).resolve()
+        if filename.with_suffix(".parquet").exists():
+            if "comment" in kwargs:
+                del kwargs["comment"]
+            print(f"Reading {filename.with_suffix('.parquet')}")
+            df = pd.read_parquet(filename.with_suffix(".parquet"), **kwargs)
+            if df.index.name is not None:
+                # want the data to be read in the same as csv format -- without the index
+                df = df.reset_index(drop=False)
+            return df
+        print(f"Reading {filename}")
+        return pd.read_csv(filename, **kwargs)
 
     def read_yaml(filename, **kwargs):
         filename = filename.format(name=name)
+        print(f"Reading {os.path.join(edb_directory, filename)}")
         with open(os.path.join(edb_directory, filename), "rt") as f:
             return yaml.load(f, Loader=yaml.SafeLoader, **kwargs)
 
@@ -442,7 +469,7 @@ def cdap_data(
     except FileNotFoundError:
         joint_coef = None
         add_joint = False
-    print("Including joint tour utiltiy?:", add_joint)
+    print("Including joint tour utility?:", add_joint)
 
     spec1 = read_csv(spec1_file, comment="#")
     values = read_csv(chooser_data_file, comment="#")
@@ -499,13 +526,17 @@ def cdap_model(
     interaction_coef = d.interaction_coef
     coefficients = d.coefficients
     add_joint = d.add_joint
+    extra_vars = d.settings.get("CONSTANTS", {})
 
     cdap_dfs = cdap_dataframes(households, values, add_joint)
     m = {}
     _logger.info(f"building for model 1")
-    m[1] = Model(dataservice=cdap_dfs[1])
+    m[1] = lx.Model(
+        datatree=cdap_dfs[1].dc.as_tree("df", extra_vars=extra_vars),
+        compute_engine="numba",
+    )
     cdap_base_utility_by_person(m[1], n_persons=1, spec=spec1)
-    m[1].choice_any = True
+    m[1].choice_co_code = "override_choice"
     m[1].availability_any = True
 
     # Add cardinality into interaction_coef if not present
@@ -516,16 +547,16 @@ def cdap_model(
     for s in range(2, MAX_HHSIZE + 1):
         # for s in [2, 3, 4, 5]:
         _logger.info(f"building for model {s}")
-        m[s] = Model(dataservice=cdap_dfs[s])
+        m[s] = lx.Model(datatree=cdap_dfs[s].dc.as_tree("df", extra_vars=extra_vars))
         alts = generate_alternatives(s, add_joint)
         cdap_base_utility_by_person(m[s], s, spec1, alts, values.columns)
         cdap_interaction_utility(m[s], s, alts, interaction_coef, coefficients)
         # if add_joint:
         #     cdap_joint_tour_utility(m[s], s, alts, d.joint_coef, values)
-        m[s].choice_any = True
+        m[s].choice_co_code = "override_choice"
         m[s].availability_any = True
 
-    model = ModelGroup(m.values())
+    model = lx.ModelGroup(m.values())
     explicit_value_parameters(model)
     apply_coefficients(coefficients, model)
     if return_data:

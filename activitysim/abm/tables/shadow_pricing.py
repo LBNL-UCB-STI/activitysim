@@ -18,6 +18,7 @@ from activitysim.core import logit, tracing, util, workflow
 from activitysim.core.configuration import PydanticReadable
 from activitysim.core.configuration.logit import TourLocationComponentSettings
 from activitysim.core.input import read_input_table
+from activitysim.core.exceptions import SystemConfigurationError, MissingNameError
 
 logger = logging.getLogger(__name__)
 
@@ -181,7 +182,7 @@ class ShadowPriceCalculator:
             logger.warning(
                 "deprecated combination of multiprocessing and not fail_fast"
             )
-            raise RuntimeError(
+            raise SystemConfigurationError(
                 "Shadow pricing requires fail_fast setting in multiprocessing mode"
             )
 
@@ -859,9 +860,19 @@ class ShadowPriceCalculator:
                 sprice.replace([np.inf, -np.inf], 0, inplace=True)
 
                 # shadow prices are set to -999 if overassigned or 0 if the zone still has room for this segment
-                self.shadow_prices[segment] = np.where(
+                old_shadow_prices = self.shadow_prices[segment].values
+                new_shadow_prices = np.where(
                     (sprice <= 1 + percent_tolerance / 100), -999, 0
                 )
+
+                # the conditions above allow for zones to be reopened, but we want to prevent such behavior
+                new_shadow_prices = np.where(
+                    (old_shadow_prices == -999) & (new_shadow_prices != -999),
+                    old_shadow_prices,
+                    new_shadow_prices,
+                )
+
+                self.shadow_prices[segment] = new_shadow_prices
 
                 zonal_sample_rate = 1 - sprice
                 overpredicted_zones = self.shadow_prices[
@@ -904,7 +915,10 @@ class ShadowPriceCalculator:
             self.sampled_persons = sampled_persons
 
         else:
-            raise RuntimeError("unknown SHADOW_PRICE_METHOD %s" % shadow_price_method)
+            raise SystemConfigurationError(
+                "unknown SHADOW_PRICE_METHOD %s, method must be one of 'ctramp', 'daysim', or 'simulation'"
+                % shadow_price_method
+            )
 
     def dest_size_terms(self, segment):
         assert segment in self.segment_ids
@@ -922,8 +936,9 @@ class ShadowPriceCalculator:
             elif shadow_price_method == "simulation":
                 utility_adjustment = self.shadow_prices[segment]
             else:
-                raise RuntimeError(
-                    "unknown SHADOW_PRICE_METHOD %s" % shadow_price_method
+                raise SystemConfigurationError(
+                    "unknown SHADOW_PRICE_METHOD %s, method must be one of 'ctramp', 'daysim', or 'simulation'"
+                    % shadow_price_method
                 )
 
         size_terms = pd.DataFrame(
@@ -1036,9 +1051,7 @@ def buffers_for_shadow_pricing(shadow_pricing_info):
         if np.issubdtype(dtype, np.int64):
             typecode = ctypes.c_int64
         else:
-            raise RuntimeError(
-                "buffer_for_shadow_pricing unrecognized dtype %s" % dtype
-            )
+            raise TypeError("buffer_for_shadow_pricing unrecognized dtype %s" % dtype)
 
         shared_data_buffer = multiprocessing.Array(typecode, buffer_size)
 
@@ -1085,9 +1098,7 @@ def buffers_for_shadow_pricing_choice(state, shadow_pricing_choice_info):
         if np.issubdtype(dtype, np.int64):
             typecode = ctypes.c_int64
         else:
-            raise RuntimeError(
-                "buffer_for_shadow_pricing unrecognized dtype %s" % dtype
-            )
+            raise TypeError("buffer_for_shadow_pricing unrecognized dtype %s" % dtype)
 
         shared_data_buffer = multiprocessing.Array(typecode, buffer_size)
 
@@ -1145,12 +1156,12 @@ def shadow_price_data_from_buffers_choice(
     block_shapes = shadow_pricing_info["block_shapes"]
 
     if model_selector not in block_shapes:
-        raise RuntimeError(
+        raise MissingNameError(
             "Model selector %s not in shadow_pricing_info" % model_selector
         )
 
     if block_name(model_selector + "_choice") not in data_buffers:
-        raise RuntimeError(
+        raise MissingNameError(
             "Block %s not in data_buffers" % block_name(model_selector + "_choice")
         )
 
@@ -1195,12 +1206,14 @@ def shadow_price_data_from_buffers(data_buffers, shadow_pricing_info, model_sele
     block_shapes = shadow_pricing_info["block_shapes"]
 
     if model_selector not in block_shapes:
-        raise RuntimeError(
+        raise MissingNameError(
             "Model selector %s not in shadow_pricing_info" % model_selector
         )
 
     if block_name(model_selector) not in data_buffers:
-        raise RuntimeError("Block %s not in data_buffers" % block_name(model_selector))
+        raise MissingNameError(
+            "Block %s not in data_buffers" % block_name(model_selector)
+        )
 
     shape = block_shapes[model_selector]
     data = data_buffers[block_name(model_selector)]

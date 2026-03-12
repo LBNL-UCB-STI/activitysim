@@ -1,51 +1,27 @@
-FROM --platform=linux/amd64 continuumio/miniconda3 as builder
+FROM --platform=linux/amd64 python:3.10-slim
 
-ENV CONDA_DIR /opt/conda
-ENV CONDA_ENV asim
-ENV FULL_CONDA_PATH $CONDA_DIR/envs/$CONDA_ENV
+ENV ASIM_PATH=/activitysim
+ENV EXAMPLE=prototype_mtc_clean
+ENV EXEC_NAME=simulation.py
+ENV PYTHONNOUSERSITE=1
+ENV UV_NO_DEV=1
+ENV PATH="$ASIM_PATH/.venv/bin:$PATH"
 
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends build-essential gcc g++ git \
+    && rm -rf /var/lib/apt/lists/*
 
-ENV ASIM_PATH /activitysim
-ENV ASIM_SUBDIR examples
-ENV EXEC_NAME simulation.py
+RUN pip install --no-cache-dir uv
 
-# Install system dependencies and configure build flags
-RUN apt-get --allow-releaseinfo-change update \
-    && apt-get install -y build-essential zip unzip gcc g++ wget\
-    && rm -rf /var/lib/apt/lists/* \
-    && export MAKEFLAGS="-j$(nproc)"
-# Update conda and configure pip
-RUN conda update conda --yes \
-    && conda install -n base conda-libmamba-solver \
-    && pip config set global.no-cache-dir true
+WORKDIR $ASIM_PATH
 
-RUN conda install -n base conda-libmamba-solver
+COPY pyproject.toml uv.lock README.md $ASIM_PATH/
+RUN uv sync --locked --no-install-project --no-editable
 
-RUN mkdir -p $ASIM_PATH/conda-environments && \
-    wget -O $ASIM_PATH/conda-environments/activitysim-dev.yml https://raw.githubusercontent.com/LBNL-UCB-STI/activitysim/refs/heads/new-merge-lbl/conda-environments/activitysim-dev.yml
-RUN sed -i '/-e \.\./d' $ASIM_PATH/conda-environments/activitysim-dev.yml \
-    && conda env create -p $FULL_CONDA_PATH --file $ASIM_PATH/conda-environments/activitysim-dev.yml --solver=libmamba \
-    && $FULL_CONDA_PATH/bin/pip install --only-binary pandas "pandas>=1.4.0,<2"
+COPY activitysim $ASIM_PATH/activitysim
 
-RUN $FULL_CONDA_PATH/bin/pip install DFO-LS
-ENV EXAMPLE prototype_mtc_clean
-
-COPY activitysim/abm $ASIM_PATH/activitysim/abm
-COPY activitysim/core $ASIM_PATH/activitysim/core
-COPY activitysim/cli $ASIM_PATH/activitysim/cli
-COPY activitysim/examples/example_manifest.yaml $ASIM_PATH/activitysim/examples/example_manifest.yaml
-COPY activitysim/examples/__init__.py $ASIM_PATH/activitysim/examples/__init__.py
-COPY activitysim/examples/$EXAMPLE $ASIM_PATH/activitysim/examples/$EXAMPLE
-COPY activitysim/__init__.py $ASIM_PATH/activitysim/
-COPY pyproject.toml $ASIM_PATH/pyproject.toml
-
-RUN $FULL_CONDA_PATH/bin/pip install --no-deps --only-binary :all: $ASIM_PATH/
-
-ENV PATH $FULL_CONDA_PATH/bin:$PATH
-ENV CONDA_DEFAULT_ENV $CONDA_ENV
-ENV PYTHONPATH $ASIM_PATH:$PYTHONPATH
-
-
+RUN uv sync --locked --no-editable \
+    && .venv/bin/pip install --no-cache-dir DFO-LS
 
 WORKDIR $ASIM_PATH/activitysim/examples/$EXAMPLE
 

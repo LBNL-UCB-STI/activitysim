@@ -7,6 +7,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from activitysim.core.exceptions import PipelineError
+
 
 def run_if_exists(filename):
     import pytest
@@ -165,8 +167,8 @@ def progressive_checkpoint_test(
         if ref_target.exists():
             try:
                 state.checkpoint.check_against(ref_target, checkpoint_name=step_name)
-            except Exception:
-                print(f"> {name} {step_name}: ERROR")
+            except Exception as e:
+                print(f"> {name} {step_name}: ERROR {e}")
                 raise
             else:
                 print(f"> {name} {step_name}: ok")
@@ -176,6 +178,6 @@ def progressive_checkpoint_test(
     # generate the reference pipeline if it did not exist
     if not ref_target.exists():
         state.checkpoint.store.make_zip_archive(ref_target)
-        raise RuntimeError(
+        raise PipelineError(
             f"Reference pipeline {ref_target} did not exist, so it was created."
         )
