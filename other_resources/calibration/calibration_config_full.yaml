@@ -110,26 +110,26 @@ tunable_coefficients:
 #      bounds:
 #      - -5.0
 #      - 2.0
-    walk_ASC_no_auto_eatout:
-      initial_value: -1.491941333
-      bounds:
-      - -6.0
-      - 1.0
-    walk_ASC_no_auto_escort:
-      initial_value: 19.834108352661133
-      bounds:
-      - 14.0
-      - 21.0
-    walk_ASC_no_auto_othdiscr:
-      initial_value: -13.27774715
-      bounds:
-      - -18.0
-      - -11.0
-    walk_ASC_no_auto_othmaint:
-      initial_value: -13.99618816
-      bounds:
-      - -18.0
-      - -11.0
+#    walk_ASC_no_auto_eatout:
+#      initial_value: -1.491941333
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    walk_ASC_no_auto_escort:
+#      initial_value: 19.834108352661133
+#      bounds:
+#      - 14.0
+#      - 21.0
+#    walk_ASC_no_auto_othdiscr:
+#      initial_value: -13.27774715
+#      bounds:
+#      - -18.0
+#      - -11.0
+#    walk_ASC_no_auto_othmaint:
+#      initial_value: -13.99618816
+#      bounds:
+#      - -18.0
+#      - -11.0
     walk_ASC_no_auto_school:
       initial_value: 31.570049285888672
       bounds:
@@ -145,41 +145,41 @@ tunable_coefficients:
       bounds:
       - -12.0
       - -5.0
-    walk_ASC_no_auto_univ:
-      initial_value: -5.209798813
-      bounds:
-      - -10.0
-      - -3.0
+#    walk_ASC_no_auto_univ:
+#      initial_value: -5.209798813
+#      bounds:
+#      - -10.0
+#      - -3.0
     walk_ASC_no_auto_work:
       initial_value: -12.79683781
       bounds:
       - -17.0
       - -10.0
-    walk_ASC_no_auto_atwork:
-      initial_value: 6.669213
-      bounds:
-      - 1.0
-      - 8.0
-    walk_ASC_auto_deficient_eatout:
-      initial_value: 8.714327812194824
-      bounds:
-      - 3.0
-      - 10.0
-    walk_ASC_auto_deficient_escort:
-      initial_value: 8.400849342346191
-      bounds:
-      - 3.0
-      - 10.0
-    walk_ASC_auto_deficient_othdiscr:
-      initial_value: -17.23918724
-      bounds:
-      - -22.0
-      - -15.0
-    walk_ASC_auto_deficient_othmaint:
-      initial_value: -9.614654541
-      bounds:
-      - -14.0
-      - -7.0
+#    walk_ASC_no_auto_atwork:
+#      initial_value: 6.669213
+#      bounds:
+#      - 1.0
+#      - 8.0
+#    walk_ASC_auto_deficient_eatout:
+#      initial_value: 8.714327812194824
+#      bounds:
+#      - 3.0
+#      - 10.0
+#    walk_ASC_auto_deficient_escort:
+#      initial_value: 8.400849342346191
+#      bounds:
+#      - 3.0
+#      - 10.0
+#    walk_ASC_auto_deficient_othdiscr:
+#      initial_value: -17.23918724
+#      bounds:
+#      - -22.0
+#      - -15.0
+#    walk_ASC_auto_deficient_othmaint:
+#      initial_value: -9.614654541
+#      bounds:
+#      - -14.0
+#      - -7.0
     walk_ASC_auto_deficient_school:
       initial_value: -0.259806991
       bounds:
@@ -195,41 +195,41 @@ tunable_coefficients:
       bounds:
       - -10.0
       - -3.0
-    walk_ASC_auto_deficient_univ:
-      initial_value: -15.38105583
-      bounds:
-      - -20.0
-      - -13.0
+#    walk_ASC_auto_deficient_univ:
+#      initial_value: -15.38105583
+#      bounds:
+#      - -20.0
+#      - -13.0
     walk_ASC_auto_deficient_work:
       initial_value: -1.923326612
       bounds:
       - -6.0
       - 1.0
-    walk_ASC_auto_deficient_atwork:
-      initial_value: 0.92546093
-      bounds:
-      - -5.0
-      - 2.0
+#    walk_ASC_auto_deficient_atwork:
+#      initial_value: 0.92546093
+#      bounds:
+#      - -5.0
+#      - 2.0
     walk_ASC_auto_sufficient_eatout:
       initial_value: 2.0336148738861084
       bounds:
       - -3.0
       - 4.0
-    walk_ASC_auto_sufficient_escort:
-      initial_value: -3.476354837
-      bounds:
-      - -8.0
-      - -1.0
-    walk_ASC_auto_sufficient_othdiscr:
-      initial_value: 0.8849702477455139
-      bounds:
-      - -5.0
-      - 2.0
-    walk_ASC_auto_sufficient_othmaint:
-      initial_value: 0.5769327878952026
-      bounds:
-      - -5.0
-      - 2.0
+#    walk_ASC_auto_sufficient_escort:
+#      initial_value: -3.476354837
+#      bounds:
+#      - -8.0
+#      - -1.0
+#    walk_ASC_auto_sufficient_othdiscr:
+#      initial_value: 0.8849702477455139
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    walk_ASC_auto_sufficient_othmaint:
+#      initial_value: 0.5769327878952026
+#      bounds:
+#      - -5.0
+#      - 2.0
     walk_ASC_auto_sufficient_school:
       initial_value: 1.6634445190429688
       bounds:
@@ -245,21 +245,21 @@ tunable_coefficients:
       bounds:
       - 0.0
       - 7.0
-    walk_ASC_auto_sufficient_univ:
-      initial_value: 4.097455024719238
-      bounds:
-      - -1.0
-      - 6.0
+#    walk_ASC_auto_sufficient_univ:
+#      initial_value: 4.097455024719238
+#      bounds:
+#      - -1.0
+#      - 6.0
     walk_ASC_auto_sufficient_work:
       initial_value: 4.044371128082275
       bounds:
       - -1.0
       - 6.0
-    walk_ASC_auto_sufficient_atwork:
-      initial_value: 0.677216
-      bounds:
-      - -5.0
-      - 2.0
+#    walk_ASC_auto_sufficient_atwork:
+#      initial_value: 0.677216
+#      bounds:
+#      - -5.0
+#      - 2.0
 #    bike_ASC_no_auto_eatout:
 #      initial_value: -12.28494263
 #      bounds:
@@ -420,21 +420,21 @@ tunable_coefficients:
       bounds:
       - -9.0
       - -2.0
-    sr2_ASC_auto_deficient_escort:
-      initial_value: 0.0
-      bounds:
-      - -5.0
-      - 2.0
-    sr2_ASC_auto_deficient_othdiscr:
-      initial_value: 0.29651057720184326
-      bounds:
-      - -5.0
-      - 2.0
-    sr2_ASC_auto_deficient_othmaint:
-      initial_value: 12.412137985229492
-      bounds:
-      - 7.0
-      - 14.0
+#    sr2_ASC_auto_deficient_escort:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    sr2_ASC_auto_deficient_othdiscr:
+#      initial_value: 0.29651057720184326
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    sr2_ASC_auto_deficient_othmaint:
+#      initial_value: 12.412137985229492
+#      bounds:
+#      - 7.0
+#      - 14.0
     sr2_ASC_auto_deficient_school:
       initial_value: -8.372909546
       bounds:
@@ -450,11 +450,11 @@ tunable_coefficients:
       bounds:
       - 20.0
       - 27.0
-    sr2_ASC_auto_deficient_univ:
-      initial_value: -13.92011547
-      bounds:
-      - -18.0
-      - -11.0
+#    sr2_ASC_auto_deficient_univ:
+#      initial_value: -13.92011547
+#      bounds:
+#      - -18.0
+#      - -11.0
     sr2_ASC_auto_deficient_work:
       initial_value: 13.575478553771973
       bounds:
@@ -465,26 +465,26 @@ tunable_coefficients:
       bounds:
       - -7.0
       - 0.0
-    sr2_ASC_auto_sufficient_eatout:
-      initial_value: 0.9112170338630676
-      bounds:
-      - -5.0
-      - 2.0
-    sr2_ASC_auto_sufficient_escort:
-      initial_value: 0.0
-      bounds:
-      - -5.0
-      - 2.0
-    sr2_ASC_auto_sufficient_othdiscr:
-      initial_value: 1.9953718185424805
-      bounds:
-      - -4.0
-      - 3.0
-    sr2_ASC_auto_sufficient_othmaint:
-      initial_value: 0.41315752267837524
-      bounds:
-      - -5.0
-      - 2.0
+#    sr2_ASC_auto_sufficient_eatout:
+#      initial_value: 0.9112170338630676
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    sr2_ASC_auto_sufficient_escort:
+#      initial_value: 0.0
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    sr2_ASC_auto_sufficient_othdiscr:
+#      initial_value: 1.9953718185424805
+#      bounds:
+#      - -4.0
+#      - 3.0
+#    sr2_ASC_auto_sufficient_othmaint:
+#      initial_value: 0.41315752267837524
+#      bounds:
+#      - -5.0
+#      - 2.0
     sr2_ASC_auto_sufficient_school:
       initial_value: 1.4424705505371094
       bounds:
@@ -500,41 +500,41 @@ tunable_coefficients:
       bounds:
       - -5.0
       - 2.0
-    sr2_ASC_auto_sufficient_univ:
-      initial_value: 0.25325921177864075
-      bounds:
-      - -5.0
-      - 2.0
+#    sr2_ASC_auto_sufficient_univ:
+#      initial_value: 0.25325921177864075
+#      bounds:
+#      - -5.0
+#      - 2.0
     sr2_ASC_auto_sufficient_work:
       initial_value: -5.458568573
       bounds:
       - -10.0
       - -3.0
-    sr2_ASC_auto_sufficient_atwork:
-      initial_value: -1.4450618
-      bounds:
-      - -6.0
-      - 1.0
+#    sr2_ASC_auto_sufficient_atwork:
+#      initial_value: -1.4450618
+#      bounds:
+#      - -6.0
+#      - 1.0
     sr3p_ASC_no_auto_eatout:
       initial_value: 22.812694549560547
       bounds:
       - 17.0
       - 24.0
-    sr3p_ASC_no_auto_escort:
-      initial_value: -7.421368599
-      bounds:
-      - -12.0
-      - -5.0
-    sr3p_ASC_no_auto_othdiscr:
-      initial_value: 28.894943237304688
-      bounds:
-      - 23.0
-      - 30.0
-    sr3p_ASC_no_auto_othmaint:
-      initial_value: 1.0649608373641968
-      bounds:
-      - -4.0
-      - 3.0
+#    sr3p_ASC_no_auto_escort:
+#      initial_value: -7.421368599
+#      bounds:
+#      - -12.0
+#      - -5.0
+#    sr3p_ASC_no_auto_othdiscr:
+#      initial_value: 28.894943237304688
+#      bounds:
+#      - 23.0
+#      - 30.0
+#    sr3p_ASC_no_auto_othmaint:
+#      initial_value: 1.0649608373641968
+#      bounds:
+#      - -4.0
+#      - 3.0
     sr3p_ASC_no_auto_school:
       initial_value: -13.94913483
       bounds:
@@ -560,31 +560,31 @@ tunable_coefficients:
       bounds:
       - -23.0
       - -16.0
-    sr3p_ASC_no_auto_atwork:
-      initial_value: 0.5826626
-      bounds:
-      - -5.0
-      - 2.0
-    sr3p_ASC_auto_deficient_eatout:
-      initial_value: -9.155963898
-      bounds:
-      - -14.0
-      - -7.0
-    sr3p_ASC_auto_deficient_escort:
-      initial_value: 2.151855469
-      bounds:
-      - -3.0
-      - 4.0
-    sr3p_ASC_auto_deficient_othdiscr:
-      initial_value: 34.59121322631836
-      bounds:
-      - 29.0
-      - 36.0
-    sr3p_ASC_auto_deficient_othmaint:
-      initial_value: -12.70749569
-      bounds:
-      - -17.0
-      - -10.0
+#    sr3p_ASC_no_auto_atwork:
+#      initial_value: 0.5826626
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    sr3p_ASC_auto_deficient_eatout:
+#      initial_value: -9.155963898
+#      bounds:
+#      - -14.0
+#      - -7.0
+#    sr3p_ASC_auto_deficient_escort:
+#      initial_value: 2.151855469
+#      bounds:
+#      - -3.0
+#      - 4.0
+#    sr3p_ASC_auto_deficient_othdiscr:
+#      initial_value: 34.59121322631836
+#      bounds:
+#      - 29.0
+#      - 36.0
+#    sr3p_ASC_auto_deficient_othmaint:
+#      initial_value: -12.70749569
+#      bounds:
+#      - -17.0
+#      - -10.0
     sr3p_ASC_auto_deficient_school:
       initial_value: -5.616947651
       bounds:
@@ -610,31 +610,31 @@ tunable_coefficients:
       bounds:
       - 4.0
       - 11.0
-    sr3p_ASC_auto_deficient_atwork:
-      initial_value: -2.514658
-      bounds:
-      - -7.0
-      - 0.0
-    sr3p_ASC_auto_sufficient_eatout:
-      initial_value: 0.5884100198745728
-      bounds:
-      - -5.0
-      - 2.0
-    sr3p_ASC_auto_sufficient_escort:
-      initial_value: -0.467015147
-      bounds:
-      - -5.0
-      - 2.0
-    sr3p_ASC_auto_sufficient_othdiscr:
-      initial_value: -12.46940613
-      bounds:
-      - -17.0
-      - -10.0
-    sr3p_ASC_auto_sufficient_othmaint:
-      initial_value: -0.136629149
-      bounds:
-      - -5.0
-      - 2.0
+#    sr3p_ASC_auto_deficient_atwork:
+#      initial_value: -2.514658
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    sr3p_ASC_auto_sufficient_eatout:
+#      initial_value: 0.5884100198745728
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    sr3p_ASC_auto_sufficient_escort:
+#      initial_value: -0.467015147
+#      bounds:
+#      - -5.0
+#      - 2.0
+#    sr3p_ASC_auto_sufficient_othdiscr:
+#      initial_value: -12.46940613
+#      bounds:
+#      - -17.0
+#      - -10.0
+#    sr3p_ASC_auto_sufficient_othmaint:
+#      initial_value: -0.136629149
+#      bounds:
+#      - -5.0
+#      - 2.0
     sr3p_ASC_auto_sufficient_school:
       initial_value: 1.8787201642990112
       bounds:
@@ -650,41 +650,41 @@ tunable_coefficients:
       bounds:
       - -5.0
       - 2.0
-    sr3p_ASC_auto_sufficient_univ:
-      initial_value: 0.25643718242645264
-      bounds:
-      - -5.0
-      - 2.0
+#    sr3p_ASC_auto_sufficient_univ:
+#      initial_value: 0.25643718242645264
+#      bounds:
+#      - -5.0
+#      - 2.0
     sr3p_ASC_auto_sufficient_work:
       initial_value: -3.314520597
       bounds:
       - -8.0
       - -1.0
-    sr3p_ASC_auto_sufficient_atwork:
-      initial_value: -1.652174
-      bounds:
-      - -6.0
-      - 1.0
-    walk_transit_ASC_no_auto_eatout:
-      initial_value: -18.05977249
-      bounds:
-      - -23.0
-      - -16.0
-    walk_transit_ASC_no_auto_escort:
-      initial_value: -2.911773205
-      bounds:
-      - -7.0
-      - 0.0
-    walk_transit_ASC_no_auto_othdiscr:
-      initial_value: -21.38959694
-      bounds:
-      - -26.0
-      - -19.0
-    walk_transit_ASC_no_auto_othmaint:
-      initial_value: 6.362695217132568
-      bounds:
-      - 1.0
-      - 8.0
+#    sr3p_ASC_auto_sufficient_atwork:
+#      initial_value: -1.652174
+#      bounds:
+#      - -6.0
+#      - 1.0
+#    walk_transit_ASC_no_auto_eatout:
+#      initial_value: -18.05977249
+#      bounds:
+#      - -23.0
+#      - -16.0
+#    walk_transit_ASC_no_auto_escort:
+#      initial_value: -2.911773205
+#      bounds:
+#      - -7.0
+#      - 0.0
+#    walk_transit_ASC_no_auto_othdiscr:
+#      initial_value: -21.38959694
+#      bounds:
+#      - -26.0
+#      - -19.0
+#    walk_transit_ASC_no_auto_othmaint:
+#      initial_value: 6.362695217132568
+#      bounds:
+#      - 1.0
+#      - 8.0
     walk_transit_ASC_no_auto_school:
       initial_value: -2.142196178
       bounds:
@@ -699,32 +699,32 @@ tunable_coefficients:
       initial_value: -17.54115105
       bounds:
       - -22.0
-      - -15.0
-    walk_transit_ASC_no_auto_univ:
-      initial_value: 21.484037399291992
-      bounds:
-      - 16.0
-      - 23.0
+#      - -15.0
+#    walk_transit_ASC_no_auto_univ:
+#      initial_value: 21.484037399291992
+#      bounds:
+#      - 16.0
+#      - 23.0
     walk_transit_ASC_no_auto_work:
       initial_value: 29.476585388183594
       bounds:
       - 24.0
       - 31.0
-    walk_transit_ASC_no_auto_atwork:
-      initial_value: 2.7041876
-      bounds:
-      - -3.0
-      - 4.0
+#    walk_transit_ASC_no_auto_atwork:
+#      initial_value: 2.7041876
+#      bounds:
+#      - -3.0
+#      - 4.0
     walk_transit_ASC_auto_deficient_eatout:
       initial_value: -13.24145222
       bounds:
       - -18.0
       - -11.0
-    walk_transit_ASC_auto_deficient_escort:
-      initial_value: -18.75063705
-      bounds:
-      - -23.0
-      - -16.0
+#    walk_transit_ASC_auto_deficient_escort:
+#      initial_value: -18.75063705
+#      bounds:
+#      - -23.0
+#      - -16.0
     walk_transit_ASC_auto_deficient_othdiscr:
       initial_value: -14.83991432
       bounds:
@@ -820,91 +820,91 @@ tunable_coefficients:
       bounds:
       - -5.0
       - 2.0
-    drive_transit_ASC_auto_deficient_eatout:
-      initial_value: -15.81105709
-      bounds:
-      - -20.0
-      - -13.0
-    drive_transit_ASC_auto_deficient_escort:
-      initial_value: -15.76831818
-      bounds:
-      - -20.0
-      - -13.0
-    drive_transit_ASC_auto_deficient_othdiscr:
-      initial_value: -11.18155384
-      bounds:
-      - -16.0
-      - -9.0
-    drive_transit_ASC_auto_deficient_othmaint:
-      initial_value: -12.85981846
-      bounds:
-      - -17.0
-      - -10.0
-    drive_transit_ASC_auto_deficient_school:
-      initial_value: -18.86919594
-      bounds:
-      - -23.0
-      - -16.0
-    drive_transit_ASC_auto_deficient_shopping:
-      initial_value: -11.26554871
-      bounds:
-      - -16.0
-      - -9.0
-    drive_transit_ASC_auto_deficient_social:
-      initial_value: -9.961061478
-      bounds:
-      - -14.0
-      - -7.0
-    drive_transit_ASC_auto_deficient_univ:
-      initial_value: -26.73368263
-      bounds:
-      - -31.0
-      - -24.0
+#    drive_transit_ASC_auto_deficient_eatout:
+#      initial_value: -15.81105709
+#      bounds:
+#      - -20.0
+#      - -13.0
+#    drive_transit_ASC_auto_deficient_escort:
+#      initial_value: -15.76831818
+#      bounds:
+#      - -20.0
+#      - -13.0
+#    drive_transit_ASC_auto_deficient_othdiscr:
+#      initial_value: -11.18155384
+#      bounds:
+#      - -16.0
+#      - -9.0
+#    drive_transit_ASC_auto_deficient_othmaint:
+#      initial_value: -12.85981846
+#      bounds:
+#      - -17.0
+#      - -10.0
+#    drive_transit_ASC_auto_deficient_school:
+#      initial_value: -18.86919594
+#      bounds:
+#      - -23.0
+#      - -16.0
+#    drive_transit_ASC_auto_deficient_shopping:
+#      initial_value: -11.26554871
+#      bounds:
+#      - -16.0
+#      - -9.0
+#    drive_transit_ASC_auto_deficient_social:
+#      initial_value: -9.961061478
+#      bounds:
+#      - -14.0
+#      - -7.0
+#    drive_transit_ASC_auto_deficient_univ:
+#      initial_value: -26.73368263
+#      bounds:
+#      - -31.0
+#      - -24.0
     drive_transit_ASC_auto_deficient_work:
       initial_value: 9.354217529296875
       bounds:
       - 4.0
       - 11.0
-    drive_transit_ASC_auto_deficient_atwork:
-      initial_value: -998.8196
-      bounds:
-      - -1003.0
-      - -996.0
-    drive_transit_ASC_auto_sufficient_eatout:
-      initial_value: -10.91447544
-      bounds:
-      - -15.0
-      - -8.0
-    drive_transit_ASC_auto_sufficient_escort:
-      initial_value: -26.07130623
-      bounds:
-      - -31.0
-      - -24.0
-    drive_transit_ASC_auto_sufficient_othdiscr:
-      initial_value: -5.231681824
-      bounds:
-      - -10.0
-      - -3.0
-    drive_transit_ASC_auto_sufficient_othmaint:
-      initial_value: -11.67416954
-      bounds:
-      - -16.0
-      - -9.0
+#    drive_transit_ASC_auto_deficient_atwork:
+#      initial_value: -998.8196
+#      bounds:
+#      - -1003.0
+#      - -996.0
+#    drive_transit_ASC_auto_sufficient_eatout:
+#      initial_value: -10.91447544
+#      bounds:
+#      - -15.0
+#      - -8.0
+#    drive_transit_ASC_auto_sufficient_escort:
+#      initial_value: -26.07130623
+#      bounds:
+#      - -31.0
+#      - -24.0
+#    drive_transit_ASC_auto_sufficient_othdiscr:
+#      initial_value: -5.231681824
+#      bounds:
+#      - -10.0
+#      - -3.0
+#    drive_transit_ASC_auto_sufficient_othmaint:
+#      initial_value: -11.67416954
+#      bounds:
+#      - -16.0
+#      - -9.0
     drive_transit_ASC_auto_sufficient_school:
       initial_value: -22.75538826
       bounds:
       - -27.0
       - -20.0
-    drive_transit_ASC_auto_sufficient_shopping:
-      initial_value: -10.62800884
-      bounds:
-      - -15.0
-      - -8.0
-    drive_transit_ASC_auto_sufficient_social:
-      initial_value: -2.139929771
-      bounds:
-      - -7.0
-      - 0.0
+#    drive_transit_ASC_auto_sufficient_shopping:
+#      initial_value: -10.62800884
+#      bounds:
+#      - -15.0
+#      - -8.0
+#    drive_transit_ASC_auto_sufficient_social:
+#      initial_value: -2.139929771
+#      bounds:
+#      - -7.0
+#      - 0.0
     drive_transit_ASC_auto_sufficient_univ:
       initial_value: 2.4619836807250977
       bounds:
@@ -915,11 +915,11 @@ tunable_coefficients:
       bounds:
       - -19.0
       - -12.0
-    drive_transit_ASC_auto_sufficient_atwork:
-      initial_value: -999.21466
-      bounds:
-      - -1004.0
-      - -997.0
+#    drive_transit_ASC_auto_sufficient_atwork:
+#      initial_value: -999.21466
+#      bounds:
+#      - -1004.0
+#      - -997.0
 #    taxi_ASC_no_auto_eatout_othdiscr_social:
 #      initial_value: 0.9923
 #      bounds:
@@ -2075,21 +2075,21 @@ tunable_coefficients:
 #      bounds:
 #      - -7.0
 #      - 0.0
-#    joint_walk_ASC_no_auto_othdiscr:
-#      initial_value: -11.70575714
-#      bounds:
-#      - -16.0
-#      - -9.0
-#    joint_walk_ASC_auto_deficient_othdiscr:
-#      initial_value: -19.79304123
-#      bounds:
-#      - -24.0
-#      - -17.0
-#    joint_walk_ASC_auto_sufficient_othdiscr:
-#      initial_value: -33.78726196
-#      bounds:
-#      - -38.0
-#      - -31.0
+    joint_walk_ASC_no_auto_othdiscr:
+      initial_value: -11.70575714
+      bounds:
+      - -16.0
+      - -9.0
+    joint_walk_ASC_auto_deficient_othdiscr:
+      initial_value: -19.79304123
+      bounds:
+      - -24.0
+      - -17.0
+    joint_walk_ASC_auto_sufficient_othdiscr:
+      initial_value: -33.78726196
+      bounds:
+      - -38.0
+      - -31.0
 #    joint_bike_ASC_no_auto_othdiscr:
 #      initial_value: -13.40789318
 #      bounds:
@@ -2120,21 +2120,21 @@ tunable_coefficients:
 #      bounds:
 #      - 24.0
 #      - 31.0
-#    joint_walk_transit_ASC_no_auto_othdiscr:
-#      initial_value: -14.35704136
-#      bounds:
-#      - -19.0
-#      - -12.0
-#    joint_walk_transit_ASC_auto_deficient_othdiscr:
-#      initial_value: -24.36103439
-#      bounds:
-#      - -29.0
-#      - -22.0
-#    joint_walk_transit_ASC_auto_sufficient_othdiscr:
-#      initial_value: -30.19796753
-#      bounds:
-#      - -35.0
-#      - -28.0
+    joint_walk_transit_ASC_no_auto_othdiscr:
+      initial_value: -14.35704136
+      bounds:
+      - -19.0
+      - -12.0
+    joint_walk_transit_ASC_auto_deficient_othdiscr:
+      initial_value: -24.36103439
+      bounds:
+      - -29.0
+      - -22.0
+    joint_walk_transit_ASC_auto_sufficient_othdiscr:
+      initial_value: -30.19796753
+      bounds:
+      - -35.0
+      - -28.0
 #    joint_drive_transit_ASC_auto_deficient_othdiscr:
 #      initial_value: -23.24106598
 #      bounds:
@@ -5052,8 +5052,8 @@ tunable_coefficients:
 
 
 sample_size_schedule:
-  1 : 5000
-  250 : 20000
+  1 : 15000
+  150 : 30000
   1000 : 50000
 
 main_settings_file: settings.yaml
