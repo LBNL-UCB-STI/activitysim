@@ -290,6 +290,8 @@ class ShadowPriceCalculator:
         self.choices_by_iteration = pd.DataFrame()
         self.global_pending_persons = 1
         self.sampled_persons = pd.DataFrame()
+        self.movable_chooser_ids = None
+        self.stalled_on_fixed_population = False
 
         if (
             self.use_shadow_pricing
@@ -364,6 +366,9 @@ class ShadowPriceCalculator:
                 logger.warning("Could not find saved_shadow_prices file %s" % file_path)
 
         return shadow_prices
+
+    def set_movable_choosers(self, chooser_index):
+        self.movable_chooser_ids = pd.Index(chooser_index).copy()
 
     def synchronize_modeled_size(self, local_modeled_size):
         """
@@ -603,6 +608,8 @@ class ShadowPriceCalculator:
         if write_choices:
             self.choices_by_iteration[iteration] = self.choices_synced
 
+        self.stalled_on_fixed_population = False
+
         if self.shadow_settings.SHADOW_PRICE_METHOD != "simulation":
             modeled_size = self.modeled_size
             desired_size = self.desired_size
@@ -675,8 +682,11 @@ class ShadowPriceCalculator:
             # FIXME - should not count zones where desired_size < threshold? (could calc in init)
             max_fail = (fail_threshold / 100.0) * util.iprod(desired_size.shape)
 
-            converged = (total_fails <= np.ceil(max_fail)) | (
-                (iteration > 1) & (self.global_pending_persons == 0)
+            converged = total_fails <= np.ceil(max_fail)
+            self.stalled_on_fixed_population = (
+                (iteration > 1)
+                and (self.global_pending_persons == 0)
+                and (not converged)
             )
 
         logger.info(
@@ -839,6 +849,11 @@ class ShadowPriceCalculator:
                 left_index=True,
                 right_index=True,
             ).rename(columns={segment_name: "segment"})
+
+            if self.movable_chooser_ids is not None:
+                choices_synced = choices_synced[
+                    choices_synced.index.isin(self.movable_chooser_ids)
+                ]
 
             for segment in self.segment_ids:
                 desired_size = self.target[segment]

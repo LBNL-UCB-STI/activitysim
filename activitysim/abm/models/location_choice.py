@@ -75,6 +75,65 @@ logger = logging.getLogger(__name__)
 ALT_LOGSUM = "mode_choice_logsum"
 
 
+def _location_chooser_mask(choosers: pd.DataFrame, column_name: str | None) -> pd.Series:
+    if column_name is None:
+        return pd.Series(True, index=choosers.index)
+
+    assert (
+        column_name in choosers
+    ), f"Chooser filter column '{column_name}' not in choosers table."
+    return choosers[column_name].fillna(False).astype(bool)
+
+
+def _combine_location_choices(
+    persons: pd.DataFrame,
+    eligible_index: pd.Index,
+    modeled_choices: pd.DataFrame,
+    dest_choice_column_name: str,
+    dc_logsum_column_name: str | None,
+    mc_logsum_column_name: str | None,
+) -> pd.DataFrame:
+    combined_choices = pd.DataFrame(index=eligible_index)
+
+    if dest_choice_column_name in persons:
+        combined_choices["choice"] = persons[dest_choice_column_name].reindex(
+            eligible_index
+        )
+    else:
+        combined_choices["choice"] = np.nan
+
+    if len(modeled_choices) > 0:
+        combined_choices.loc[modeled_choices.index, "choice"] = modeled_choices["choice"]
+
+    if dc_logsum_column_name:
+        if dc_logsum_column_name in persons:
+            combined_choices["logsum"] = persons[dc_logsum_column_name].reindex(
+                eligible_index
+            )
+        else:
+            combined_choices["logsum"] = np.nan
+
+        if "logsum" in modeled_choices:
+            combined_choices.loc[modeled_choices.index, "logsum"] = modeled_choices[
+                "logsum"
+            ]
+
+    if mc_logsum_column_name:
+        if mc_logsum_column_name in persons:
+            combined_choices[ALT_LOGSUM] = persons[mc_logsum_column_name].reindex(
+                eligible_index
+            )
+        else:
+            combined_choices[ALT_LOGSUM] = np.nan
+
+        if ALT_LOGSUM in modeled_choices:
+            combined_choices.loc[modeled_choices.index, ALT_LOGSUM] = modeled_choices[
+                ALT_LOGSUM
+            ]
+
+    return combined_choices.sort_index()
+
+
 def write_estimation_specs(
     state: workflow.State,
     estimator: estimation.Estimator,
@@ -983,6 +1042,7 @@ def iterate_location_choice(
 
     # boolean to filter out persons not needing location modeling (e.g. is_worker, is_student)
     chooser_filter_column = model_settings.CHOOSER_FILTER_COLUMN_NAME
+    reassign_filter_column = model_settings.REASSIGN_FILTER_COLUMN_NAME
 
     dest_choice_column_name = model_settings.DEST_CHOICE_COLUMN_NAME
     dc_logsum_column_name = model_settings.DEST_CHOICE_LOGSUM_COLUMN_NAME
@@ -997,12 +1057,20 @@ def iterate_location_choice(
     )
 
     persons_merged_df = persons_merged
-
-    persons_merged_df = persons_merged_df[persons_merged[chooser_filter_column]]
-
+    eligible_choosers = _location_chooser_mask(persons_merged_df, chooser_filter_column)
+    persons_merged_df = persons_merged_df[eligible_choosers]
     persons_merged_df.sort_index(
         inplace=True
     )  # interaction_sample expects chooser index to be monotonic increasing
+
+    if reassign_filter_column:
+        modeled_choosers = eligible_choosers & _location_chooser_mask(
+            persons_merged, reassign_filter_column
+        )
+        modeled_persons_merged_df = persons_merged.loc[modeled_choosers].copy()
+        modeled_persons_merged_df.sort_index(inplace=True)
+    else:
+        modeled_persons_merged_df = persons_merged_df
 
     # chooser segmentation allows different sets coefficients for e.g. different income_segments or tour_types
     chooser_segment_column = model_settings.CHOOSER_SEGMENT_COLUMN_NAME
@@ -1013,17 +1081,16 @@ def iterate_location_choice(
     ), f"CHOOSER_SEGMENT_COLUMN '{chooser_segment_column}' not in persons_merged table."
 
     spc = shadow_pricing.load_shadow_price_calculator(state, model_settings)
+    spc.set_movable_choosers(modeled_persons_merged_df.index)
     max_iterations = spc.max_iterations
     assert not (spc.use_shadow_pricing and estimator)
 
     logger.debug(f"{trace_label} max_iterations: {max_iterations}")
 
-    save_sample_df = (
-        choices_df
-    ) = None  # initialize to None, will be populated in first iteration
+    save_sample_df = choices_df = modeled_choices_df = None
 
     for iteration in range(1, max_iterations + 1):
-        persons_merged_df_ = persons_merged_df.copy()
+        persons_merged_df_ = modeled_persons_merged_df.copy()
 
         if spc.use_shadow_pricing and iteration > 1:
             spc.update_shadow_prices(state)
@@ -1061,20 +1128,34 @@ def iterate_location_choice(
             ):
                 # if a process ends up with no sampled workers in it, hence an empty choice_df_, then choice_df wil be what it was previously
                 if len(choices_df_) != 0:
-                    choices_df = pd.concat([choices_df, choices_df_], axis=0)
+                    modeled_choices_df = pd.concat(
+                        [modeled_choices_df, choices_df_], axis=0
+                    )
                     choices_df_index = choices_df_.index.name
-                    choices_df = choices_df.reset_index()
+                    modeled_choices_df = modeled_choices_df.reset_index()
                     # update choices of workers/students
-                    choices_df = choices_df.drop_duplicates(
+                    modeled_choices_df = modeled_choices_df.drop_duplicates(
                         subset=[choices_df_index], keep="last"
                     )
-                    choices_df = choices_df.set_index(choices_df_index)
-                    choices_df = choices_df.sort_index()
+                    modeled_choices_df = modeled_choices_df.set_index(choices_df_index)
+                    modeled_choices_df = modeled_choices_df.sort_index()
             else:
-                choices_df = choices_df_.copy()
+                modeled_choices_df = choices_df_.copy()
 
         else:
-            choices_df = choices_df_
+            modeled_choices_df = choices_df_
+
+        if reassign_filter_column:
+            choices_df = _combine_location_choices(
+                persons=persons,
+                eligible_index=persons_merged_df.index,
+                modeled_choices=modeled_choices_df,
+                dest_choice_column_name=dest_choice_column_name,
+                dc_logsum_column_name=dc_logsum_column_name,
+                mc_logsum_column_name=mc_logsum_column_name,
+            )
+        else:
+            choices_df = modeled_choices_df
 
         spc.set_choices(
             choices=choices_df["choice"],
@@ -1086,15 +1167,26 @@ def iterate_location_choice(
         if locutor:
             spc.write_trace_files(state, iteration)
 
-        if spc.use_shadow_pricing and spc.check_fit(state, iteration):
-            logging.info(
-                "%s converged after iteration %s"
-                % (
-                    trace_label,
-                    iteration,
+        if spc.use_shadow_pricing:
+            if spc.check_fit(state, iteration):
+                logging.info(
+                    "%s converged after iteration %s"
+                    % (
+                        trace_label,
+                        iteration,
+                    )
                 )
-            )
-            break
+                break
+
+            if spc.stalled_on_fixed_population:
+                logging.warning(
+                    "%s stopped after iteration %s because no movable choosers remain"
+                    % (
+                        trace_label,
+                        iteration,
+                    )
+                )
+                break
 
     # - shadow price table
     if locutor:
@@ -1110,24 +1202,26 @@ def iterate_location_choice(
     # so we backfill the empty choices with -1 to code as no school location
     # names for location choice and (optional) logsums columns
     NO_DEST_ZONE = -1
-    persons_df[dest_choice_column_name] = (
-        choices_df["choice"].reindex(persons_df.index).fillna(NO_DEST_ZONE).astype(int)
-    )
+    dest_choices = pd.Series(NO_DEST_ZONE, index=persons_df.index)
+    dest_choices.loc[persons_merged_df.index] = choices_df["choice"]
+    persons_df[dest_choice_column_name] = dest_choices.fillna(NO_DEST_ZONE).astype(int)
 
     # add the dest_choice_logsum column to persons dataframe
     if dc_logsum_column_name:
-        persons_df[dc_logsum_column_name] = (
-            choices_df["logsum"].reindex(persons_df.index).astype("float")
-        )
+        dc_logsums = pd.Series(np.nan, index=persons_df.index)
+        dc_logsums.loc[persons_merged_df.index] = choices_df["logsum"]
+        persons_df[dc_logsum_column_name] = dc_logsums.astype("float")
     # add the mode choice logsum column to persons dataframe
     if mc_logsum_column_name:
-        persons_df[mc_logsum_column_name] = (
-            choices_df[ALT_LOGSUM].reindex(persons_df.index).astype("float")
-        )
+        mc_logsums = pd.Series(np.nan, index=persons_df.index)
+        mc_logsums.loc[persons_merged_df.index] = choices_df[ALT_LOGSUM]
+        persons_df[mc_logsum_column_name] = mc_logsums.astype("float")
 
     if save_sample_df is not None:
         # might be None for tiny samples even if sample_table_name was specified
-        assert len(save_sample_df.index.get_level_values(0).unique()) == len(choices_df)
+        assert len(save_sample_df.index.get_level_values(0).unique()) == len(
+            modeled_choices_df
+        )
         # lest they try to put school and workplace samples into the same table
         if state.is_table(sample_table_name):
             raise DuplicateWorkflowTableError(

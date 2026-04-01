@@ -578,3 +578,55 @@ def test_shadow_pricing_simulate(state, model_settings, network_los):
                 choices_df.index
             ),
         )
+
+
+def test_shadow_pricing_simulate_resamples_only_movable_choosers(
+    state, model_settings, network_los, monkeypatch
+):
+    model_settings.LOGSUM_SETTINGS = None
+
+    persons_merged = state.get_dataframe("persons_merged").sort_index()
+    movable_ids = persons_merged.index[:5]
+    fixed_ids = persons_merged.index[5:]
+
+    spc = shadow_pricing.load_shadow_price_calculator(state, model_settings)
+    spc.set_movable_choosers(movable_ids)
+
+    monkeypatch.setattr(
+        shadow_pricing.logit,
+        "make_choices",
+        lambda _state, probs: (pd.Series(1, index=probs.index), None),
+    )
+
+    choices = pd.Series(22670, index=persons_merged.index, name="choice")
+    spc.set_choices(choices=choices, segment_ids=persons_merged["school_segment"])
+    spc.update_shadow_prices(state)
+
+    sampled_ids = pd.Index(spc.sampled_persons.index)
+
+    assert len(sampled_ids) > 0
+    assert sampled_ids.isin(movable_ids).all()
+    assert not sampled_ids.isin(fixed_ids).any()
+
+
+def test_shadow_pricing_simulate_stall_is_not_convergence(
+    state, model_settings, network_los
+):
+    model_settings.LOGSUM_SETTINGS = None
+
+    persons_merged = state.get_dataframe("persons_merged").sort_index()
+    movable_ids = persons_merged.index[:5]
+
+    spc = shadow_pricing.load_shadow_price_calculator(state, model_settings)
+    spc.set_movable_choosers(movable_ids)
+
+    choices = pd.Series(22670, index=persons_merged.index, name="choice")
+    spc.set_choices(choices=choices, segment_ids=persons_merged["school_segment"])
+
+    spc.global_pending_persons = 0
+
+    converged = spc.check_fit(state, iteration=2)
+
+    assert not converged
+    assert spc.stalled_on_fixed_population
+    assert (spc.rel_diff > 0).any()

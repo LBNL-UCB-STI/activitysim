@@ -250,6 +250,7 @@ class TourLocationComponentSettings(LocationComponentSettings, extra="forbid"):
     SIZE_TERM_SELECTOR: str | None = None
 
     CHOOSER_FILTER_COLUMN_NAME: str | None = None
+    REASSIGN_FILTER_COLUMN_NAME: str | None = None
     DEST_CHOICE_COLUMN_NAME: str | None = None
     DEST_CHOICE_LOGSUM_COLUMN_NAME: str | None = None
     """Column name for logsum calculated across all sampled destinations."""
