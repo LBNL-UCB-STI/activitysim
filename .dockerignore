@@ -1,13 +1,5 @@
 **
-!pyproject.toml
-!uv.lock
-!README.md
 !activitysim/
 !activitysim/**
-
-# Keep only the example assets used by this image.
-activitysim/examples/*
-!activitysim/examples/__init__.py
-!activitysim/examples/example_manifest.yaml
-!activitysim/examples/prototype_mtc_clean/
-!activitysim/examples/prototype_mtc_clean/**
+!sharrow/
+!sharrow/**

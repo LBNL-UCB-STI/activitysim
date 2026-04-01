@@ -4,7 +4,9 @@ import glob
 import logging
 import os
 import re
+import shutil
 import time
+import tempfile
 from functools import partial
 from pathlib import Path
 
@@ -689,6 +691,138 @@ def load_sparse_maz_skims(
     return dataset
 
 
+def _env_flag(name: str) -> bool:
+    value = os.environ.get(name, "")
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _dataset_coord_summary(dataset: xr.Dataset) -> list[dict]:
+    summaries = []
+    for name in dataset.coords:
+        coord = dataset.coords[name]
+        summaries.append(
+            {
+                "name": name,
+                "dims": tuple(coord.dims),
+                "dtype": str(coord.dtype),
+                "size": int(coord.size),
+                "sample": coord.values[: min(5, coord.size)].tolist(),
+            }
+        )
+    return summaries
+
+
+def _dataset_var_summary(dataset: xr.Dataset, limit: int = 12) -> list[dict]:
+    summaries = []
+    for idx, name in enumerate(dataset.data_vars):
+        if idx >= limit:
+            break
+        var = dataset.data_vars[name]
+        summaries.append(
+            {
+                "name": name,
+                "dims": tuple(var.dims),
+                "dtype": str(var.dtype),
+                "shape": tuple(int(i) for i in var.shape),
+                "nbytes_gb": round(var.nbytes / (1024**3), 4),
+            }
+        )
+    return summaries
+
+
+def _log_zarr_write_diagnostics(dataset: xr.Dataset, zarr_file: str) -> None:
+    approx_bytes = sum(var.nbytes for var in dataset.data_vars.values())
+    logger.warning(
+        "Zarr write diagnostics: path=%s vars=%d coords=%s attrs=%s approx_uncompressed_gb=%.3f sample_vars=%s",
+        zarr_file,
+        len(dataset.data_vars),
+        _dataset_coord_summary(dataset),
+        sorted(dataset.attrs),
+        approx_bytes / (1024**3),
+        _dataset_var_summary(dataset),
+    )
+
+
+def _probe_zarr_write_per_variable(dataset: xr.Dataset, zarr_file: str) -> None:
+    if not _env_flag("ASIM_DEBUG_ZARR_PROBE"):
+        return
+
+    probe_root = os.environ.get("ASIM_DEBUG_ZARR_PROBE_DIR")
+    if not probe_root:
+        probe_root = f"{zarr_file}_probe"
+    os.makedirs(probe_root, exist_ok=True)
+
+    limit_raw = os.environ.get("ASIM_DEBUG_ZARR_PROBE_LIMIT")
+    probe_limit = int(limit_raw) if limit_raw else None
+    vars_to_probe = list(dataset.data_vars)
+    if probe_limit is not None:
+        vars_to_probe = vars_to_probe[:probe_limit]
+
+    logger.warning(
+        "ASIM_DEBUG_ZARR_PROBE enabled. Probing %d/%d skim variables into %s",
+        len(vars_to_probe),
+        len(dataset.data_vars),
+        probe_root,
+    )
+
+    for idx, name in enumerate(vars_to_probe, start=1):
+        var = dataset.data_vars[name]
+        base_dataset = dataset[[name]]
+        variants = [("full", base_dataset)]
+
+        if var.ndim >= 3 and "otaz" in var.dims and "dtaz" in var.dims:
+            subset_512 = base_dataset.isel(otaz=slice(0, 512), dtaz=slice(0, 512))
+            subset_1024 = base_dataset.isel(otaz=slice(0, 1024), dtaz=slice(0, 1024))
+            two_period_subset = (
+                subset_512.isel(time_period=slice(0, 2))
+                if "time_period" in var.dims
+                else subset_512
+            )
+            loaded_subset_512 = subset_512.load()
+            variants = [
+                (
+                    "single_period",
+                    base_dataset.isel(time_period=slice(0, 1))
+                    if "time_period" in var.dims
+                    else base_dataset,
+                ),
+                ("subset3d_512_two_periods", two_period_subset),
+                ("subset3d_512_loaded", loaded_subset_512),
+                ("subset3d_512", subset_512),
+                ("subset3d_1024", subset_1024),
+                ("full", base_dataset),
+            ]
+
+        for variant_name, variant_dataset in variants:
+            probe_path = os.path.join(probe_root, f"{idx:03d}_{name}__{variant_name}.zarr")
+            if os.path.exists(probe_path):
+                shutil.rmtree(probe_path)
+            variant_var = variant_dataset.data_vars[name]
+            logger.warning(
+                "Zarr probe writing variable %d/%d (%s): %s dims=%s dtype=%s shape=%s data_type=%s chunks=%s path=%s",
+                idx,
+                len(vars_to_probe),
+                variant_name,
+                name,
+                tuple(variant_var.dims),
+                variant_var.dtype,
+                tuple(int(i) for i in variant_var.shape),
+                type(variant_var.data).__name__,
+                getattr(variant_var.data, "chunks", None),
+                probe_path,
+            )
+            variant_dataset.to_zarr(probe_path, mode="w", consolidated=True)
+            logger.warning(
+                "Zarr probe wrote variable %s (%s)",
+                name,
+                variant_name,
+            )
+
+
+def _probe_only_mode() -> bool:
+    return _env_flag("ASIM_DEBUG_ZARR_PROBE_ONLY")
+
+
 def load_skim_dataset_to_shared_memory(state, skim_tag="taz") -> xr.Dataset:
     """
     Load skims from disk into shared memory.
@@ -861,12 +995,38 @@ def load_skim_dataset_to_shared_memory(state, skim_tag="taz") -> xr.Dataset:
                         "cannot cache skims to zarr"
                     )
                 else:
-                    if zarr_digital_encoding:
-                        d = _apply_digital_encoding(d, zarr_digital_encoding)
-                    logger.info(f"writing zarr skims to {zarr_file}")
-                    d.attrs["ZARR_WRITE_TIME"] = time.time()
-                    if not do_not_save_zarr:
-                        d.to_zarr_with_attr(zarr_file)
+                    d_for_zarr = d
+                    zarr_stage_key = None
+                    zarr_stage_dir = None
+                    try:
+                        if any(getattr(var.data, "chunks", None) is not None for var in d.data_vars.values()):
+                            logger.info(
+                                "staging skim dataset through memmap + reload_from_omx_3d before zarr cache write"
+                            )
+                            zarr_stage_dir = tempfile.mkdtemp(
+                                prefix="asim_zarr_stage_",
+                                dir=state.filesystem.get_cache_dir(),
+                            )
+                            zarr_stage_key = f"memmap:{os.path.join(zarr_stage_dir, 'skim_dataset.mmap')}"
+                            d_for_zarr = d.shm.to_shared_memory(zarr_stage_key, mode="r", load=False)
+                            sh.dataset.reload_from_omx_3d(
+                                d_for_zarr,
+                                [str(i) for i in omx_file_paths],
+                                ignore=state.settings.omx_ignore_patterns,
+                            )
+                        if zarr_digital_encoding:
+                            d_for_zarr = _apply_digital_encoding(d_for_zarr, zarr_digital_encoding)
+                        if _env_flag("ASIM_DEBUG_ZARR_WRITE"):
+                            _log_zarr_write_diagnostics(d_for_zarr, zarr_file)
+                        logger.info(f"writing zarr skims to {zarr_file}")
+                        d_for_zarr.attrs["ZARR_WRITE_TIME"] = time.time()
+                        if not do_not_save_zarr:
+                            d_for_zarr.to_zarr_with_attr(zarr_file)
+                    finally:
+                        if zarr_stage_key is not None:
+                            xr.Dataset.shm.delete_shared_memory_files(zarr_stage_key)
+                        if zarr_stage_dir and os.path.isdir(zarr_stage_dir):
+                            shutil.rmtree(zarr_stage_dir, ignore_errors=True)
 
         if skim_tag in ("taz", "maz"):
             # load sparse MAZ skims, if any
