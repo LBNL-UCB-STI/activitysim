@@ -1,5 +1,11 @@
 **
+!.dockerignore
+!Dockerfile
+!README.md
+!pyproject.toml
+!uv.lock
 !activitysim/
 !activitysim/**
-!sharrow/
-!sharrow/**
+!activitysim/examples/
+activitysim/examples/**
+!activitysim/examples/example_manifest.yaml
